@@ -28,7 +28,7 @@ import {
   Settings,
   BookOpen
 } from "lucide-react";
-import HeaderBanner from "../components/HeaderBanner";
+import HeaderBanner from "../../components/HeaderBanner";
 
 
 export default function HRContactPage() {
