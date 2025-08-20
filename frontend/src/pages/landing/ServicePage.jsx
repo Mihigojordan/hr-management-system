@@ -20,7 +20,7 @@ import {
   Briefcase,
   Settings
 } from "lucide-react";
-import HeaderBanner from "../components/HeaderBanner";
+import HeaderBanner from "../../components/HeaderBanner";
 
 export default function ServicesPage() {
   const [activeTab, setActiveTab] = useState('core');
