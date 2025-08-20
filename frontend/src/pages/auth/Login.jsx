@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Users, Building2 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import useAdminAuth from "../../context/AdminAuthContext";
 
-// Mock context for demo purposes (replace with your actual imports)
-const useAdminAuth = () => ({
-  login: async (data) => ({ authenticated: true }),
-  isLoading: false,
-  isAuthenticated: false
-});
+
 
 const AdminLogin = () => {
   const { login, isLoading: authLoading, isAuthenticated } = useAdminAuth();
+  console.log(isAuthenticated, authLoading);
+  
 
   const [formData, setFormData] = useState({
     email: "",
@@ -22,8 +21,8 @@ const AdminLogin = () => {
   const [rememberMe, setRememberMe] = useState(false);
 
   // Mock navigation for demo
-  const navigate = (path) => console.log('Navigating to:', path);
-  const location = { state: null };
+  const navigate = useNavigate();
+  const location = useLocation()
 
   // Redirect if already authenticated
   useEffect(() => {
