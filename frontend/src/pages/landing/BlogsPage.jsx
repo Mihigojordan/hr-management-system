@@ -25,7 +25,7 @@ import {
   Download,
   Bookmark
 } from 'lucide-react';
-import HeaderBanner from '../../components/HeaderBanner';
+import HeaderBanner from '../../components/landing/HeaderBanner';
 import { blogs, blogsCategories } from '../../store/Blogs';
 import { useNavigate } from 'react-router-dom';
 

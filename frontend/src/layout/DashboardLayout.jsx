@@ -1,30 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  MapPin, 
-  Plane, 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp,
-  Bell,
-  Settings,
-  LogOut,
-  Search,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Filter,
-  Download,
-  Globe,
-  Star,
-  Clock,
-  User
-} from 'lucide-react';
-import Header from '../../components/dashboard/Header';
-import useAdminAuth from '../AdminAuthContext';
-import Sidebar from '../../components/dashboard/Sidebar';
-import Dashboard from '../../pages/dashboard/DashboardHome';
+
+import Header from '../components/dashboard/Header';
+
+import Sidebar from '../components/dashboard/Sidebar';
+
 import { Outlet } from 'react-router-dom';
 
 const DashboardLayout = () => {

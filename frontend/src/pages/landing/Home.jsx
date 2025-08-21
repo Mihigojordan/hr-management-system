@@ -1,10 +1,10 @@
 import React from 'react'
-import HeroSection from '../../components/home/HeroSection';
-import Categories from '../../components/home/Categories';
-import FeaturedProducts from '../../components/home/Featured';
-import Testimonials from '../../components/home/Testimonials';
-import Blog from '../../components/home/Blog';
-import AboutSection from '../../components/home/About';
+import HeroSection from '../../components/landing/home/HeroSection';
+import Categories from '../../components/landing/home/Categories';
+import FeaturedProducts from '../../components/landing/home/Featured';
+import Testimonials from '../../components/landing/home/Testimonials';
+import Blog from '../../components/landing/home/Blog';
+import AboutSection from '../../components/landing/home/About';
 
 const Home = () => {
   return (

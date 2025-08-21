@@ -29,7 +29,7 @@ import {
   Bell,
   Filter
 } from 'lucide-react';
-import HeaderBanner from '../../components/HeaderBanner';
+import HeaderBanner from '../../components/landing/HeaderBanner';
 
 
 export default function HRFeaturesPage() {
