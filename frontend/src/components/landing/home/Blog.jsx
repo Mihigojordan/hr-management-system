@@ -25,7 +25,7 @@ import {
   Download,
   Bookmark
 } from 'lucide-react';
-import { blogs } from '../../store/Blogs';
+import { blogs } from '../../../store/Blogs';
 import { useNavigate } from 'react-router-dom';
 
 export default function Blog() {

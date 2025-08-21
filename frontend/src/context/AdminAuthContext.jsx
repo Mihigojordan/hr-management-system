@@ -40,7 +40,7 @@ export const AdminAuthContextProvider = ({ children }) => {
                     const userProfile = await adminAuthService.getAdminProfile()
                     
                     updateAuthState({
-                        user: userProfile,
+                        user: userProfile.admin,
                         isAuthenticated: true,
                         isLocked: false
                     })
@@ -126,11 +126,14 @@ export const AdminAuthContextProvider = ({ children }) => {
             // Try to fetch profile data to verify authentication
             const response = await adminAuthService.getAdminProfile()
 
-            if (response) {
+            if (response.authenticated) {
+                const result  = response.admin;
+                console.log('Admin profile fetched successfully:', result);
+                
                 updateAuthState({
-                    user: response,
+                    user: result,
                     isAuthenticated: true,
-                    isLocked: response.isLocked || false
+                    isLocked: result.isLocked || false
                 })
             } else {
                 // Server says we're not authenticated

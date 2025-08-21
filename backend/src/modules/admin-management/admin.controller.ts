@@ -73,7 +73,15 @@ export class AdminController {
   async getAdminProfile(@Req() req: RequestWithAdmin) {
     const adminId = req.admin?.id as string;
     try {
-      return await this.adminServices.findAdminById(adminId);
+      const admin=  await this.adminServices.findAdminById(adminId);
+
+      if (!admin) {
+        throw new HttpException('Admin not found', 404);
+      }
+      return{
+      admin,
+      authenticated: true,
+      }
     } catch (error) {
       console.error('Error logging out admin:', error);
       throw new HttpException(error.message, error.status);

@@ -20,7 +20,7 @@ import {
   Star
 } from 'lucide-react';
 import HeaderBanner from './HeaderBanner';
-import { blogs } from '../store/Blogs';
+import { blogs } from '../../store/Blogs';
 
 export default function BlogViewPage() {
   const { id } = useParams();

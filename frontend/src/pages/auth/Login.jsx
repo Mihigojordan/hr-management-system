@@ -6,7 +6,7 @@ import useAdminAuth from "../../context/AdminAuthContext";
 
 
 const AdminLogin = () => {
-  const { login, isLoading: authLoading, isAuthenticated } = useAdminAuth();
+  const { login, isLoading: authLoading, isAuthenticated, } = useAdminAuth();
   console.log(isAuthenticated, authLoading);
   
 
@@ -125,6 +125,7 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
 
     // Mark all fields as touched
     setTouched({
@@ -141,6 +142,8 @@ const AdminLogin = () => {
 
     setIsLoading(true);
     setErrors({});
+    console.log("Submitting form with data:", formData);
+    
 
     try {
       const response = await login({
@@ -247,7 +250,7 @@ const AdminLogin = () => {
           )}
 
           {/* Login Form */}
-          <div onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
               <label
@@ -320,18 +323,7 @@ const AdminLogin = () => {
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
-                  disabled={isLoading || authLoading}
-                />
-                <span className="ml-2 text-sm text-gray-600">
-                  Remember Me
-                </span>
-              </label>
+             
               <button
                 type="button"
                 className="text-sm text-orange-600 hover:text-orange-700 font-medium"
@@ -358,7 +350,7 @@ const AdminLogin = () => {
             </button>
 
           
-          </div>
+          </form>
 
           {/* Footer */}
           <div className="text-center mt-8">
