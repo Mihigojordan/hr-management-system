@@ -18,6 +18,7 @@ const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
 const ContactPage = lazy(() => import('../pages/landing/ContactUs'));
 const AboutPage = lazy(() => import('../pages/landing/AboutPage'));
+const DepartmentDashboard = lazy(() => import('../pages/dashboard/DepartmentManagement'));
 
 
 const LoadingSpinner = () => (
@@ -97,6 +98,10 @@ const routes = createBrowserRouter([
                             {
                                 path:'profile',
                                 element: <SuspenseWrapper> <AdminProfile /></SuspenseWrapper>
+                            },
+                            {
+                                path:'department-management',
+                                element: <SuspenseWrapper> <DepartmentDashboard /></SuspenseWrapper>
                             }
                            
                         ]
