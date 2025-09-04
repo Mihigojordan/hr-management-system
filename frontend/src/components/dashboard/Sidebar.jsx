@@ -24,14 +24,7 @@ const Sidebar = ({ isOpen = true, onToggle }) => {
 
   const navlinks = [
     { id: '', label: 'Dashboard', icon: TrendingUp, path: '/admin/dashboard' },
-    { id: 'users', label: 'Users', icon: Users, path: '/admin/dashboard/users' },
-    { id: 'attendance', label: 'Attendance', icon: Calendar, path: '/admin/dashboard/attendance' },
-    { id: 'payroll', label: 'Payroll', icon: DollarSign, path: '/admin/dashboard/payroll' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, path: '/admin/dashboard/notifications' },
-    { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/dashboard/settings' },
-    
-    
-  
+    { id: 'departments', label: 'Departments Management', icon: TrendingUp, path: '/admin/dashboard/department-management' },
   ];
 
   const getProfileRoute = () => '/admin/dashboard/profile';
@@ -76,7 +69,7 @@ const Sidebar = ({ isOpen = true, onToggle }) => {
       {/* Sidebar Container */}
       <div className={`fixed left-0 top-0 min-h-screen bg-white flex flex-col border-r border-primary-200 shadow-lg transform transition-transform duration-300 z-50 lg:relative lg:translate-x-0 ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
-      } w-96`}>
+      } w-80`}>
 
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-6 border-b border-primary-200">
