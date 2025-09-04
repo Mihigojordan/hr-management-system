@@ -13,6 +13,10 @@ import DashboardLayout from '../layout/DashboardLayout';
 import DashboardHome from '../pages/dashboard/DashboardHome';
 import ProtectPrivateAdminRoute from '../components/protectors/ProtectPrivateAdminRoute';
 import AdminProfile from '../pages/dashboard/AdminProfile';
+import EmployeeDashboard from '../pages/dashboard/EmployeeDashboard';
+import EmployeeFormExample from '../components/dashboard/employee/EmployeeForm';
+import ContractDashboard from '../pages/dashboard/ContractManagement';
+import ViewEmployee from '../components/dashboard/employee/EmployeeViewMorePage';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -102,7 +106,31 @@ const routes = createBrowserRouter([
                             {
                                 path:'department-management',
                                 element: <SuspenseWrapper> <DepartmentDashboard /></SuspenseWrapper>
-                            }
+                            },
+                           
+                            {
+                                path:'employee-management',
+                                element: <SuspenseWrapper> <EmployeeDashboard /></SuspenseWrapper>
+                            },
+                           
+                            {
+                                path:'employee-management/:id',
+                                element: <SuspenseWrapper> <ViewEmployee /></SuspenseWrapper>
+                            },
+                           
+                            {
+                                path:'employee-management/create',
+                                element: <SuspenseWrapper> <EmployeeFormExample /></SuspenseWrapper>
+                            },
+                           
+                            {
+                                path:'employee-management/update/:id',
+                                element: <SuspenseWrapper> <EmployeeFormExample /></SuspenseWrapper>
+                            },
+                            {
+                                path:'contract-management',
+                                element: <SuspenseWrapper> <ContractDashboard /></SuspenseWrapper>
+                            },
                            
                         ]
                             

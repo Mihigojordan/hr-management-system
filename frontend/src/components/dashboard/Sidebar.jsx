@@ -12,7 +12,9 @@ import {
   User,
   X,
   UserRoundCog,
-  LetterTextIcon
+  LetterTextIcon,
+  Building,
+  FileBadge
 } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -24,7 +26,9 @@ const Sidebar = ({ isOpen = true, onToggle }) => {
 
   const navlinks = [
     { id: '', label: 'Dashboard', icon: TrendingUp, path: '/admin/dashboard' },
-    { id: 'departments', label: 'Departments Management', icon: TrendingUp, path: '/admin/dashboard/department-management' },
+    { id: 'departments', label: 'Departments Management', icon: Building, path: '/admin/dashboard/department-management' },
+    { id: 'employees', label: 'Employees Management', icon: Users, path: '/admin/dashboard/employee-management' },
+    { id: 'contracts', label: 'Contract Management', icon: FileBadge, path: '/admin/dashboard/contract-management' },
   ];
 
   const getProfileRoute = () => '/admin/dashboard/profile';
