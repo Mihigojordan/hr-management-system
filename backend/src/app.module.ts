@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { EmployeeModule } from './modules/employee/employee.module';
 import { ContractModule } from './modules/contract/contract.module';
+import { EmailModule } from './global/email/email.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ContractModule } from './modules/contract/contract.module';
     DepartmentModule,
     EmployeeModule,
     ContractModule,
+    EmailModule
   ],
   controllers: [AppController],
 })
