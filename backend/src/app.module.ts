@@ -6,6 +6,7 @@ import { DepartmentModule } from './modules/department/department.module';
 import { EmployeeModule } from './modules/employee/employee.module';
 import { ContractModule } from './modules/contract/contract.module';
 import { JobModule } from './modules/job-management/job.module';
+import { ApplicantModule } from './modules/applicants-management/applicant.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JobModule } from './modules/job-management/job.module';
     EmployeeModule,
     ContractModule,
     JobModule,
+    ApplicantModule,
   ],
   controllers: [AppController],
 })
