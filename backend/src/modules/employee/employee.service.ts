@@ -4,12 +4,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { Experience } from '../../common/interfaces/employee.interface';
 import { EmployeeStatus, MaritalStatus } from '../../../generated/prisma';
 import { deleteFile } from '../../common/utils/file-upload.utils';
+import { EmailService } from 'src/global/email/email.service';
 
 
 
 @Injectable()
 export class EmployeeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService , private email:EmailService ) {}
 
  async create(data: {
     first_name: string;
@@ -46,7 +47,7 @@ export class EmployeeService {
     }
 
     // ✅ Create new employee
-    return this.prisma.employee.create({
+    const createdEmployee = await this.prisma.employee.create({
       data: {
         ...data,
         experience: data.experience || [],
@@ -57,6 +58,22 @@ export class EmployeeService {
         department: true,
       },
     });
+
+    const currentYear = new Date().getFullYear();
+    await this.email.sendEmail(
+      String(createdEmployee.email),
+      'Welcome to the Company',
+      'Employee-registration-success',
+      {
+        firstname: createdEmployee.first_name,
+        lastname: createdEmployee.last_name,
+        password:'password not yet',
+        email:createdEmployee.email,
+        year:currentYear
+      }
+    )
+
+    return createdEmployee;
   }
 
   async findAll() {
