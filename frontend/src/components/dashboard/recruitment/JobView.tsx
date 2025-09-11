@@ -29,6 +29,7 @@ import {
 import jobService from "../../../services/jobService";
 import applicantService from "../../../services/applicantService";
 import type { Job,  Applicant } from "../../../types/model";
+import Swal from "sweetalert2";
 
 interface OperationStatus {
   type: "success" | "error" | "info";
@@ -60,7 +61,7 @@ const JobView: React.FC = () => {
   useEffect(() => {
     if (id) {
       loadJobData();
-      loadApplicants();
+     
     }
   }, [id]);
 
@@ -81,17 +82,7 @@ const JobView: React.FC = () => {
     }
   };
 
-  const loadApplicants = async () => {
-    try {
-      setApplicantsLoading(true);
-      const applicantsData = await applicantService.getApplicantsByJobId(parseInt(id!));
-      setApplicants(applicantsData || []);
-    } catch (err: any) {
-      console.error("Failed to load applicants:", err);
-    } finally {
-      setApplicantsLoading(false);
-    }
-  };
+
 
   const showOperationStatus = (type: OperationStatus["type"], message: string, duration: number = 3000) => {
     setOperationStatus({ type, message });
@@ -102,20 +93,44 @@ const JobView: React.FC = () => {
     navigate(`/admin/dashboard/recruiting-management/update/${id}`);
   };
 
-  const handleDeleteJob = async () => {
+
+const handleDeleteJob = async () => {
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "This action cannot be undone. Do you really want to delete this job?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!",
+    cancelButtonText: "Cancel",
+  });
+
+  if (result.isConfirmed) {
     try {
       setOperationLoading(true);
       await jobService.deleteJob(id!);
-      showOperationStatus("success", "Job deleted successfully!");
-      setTimeout(() => {
-        navigate('/admin/dashboard/recruiting-management');
-      }, 1500);
+
+      await Swal.fire(
+        "Deleted!",
+        "Job deleted successfully.",
+        "success"
+      );
+
+      
+        navigate("/admin/dashboard/recruiting-management");
+     
     } catch (err: any) {
-      showOperationStatus("error", err.message || "Failed to delete job");
+      await Swal.fire(
+        "Error",
+        err.message || "Failed to delete job",
+        "error"
+      );
     } finally {
       setOperationLoading(false);
     }
-  };
+  }
+};
 
   const handleApplicantAction = async (applicant: Applicant, action: 'hire' | 'reject') => {
     try {
@@ -125,7 +140,7 @@ const JobView: React.FC = () => {
       const newStage = action === 'hire' ? 'HIRED' : 'REJECTED';
       await applicantService.updateApplicantStage(applicant.id, newStage);
       
-      await loadApplicants();
+     
       
       showOperationStatus(
         "success", 
@@ -215,10 +230,10 @@ const JobView: React.FC = () => {
     );
   };
 
-  const totalPages = Math.ceil(applicants.length / itemsPerPage);
+  const totalPages = Math.ceil((job?.applicants?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentApplicants = applicants.slice(startIndex, endIndex);
+  const currentApplicants = job?.applicants?.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -242,8 +257,8 @@ const JobView: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-center justify-between bg-white px-4 py-3 border-t">
         <div className="flex items-center text-sm text-gray-700 mb-4 sm:mb-0">
           <span>
-            Showing {startIndex + 1} to {Math.min(endIndex, applicants.length)} of{" "}
-            {applicants.length} applicants
+            Showing {startIndex + 1} to {Math.min(endIndex, (job?.applicants?.length || 0))} of{" "}
+            {job?.applicants?.length} applicants
           </span>
         </div>
         <div className="flex items-center space-x-2">
@@ -407,7 +422,7 @@ const JobView: React.FC = () => {
               </div>
               <div className="flex items-center text-gray-600">
                 <Users className="w-5 h-5 mr-2 text-gray-400" />
-                <span>{applicants.length} Applicant{applicants.length !== 1 ? 's' : ''}</span>
+                <span>{job?.applicants?.length} Applicant{job?.applicants?.length !== 1 ? 's' : ''}</span>
               </div>
             </div>
 
@@ -443,7 +458,7 @@ const JobView: React.FC = () => {
           <div className="p-6 border-b">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">
-                Applicants ({applicants.length})
+                Applicants ({job?.applicants?.length || 0})
               </h2>
             </div>
           </div>
@@ -456,7 +471,7 @@ const JobView: React.FC = () => {
                   <span>Loading applicants...</span>
                 </div>
               </div>
-            ) : currentApplicants.length === 0 ? (
+            ) : currentApplicants?.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p>No applicants yet for this position</p>
@@ -490,7 +505,7 @@ const JobView: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {currentApplicants.map((applicant, index) => (
+                    { currentApplicants && currentApplicants?.map((applicant, index) => (
                       <tr key={applicant.id} className="hover:bg-gray-50">
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm">
                           {startIndex + index + 1}
@@ -652,7 +667,7 @@ const JobView: React.FC = () => {
               <p className="text-gray-700">
                 Are you sure you want to {actionConfirm.action}{" "}
                 <span className="font-semibold">
-                  {actionConfirm.applicant.name}
+                  {actionConfirm?.applicant?.name}
                 </span>
                 ? This will change their application status to{" "}
                 <span className="font-semibold">

@@ -432,7 +432,10 @@ const JobDashboard: React.FC = () => {
                         </div>
                       </th>
                       <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
-                        Type & Status
+                        Type
+                      </th>
+                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
+                         Status
                       </th>
                       <th
                         className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 hidden sm:table-cell"
@@ -484,7 +487,13 @@ const JobDashboard: React.FC = () => {
                         <td className="py-4 px-4 sm:px-6 hidden lg:table-cell">
                           <div className="flex flex-col space-y-1">
                             {getEmploymentTypeBadge(job.employment_type)}
+                           
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 sm:px-6 hidden lg:table-cell">
+                          <div className="flex flex-col space-y-1">
                             {getStatusBadge(job.status!)}
+                           
                           </div>
                         </td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
