@@ -80,8 +80,6 @@ class EmployeeService {
      * @returns {Promise<Object>} Response with updated employee data
      */
     async updateEmployee(id, updateData) {
-        
-        
         try {
             const response = await api.put(`/employees/${id}`, updateData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -135,6 +133,8 @@ class EmployeeService {
         }
         if (!employeeData.email?.trim()) {
             errors.push('Email is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employeeData.email)) {
+            errors.push('Invalid email format');
         }
         if (!employeeData.phone?.trim()) {
             errors.push('Phone number is required');
@@ -144,6 +144,27 @@ class EmployeeService {
         }
         if (!employeeData.departmentId?.trim()) {
             errors.push('Department ID is required');
+        }
+        if (!employeeData.date_of_birth) {
+            errors.push('Date of birth is required');
+        }
+        if (!employeeData.gender?.trim()) {
+            errors.push('Gender is required');
+        }
+        if (!employeeData.national_id?.trim()) {
+            errors.push('National ID is required');
+        }
+        if (!employeeData.address?.trim()) {
+            errors.push('Address is required');
+        }
+        if (!employeeData.date_hired) {
+            errors.push('Date hired is required');
+        }
+        if (employeeData.emergency_contact_phone && !/^\+?\d{10,15}$/.test(employeeData.emergency_contact_phone)) {
+            errors.push('Invalid emergency contact phone format');
+        }
+        if (employeeData.bank_account_number && !/^\d{8,20}$/.test(employeeData.bank_account_number)) {
+            errors.push('Invalid bank account number format');
         }
 
         return {
