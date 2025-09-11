@@ -1,18 +1,24 @@
-
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Experience } from '../../common/interfaces/employee.interface';
 import { EmployeeStatus, MaritalStatus } from '../../../generated/prisma';
 import { deleteFile } from '../../common/utils/file-upload.utils';
 import { EmailService } from 'src/global/email/email.service';
-
-
+import { generatePassword } from 'src/common/utils/GeneratePassword.utils';
 
 @Injectable()
 export class EmployeeService {
-  constructor(private prisma: PrismaService , private email:EmailService ) {}
+  constructor(
+    private prisma: PrismaService,
+    private email: EmailService,
+  ) {}
 
- async create(data: {
+  async create(data: {
     first_name: string;
     last_name: string;
     gender: string;
@@ -29,6 +35,10 @@ export class EmployeeService {
     marital_status?: MaritalStatus;
     date_hired: Date;
     status?: EmployeeStatus;
+    bank_account_number?: string;
+    bank_name?: string;
+    emergency_contact_name?: string;
+    emergency_contact_phone?: string;
     experience?: any[];
   }) {
     // 🔍 Check if employee exists by phone, email, or national_id
@@ -43,9 +53,13 @@ export class EmployeeService {
     });
 
     if (existingEmployee) {
-      throw new ConflictException('Employee already exists with provided phone, email, or national ID');
+      throw new ConflictException(
+        'Employee already exists with provided phone, email, or national ID',
+      );
     }
 
+    const password = generatePassword();
+    data['password'] = password;
     // ✅ Create new employee
     const createdEmployee = await this.prisma.employee.create({
       data: {
@@ -67,11 +81,11 @@ export class EmployeeService {
       {
         firstname: createdEmployee.first_name,
         lastname: createdEmployee.last_name,
-        password:'password not yet',
-        email:createdEmployee.email,
-        year:currentYear
-      }
-    )
+        password: password,
+        email: createdEmployee.email,
+        year: currentYear,
+      },
+    );
 
     return createdEmployee;
   }
@@ -80,7 +94,7 @@ export class EmployeeService {
     return this.prisma.employee.findMany({
       include: {
         department: true,
-        contracts:true
+        contracts: true,
       },
     });
   }
@@ -90,7 +104,7 @@ export class EmployeeService {
       where: { id },
       include: {
         department: true,
-        contracts:true
+        contracts: true,
       },
     });
 
@@ -101,25 +115,28 @@ export class EmployeeService {
     return employee;
   }
 
-  async update(id: string, data: {
-    first_name?: string;
-    last_name?: string;
-    gender?: string;
-    date_of_birth?: Date;
-    phone?: string;
-    email?: string;
-    address?: string;
-    national_id?: string;
-    profile_picture?: string;
-    cv?: string;
-    application_letter?: string;
-    position?: string;
-    departmentId?: string;
-    marital_status?: MaritalStatus;
-    date_hired?: Date;
-    status?: EmployeeStatus;
-    experience?: any;
-  }) {
+  async update(
+    id: string,
+    data: {
+      first_name?: string;
+      last_name?: string;
+      gender?: string;
+      date_of_birth?: Date;
+      phone?: string;
+      email?: string;
+      address?: string;
+      national_id?: string;
+      profile_picture?: string;
+      cv?: string;
+      application_letter?: string;
+      position?: string;
+      departmentId?: string;
+      marital_status?: MaritalStatus;
+      date_hired?: Date;
+      status?: EmployeeStatus;
+      experience?: any;
+    },
+  ) {
     const employee = await this.findOne(id);
 
     // Handle file deletion for replaced files
@@ -147,38 +164,39 @@ export class EmployeeService {
       }
     }
 
-    return  this.prisma.employee.update({
-  where: { id },
-  data: {
-    first_name: data.first_name,
-    last_name: data.last_name,
-    gender: data.gender,
-    date_of_birth: data.date_of_birth,
-    phone: data.phone,
-    email: data.email,
-    address: data.address,
-    national_id: data.national_id,
-    profile_picture: data.profile_picture,
-    cv: data.cv,
-    application_letter: data.application_letter,
-    position: data.position,
-    marital_status: data.marital_status,
-    date_hired: data.date_hired,
-    status: data.status,
-    experience: data.experience !== undefined ? data.experience : employee.experience,
+    return this.prisma.employee.update({
+      where: { id },
+      data: {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        gender: data.gender,
+        date_of_birth: data.date_of_birth,
+        phone: data.phone,
+        email: data.email,
+        address: data.address,
+        national_id: data.national_id,
+        profile_picture: data.profile_picture,
+        cv: data.cv,
+        application_letter: data.application_letter,
+        position: data.position,
+        marital_status: data.marital_status,
+        date_hired: data.date_hired,
+        status: data.status,
+        experience:
+          data.experience !== undefined ? data.experience : employee.experience,
 
-    // ✅ Update relation
-    department: data.departmentId
-      ? { connect: { id: data.departmentId } }
-      : undefined,
-  },
-  include: { department: true },
-});
+        // ✅ Update relation
+        department: data.departmentId
+          ? { connect: { id: data.departmentId } }
+          : undefined,
+      },
+      include: { department: true },
+    });
   }
 
   async remove(id: string) {
     const employee = await this.findOne(id);
-    
+
     // Delete associated files before removing employee record
     if (employee.profile_picture) {
       try {
@@ -203,7 +221,7 @@ export class EmployeeService {
         console.error('Error deleting application letter:', error);
       }
     }
-    
+
     return this.prisma.employee.delete({
       where: { id },
     });
