@@ -114,3 +114,73 @@ enum ContractStatus {
   TERMINATED
   PENDING
 }
+
+
+model Job {
+  id               Int              @id @default(autoincrement())
+  title            String
+  description      String
+  location         String
+  employment_type  EmploymentType
+  experience_level ExperienceLevel
+  industry         String?
+  
+  skills_required  Json             
+  status           JobStatus         @default(OPEN)
+
+  posted_at        DateTime?         @default(now())
+  expiry_date      DateTime?
+
+  appplicants       Applicant[]
+
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum ExperienceLevel {
+  ENTRY
+  MID
+  SENIOR
+  EXECUTIVE
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStage {
+  APPLIED
+  SHORTLISTED
+  INTERVIEWED
+  HIRED
+  REJECTED
+}
+
+model Applicant {
+  id              Int               @id @default(autoincrement())
+  jobId           Int               // FK → Job.id
+  job             Job               @relation(fields: [jobId], references: [id],onDelete:Cascade,onUpdate:Cascade)
+
+  name            String
+  email           String
+  phone           String?
+  cvUrl           String?           // link to uploaded CV
+  skills          Json?             // array of candidate’s skills
+  experienceYears Int?              // number of years experience
+
+  stage           ApplicationStage  @default(APPLIED)
+
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+
+  
+}
