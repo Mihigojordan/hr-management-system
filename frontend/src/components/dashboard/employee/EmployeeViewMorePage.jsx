@@ -16,31 +16,31 @@ import {
   Clock,
   X,
   File,
+  DollarSign,
+  UserPlus,
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import employeeService from '../../../services/employeeService'; // Hypothetical service for employee data
-import contractService from '../../../services/contractService'; // Hypothetical service for contract data
-import { API_URL } from '../../../api/api'; // Adjust based on your API base URL
+import employeeService from '../../../services/employeeService';
+import contractService from '../../../services/contractService';
+import { API_URL } from '../../../api/api';
 
 const ViewEmployee = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [previewType, setPreviewType] = useState(null); // 'image' or 'pdf'
+  const [previewType, setPreviewType] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [contractsPerPage] = useState(2); // Number of contracts per page
-  const navigate = useNavigate();
+  const [contractsPerPage] = useState(2);
 
   useEffect(() => {
     const fetchEmployee = async () => {
       try {
         setLoading(true);
-        // Fetch employee data
         const employeeData = await employeeService.getEmployeeById(id);
-        // Parse experience if it's a string
         if (employeeData.experience && typeof employeeData.experience === 'string') {
           try {
             employeeData.experience = JSON.parse(employeeData.experience);
@@ -97,7 +97,6 @@ const ViewEmployee = () => {
     setPreviewType(null);
   };
 
-  // Pagination logic
   const indexOfLastContract = currentPage * contractsPerPage;
   const indexOfFirstContract = indexOfLastContract - contractsPerPage;
   const currentContracts = employee?.contracts?.slice(indexOfFirstContract, indexOfLastContract) || [];
@@ -184,7 +183,6 @@ const ViewEmployee = () => {
       )}
 
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <button
             className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
@@ -207,8 +205,7 @@ const ViewEmployee = () => {
           </div>
         </div>
 
-        <div className="grid  lg:grid-cols-2 gap-8">
-          {/* Personal Information */}
+        <div className="grid lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -251,11 +248,38 @@ const ViewEmployee = () => {
                     <p className="text-sm text-gray-900">{employee.national_id || 'N/A'}</p>
                   </div>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Bank Account Number</label>
+                  <div className="flex items-center mt-1">
+                    <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
+                    <p className="text-sm text-gray-900">{employee.bank_account_number || 'N/A'}</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Bank Name</label>
+                  <div className="flex items-center mt-1">
+                    <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
+                    <p className="text-sm text-gray-900">{employee.bank_name || 'N/A'}</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Emergency Contact Name</label>
+                  <div className="flex items-center mt-1">
+                    <UserPlus className="w-4 h-4 text-gray-400 mr-1" />
+                    <p className="text-sm text-gray-900">{employee.emergency_contact_name || 'N/A'}</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Emergency Contact Phone</label>
+                  <div className="flex items-center mt-1">
+                    <Phone className="w-4 h-4 text-gray-400 mr-1" />
+                    <p className="text-sm text-gray-900">{employee.emergency_contact_phone || 'N/A'}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Contact Information */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -287,7 +311,6 @@ const ViewEmployee = () => {
             </div>
           </div>
 
-          {/* Employment Information */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -323,9 +346,6 @@ const ViewEmployee = () => {
             </div>
           </div>
 
-         
-
-          {/* Documents */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -387,152 +407,148 @@ const ViewEmployee = () => {
             </div>
           </div>
 
-          <div className=" lg:col-span-2 flex flex-col gap-2">
-          <div className=" grid xl:grid-cols-2 gap-4">
-            {/* Contract Information */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Briefcase className="w-5 h-5 mr-2" />
-                  Contract Information
-                </h2>
-              </div>
-              <div className="p-6">
-                {currentContracts.length > 0 ? (
-                  <div className="space-y-6">
-                    {currentContracts.map((contract) => (
-                      <div key={contract.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Contract Type</label>
-                            <p className="mt-1 text-sm text-gray-900">{contract.contractType || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Status</label>
-                            <p className="mt-1 text-sm text-gray-900">{contract.status || 'N/A'}</p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                            <div className="flex items-center mt-1">
-                              <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                              <p className="text-sm text-gray-900">{formatDate(contract.startDate)}</p>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">End Date</label>
-                            <div className="flex items-center mt-1">
-                              <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                              <p className="text-sm text-gray-900">
-                                {contract.endDate ? formatDate(contract.endDate) : 'N/A'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Salary</label>
-                            <div className="flex items-center mt-1">
-                              <CreditCard className="w-4 h-4 text-gray-400 mr-1" />
-                              <p className="text-sm text-gray-900">
-                                {formatCurrency(contract.salary, 'RWF')}
-                              </p>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Department</label>
-                            <div className="flex items-center mt-1">
-                              <Building2 className="w-4 h-4 text-gray-400 mr-1" />
-                              <p className="text-sm text-gray-900">{contract.department?.name || 'N/A'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {/* Pagination Controls */}
-                    <div className="flex justify-between items-center mt-4">
-                      <button
-                        onClick={() => paginate(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className={`px-4 py-2 rounded-lg ${
-                          currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
-                      >
-                        Previous
-                      </button>
-                      <span className="text-sm text-gray-600">
-                        Page {currentPage} of {totalPages}
-                      </span>
-                      <button
-                        onClick={() => paginate(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className={`px-4 py-2 rounded-lg ${
-                          currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-600">No contracts found for this employee.</p>
-                )}
-              </div>
-            </div>
-
-           {/* Work Experience */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Briefcase className="w-5 h-5 mr-2" />
-                Work Experience
-              </h2>
-            </div>
-            <div className="p-6">
-              {employee.experience.length > 0 ? (
-                <div className="space-y-6">
-                  {employee.experience.map((exp, index) => (
-                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Company Name</label>
-                          <p className="mt-1 text-sm text-gray-900">{exp.company_name || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Description</label>
-                          <p className="mt-1 text-sm text-gray-900">{exp.description || 'N/A'}</p>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                          <div className="flex items-center mt-1">
-                            <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                            <p className="text-sm text-gray-900">{formatDate(exp.start_date)}</p>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">End Date</label>
-                          <div className="flex items-center mt-1">
-                            <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                            <p className="text-sm text-gray-900">
-                              {exp.end_date ? formatDate(exp.end_date) : 'Present'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+          <div className="lg:col-span-2 flex flex-col gap-2">
+            <div className="grid xl:grid-cols-2 gap-4">
+              <div className="bg-white rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <Briefcase className="w-5 h-5 mr-2" />
+                    Contract Information
+                  </h2>
                 </div>
-              ) : (
-                <p className="text-sm text-gray-600">No work experience found for this employee.</p>
-              )}
-            </div>
-          </div>
-          </div>
+                <div className="p-6">
+                  {currentContracts.length > 0 ? (
+                    <div className="space-y-6">
+                      {currentContracts.map((contract) => (
+                        <div key={contract.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Contract Type</label>
+                              <p className="mt-1 text-sm text-gray-900">{contract.contractType || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Status</label>
+                              <p className="mt-1 text-sm text-gray-900">{contract.status || 'N/A'}</p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                              <div className="flex items-center mt-1">
+                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                                <p className="text-sm text-gray-900">{formatDate(contract.startDate)}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">End Date</label>
+                              <div className="flex items-center mt-1">
+                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                                <p className="text-sm text-gray-900">
+                                  {contract.endDate ? formatDate(contract.endDate) : 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Salary</label>
+                              <div className="flex items-center mt-1">
+                                <CreditCard className="w-4 h-4 text-gray-400 mr-1" />
+                                <p className="text-sm text-gray-900">
+                                  {formatCurrency(contract.salary, 'RWF')}
+                                </p>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Department</label>
+                              <div className="flex items-center mt-1">
+                                <Building2 className="w-4 h-4 text-gray-400 mr-1" />
+                                <p className="text-sm text-gray-900">{contract.department?.name || 'N/A'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex justify-between items-center mt-4">
+                        <button
+                          onClick={() => paginate(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className={`px-4 py-2 rounded-lg ${
+                            currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <span className="text-sm text-gray-600">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => paginate(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className={`px-4 py-2 rounded-lg ${
+                            currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-600">No contracts found for this employee.</p>
+                  )}
+                </div>
+              </div>
 
-            {/* System Information */}
+              <div className="bg-white rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <Briefcase className="w-5 h-5 mr-2" />
+                    Work Experience
+                  </h2>
+                </div>
+                <div className="p-6">
+                  {employee.experience.length > 0 ? (
+                    <div className="space-y-6">
+                      {employee.experience.map((exp, index) => (
+                        <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                              <p className="mt-1 text-sm text-gray-900">{exp.company_name || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Description</label>
+                              <p className="mt-1 text-sm text-gray-900">{exp.description || 'N/A'}</p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                              <div className="flex items-center mt-1">
+                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                                <p className="text-sm text-gray-900">{formatDate(exp.start_date)}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">End Date</label>
+                              <div className="flex items-center mt-1">
+                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                                <p className="text-sm text-gray-900">
+                                  {exp.end_date ? formatDate(exp.end_date) : 'Present'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-600">No work experience found for this employee.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
