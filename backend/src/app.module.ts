@@ -7,6 +7,7 @@ import { EmployeeModule } from './modules/employee/employee.module';
 import { ContractModule } from './modules/contract/contract.module';
 import { JobModule } from './modules/job-management/job.module';
 import { ApplicantModule } from './modules/applicants-management/applicant.module';
+import { EmailModule } from './global/email/email.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ApplicantModule } from './modules/applicants-management/applicant.modul
     ContractModule,
     JobModule,
     ApplicantModule,
+    EmailModule
   ],
   controllers: [AppController],
 })
