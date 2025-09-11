@@ -55,6 +55,10 @@ const EmployeeForm = () => {
     marital_status: 'SINGLE',
     date_hired: '',
     status: 'ACTIVE',
+    bank_account_number: '',
+    bank_name: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
     experience: []
   });
 
@@ -71,16 +75,16 @@ const EmployeeForm = () => {
     { title: 'Review', icon: Check }
   ];
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-const onSuccess = (resp)=>{
-    if(!resp) return
-    navigate('/admin/dashboard/employee-management',{replace:true})
-}
-const onCancel = ()=>{
-   
-    navigate('/admin/dashboard/employee-management',{replace:true})
-}
+  const onSuccess = (resp) => {
+    if (!resp) return;
+    navigate('/admin/dashboard/employee-management', { replace: true });
+  };
+
+  const onCancel = () => {
+    navigate('/admin/dashboard/employee-management', { replace: true });
+  };
 
   // Load employee data if editing
   useEffect(() => {
@@ -101,7 +105,6 @@ const onCancel = ()=>{
       setIsLoading(true);
       const employee = await employeeService.getEmployeeById(employeeId);
       if (employee) {
-        // Parse experience if it's a string
         const parsedExperience = typeof employee.experience === 'string'
           ? JSON.parse(employee.experience)
           : employee.experience || [];
@@ -110,17 +113,19 @@ const onCancel = ()=>{
           ...employee,
           date_of_birth: new Date(employee.date_of_birth).toISOString().split('T')[0],
           date_hired: new Date(employee.date_hired).toISOString().split('T')[0],
+          bank_account_number: employee.bank_account_number || '',
+          bank_name: employee.bank_name || '',
+          emergency_contact_name: employee.emergency_contact_name || '',
+          emergency_contact_phone: employee.emergency_contact_phone || '',
           experience: parsedExperience
         });
 
-        // Set existing file URLs for preview
         setExistingFiles({
           profileImg: getUrlImage(employee.profile_picture) || null,
           applicationLetter: getUrlImage(employee.application_letter) || null,
           cv: getUrlImage(employee.cv) || null
         });
 
-        // Initialize previewFiles with existing file URLs
         setPreviewFiles({
           profileImg: getUrlImage(employee.profile_picture) || null,
           applicationLetter: getUrlImage(employee.application_letter) || null,
@@ -155,52 +160,43 @@ const onCancel = ()=>{
     }
   };
 
- const handleFileChange = (fileType, file) => {
-  setFiles(prev => ({ ...prev, [fileType]: file }));
-  
-  // Create preview for images and PDFs
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewFiles(prev => ({ ...prev, [fileType]: e.target.result }));
-    };
-    if (file.type.startsWith('image/') || file.type === 'application/pdf') {
-      reader.readAsDataURL(file);
+  const handleFileChange = (fileType, file) => {
+    setFiles(prev => ({ ...prev, [fileType]: file }));
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewFiles(prev => ({ ...prev, [fileType]: e.target.result }));
+      };
+      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+        reader.readAsDataURL(file);
+      } else {
+        setPreviewFiles(prev => ({ ...prev, [fileType]: file.name }));
+      }
+      setRemovedFiles(prev => ({ ...prev, [fileType]: false }));
     } else {
-      setPreviewFiles(prev => ({ ...prev, [fileType]: file.name }));
+      if (existingFiles[fileType] && !removedFiles[fileType]) {
+        setPreviewFiles(prev => ({ ...prev, [fileType]: existingFiles[fileType] }));
+      } else {
+        setPreviewFiles(prev => ({ ...prev, [fileType]: null }));
+      }
     }
-    // Reset removed flag when a new file is uploaded
-    setRemovedFiles(prev => ({ ...prev, [fileType]: false }));
-  } else {
-    // If no file selected, restore existing file preview if available
-    if (existingFiles[fileType] && !removedFiles[fileType]) {
-      setPreviewFiles(prev => ({ ...prev, [fileType]: existingFiles[fileType] }));
-    } else {
-      setPreviewFiles(prev => ({ ...prev, [fileType]: null }));
-    }
-  }
 
-  if (errors[fileType]) {
-    setErrors(prev => ({ ...prev, [fileType]: null }));
-  }
-};
- const removeFile = (fileType) => {
-  // Clear the new file
-  setFiles(prev => ({ ...prev, [fileType]: null }));
-  
-  // Clear the preview
-  setPreviewFiles(prev => ({ ...prev, [fileType]: null }));
-  
-  // If there's an existing file, mark it for removal
-  if (existingFiles[fileType]) {
-    setRemovedFiles(prev => ({ ...prev, [fileType]: true }));
-  }
-  
-  // Clear any errors
-  if (errors[fileType]) {
-    setErrors(prev => ({ ...prev, [fileType]: null }));
-  }
-};
+    if (errors[fileType]) {
+      setErrors(prev => ({ ...prev, [fileType]: null }));
+    }
+  };
+
+  const removeFile = (fileType) => {
+    setFiles(prev => ({ ...prev, [fileType]: null }));
+    setPreviewFiles(prev => ({ ...prev, [fileType]: null }));
+    if (existingFiles[fileType]) {
+      setRemovedFiles(prev => ({ ...prev, [fileType]: true }));
+    }
+    if (errors[fileType]) {
+      setErrors(prev => ({ ...prev, [fileType]: null }));
+    }
+  };
 
   const addExperience = () => {
     setFormData(prev => ({
@@ -216,7 +212,6 @@ const onCancel = ()=>{
 
   const updateExperience = (index, field, value) => {
     setFormData(prev => ({
-
       ...prev,
       experience: prev.experience.map((exp, i) => 
         i === index ? { ...exp, [field]: value } : exp
@@ -247,21 +242,26 @@ const onCancel = ()=>{
         if (!formData.position.trim()) newErrors.position = 'Position is required';
         if (!formData.departmentId.trim()) newErrors.departmentId = 'Department is required';
         if (!formData.date_hired) newErrors.date_hired = 'Hire date is required';
+        if (formData.emergency_contact_phone && !/^\+?\d{10,15}$/.test(formData.emergency_contact_phone)) {
+          newErrors.emergency_contact_phone = 'Invalid emergency contact phone format';
+        }
+        if (formData.bank_account_number && !/^\d{8,20}$/.test(formData.bank_account_number)) {
+          newErrors.bank_account_number = 'Invalid bank account number format';
+        }
         break;
 
       case 1: // Documents
-      if (!employeeId && !files.applicationLetter && !existingFiles.applicationLetter) {
-    newErrors.applicationLetter = 'Application letter is required';
-  }
-  // If editing and existing file is being removed, require new file
-  if (employeeId && existingFiles.applicationLetter && removedFiles.applicationLetter && !files.applicationLetter) {
-    newErrors.applicationLetter = 'Application letter is required';
-  }
-  if (files.applicationLetter && !files.applicationLetter.type.includes('pdf') && 
-      !files.applicationLetter.type.includes('doc')) {
-    newErrors.applicationLetter = 'Application letter must be a document (PDF, DOC, DOCX)';
-  }
-  break;
+        if (!employeeId && !files.applicationLetter && !existingFiles.applicationLetter) {
+          newErrors.applicationLetter = 'Application letter is required';
+        }
+        if (employeeId && existingFiles.applicationLetter && removedFiles.applicationLetter && !files.applicationLetter) {
+          newErrors.applicationLetter = 'Application letter is required';
+        }
+        if (files.applicationLetter && !files.applicationLetter.type.includes('pdf') && 
+            !files.applicationLetter.type.includes('doc')) {
+          newErrors.applicationLetter = 'Application letter must be a document (PDF, DOC, DOCX)';
+        }
+        break;
 
       case 2: // Experience
         formData.experience.forEach((exp, index) => {
@@ -295,44 +295,34 @@ const onCancel = ()=>{
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
-const createFormData = () => {
-  const data = new FormData();
-
-  console.warn(formData);
-  
-  
-  // Add all form fields
-  Object.keys(formData).forEach(key => {
-    if (key === 'experience') {
-      data.append(key, JSON.stringify(formData[key]));
-    } else {
-      data.append(key, formData[key]);
-    }
-  });
-
-  // Add files only if they were newly uploaded
-  if (files.profileImg) data.append('profileImg', files.profileImg);
-  if (files.applicationLetter) data.append('applicationLetter', files.applicationLetter);
-  if (files.cv) data.append('cv', files.cv);
-
-  // Add removed files information - only send true values
-  const removedFilesList = Object.entries(removedFiles)
-    .filter(([_, removed]) => removed)
-    .reduce((acc, [fileType, _]) => ({ ...acc, [fileType]: true }), {});
+  const createFormData = () => {
+    const data = new FormData();
     
-  if (Object.keys(removedFilesList).length > 0) {
-    data.append('removedFiles', JSON.stringify(removedFilesList));
-  }
+    Object.keys(formData).forEach(key => {
+      if (key === 'experience') {
+        data.append(key, JSON.stringify(formData[key]));
+      } else {
+        data.append(key, formData[key]);
+      }
+    });
 
-  
-  const new_dt = Object.fromEntries(data.entries())
-  console.warn(new_dt);
-  
-  return data;
-};
+    if (files.profileImg) data.append('profileImg', files.profileImg);
+    if (files.applicationLetter) data.append('applicationLetter', files.applicationLetter);
+    if (files.cv) data.append('cv', files.cv);
+
+    const removedFilesList = Object.entries(removedFiles)
+      .filter(([_, removed]) => removed)
+      .reduce((acc, [fileType, _]) => ({ ...acc, [fileType]: true }), {});
+      
+    if (Object.keys(removedFilesList).length > 0) {
+      data.append('removedFiles', JSON.stringify(removedFilesList));
+    }
+
+    return data;
+  };
 
   const handleSubmit = async () => {
-    if (!validateStep(2)) return; // Validate experience step
+    if (!validateStep(2)) return;
 
     try {
       setIsLoading(true);
@@ -610,6 +600,56 @@ const createFormData = () => {
                   ))}
                 </select>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bank Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.bank_name}
+                  onChange={(e) => handleInputChange('bank_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bank Account Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.bank_account_number}
+                  onChange={(e) => handleInputChange('bank_account_number', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+                {errors.bank_account_number && <p className="text-sm text-red-600 mt-1">{errors.bank_account_number}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Emergency Contact Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.emergency_contact_name}
+                  onChange={(e) => handleInputChange('emergency_contact_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Emergency Contact Phone
+                </label>
+                <input
+                  type="tel"
+                  value={formData.emergency_contact_phone}
+                  onChange={(e) => handleInputChange('emergency_contact_phone', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+                {errors.emergency_contact_phone && <p className="text-sm text-red-600 mt-1">{errors.emergency_contact_phone}</p>}
+              </div>
             </div>
 
             <div>
@@ -771,6 +811,15 @@ const createFormData = () => {
                   <p><span className="font-medium">Gender:</span> {formData.gender}</p>
                   <p><span className="font-medium">Position:</span> {formData.position}</p>
                   <p><span className="font-medium">Status:</span> {formData.status}</p>
+                  <p><span className="font-medium">Marital Status:</span> {formData.marital_status}</p>
+                  <p><span className="font-medium">Date of Birth:</span> {formData.date_of_birth}</p>
+                  <p><span className="font-medium">National ID:</span> {formData.national_id}</p>
+                  <p><span className="font-medium">Date Hired:</span> {formData.date_hired}</p>
+                  <p><span className="font-medium">Bank Name:</span> {formData.bank_name || 'Not provided'}</p>
+                  <p><span className="font-medium">Bank Account Number:</span> {formData.bank_account_number || 'Not provided'}</p>
+                  <p><span className="font-medium">Emergency Contact Name:</span> {formData.emergency_contact_name || 'Not provided'}</p>
+                  <p><span className="font-medium">Emergency Contact Phone:</span> {formData.emergency_contact_phone || 'Not provided'}</p>
+                  <p className="col-span-2"><span className="font-medium">Address:</span> {formData.address}</p>
                 </div>
               </div>
 
@@ -822,14 +871,12 @@ const createFormData = () => {
 
   return (
     <div className="w-full mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-      {/* Header */}
       <div className="bg-primary-600 px-6 py-4">
         <h1 className="text-xl font-semibold text-white">
           {employeeId ? 'Update Employee' : 'Create New Employee'}
         </h1>
       </div>
 
-      {/* Step Indicator */}
       <div className="px-6 py-4 bg-gray-50 border-b">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => {
@@ -864,12 +911,10 @@ const createFormData = () => {
         </div>
       </div>
 
-      {/* Form Content */}
       <div className="px-6 py-6">
         {renderStepContent()}
       </div>
 
-      {/* Navigation */}
       <div className="px-6 py-4 bg-gray-50 border-t">
         <div className="flex items-center justify-between">
           <div>
@@ -923,7 +968,6 @@ const createFormData = () => {
   );
 };
 
-// Example usage component
 const EmployeeFormExample = () => {
   const [showForm, setShowForm] = useState(true);
   const [editingEmployeeId, setEditingEmployeeId] = useState(null);

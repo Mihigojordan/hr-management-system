@@ -25,15 +25,14 @@ model Admin {
 }
 
 model Department {
-  id          String   @id @unique @default(uuid())
+  id          String     @id @unique @default(uuid())
   name        String?
-  description String? @db.VarChar(1000)
+  description String?    @db.VarChar(1000)
   employee    Employee[]
-  contracts            Contract[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  contracts   Contract[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
-
 
 // Define the enum first
 enum EmployeeStatus {
@@ -52,50 +51,54 @@ enum MaritalStatus {
 }
 
 model Employee {
-  id          String   @id @unique @default(uuid())
-  first_name          String
-  last_name           String
-  gender              String
-  date_of_birth       DateTime
-  phone               String
-  email               String         @unique
-  address             String
-  national_id         String        @unique
-  profile_picture     String?
-  cv                  String?
-  application_letter  String?
-  position            String
-  departmentId        String
-  department          Department     @relation(fields: [departmentId], references: [id],onDelete: Cascade, onUpdate: Cascade)
-  marital_status      MaritalStatus? @default(SINGLE)
-  date_hired          DateTime
-  status              EmployeeStatus @default(ACTIVE)
-  experience          Json?
-  contracts            Contract[]
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  
+  id                      String         @id @unique @default(uuid())
+  first_name              String
+  last_name               String
+  gender                  String
+  date_of_birth           DateTime
+  phone                   String
+  email                   String         @unique
+  password                String?
+  address                 String
+  national_id             String         @unique
+  profile_picture         String?
+  bank_account_number     String?
+  bank_name               String?
+  cv                      String?
+  application_letter      String?
+  position                String
+  departmentId            String
+  department              Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  marital_status          MaritalStatus? @default(SINGLE)
+  date_hired              DateTime
+  status                  EmployeeStatus @default(ACTIVE)
+  experience              Json?
+  emergency_contact_name  String?
+  emergency_contact_phone String?
+
+  contracts Contract[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
-
 model Contract {
-  id            String       @id @default(uuid())
-  
-  employee      Employee     @relation(fields: [employeeId], references: [id],onDelete: Cascade, onUpdate: Cascade)
-  employeeId    String       // 👈 Use String if Employee.id is String (UUID). Change to Int if Employee.id is Int
+  id String @id @default(uuid())
 
-  department    Department   @relation(fields: [departmentId], references: [id])
-  departmentId  String       // 👈 Same here: match Department.id type
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId String // 👈 Use String if Employee.id is String (UUID). Change to Int if Employee.id is Int
 
-  contractType  ContractType
-  startDate     DateTime
-  endDate       DateTime?
-  salary        Float
-  currency      String       @default("RWF")
-  status        ContractStatus @default(ACTIVE)
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId String // 👈 Same here: match Department.id type
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  contractType ContractType
+  startDate    DateTime
+  endDate      DateTime?
+  salary       Float
+  currency     String         @default("RWF")
+  status       ContractStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum ContractType {
