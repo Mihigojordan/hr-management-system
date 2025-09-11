@@ -8,6 +8,8 @@ export class JobService {
 
     async create(data: any) {
         try {
+            console.log(data);
+            
             return await this.prisma.job.create({ data });
         } catch (error) {
             console.error(error);
