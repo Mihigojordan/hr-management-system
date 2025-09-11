@@ -1,0 +1,140 @@
+
+// 1. ======/=> EMPOLOYEE <=/========
+// Interface for employee data (used for validation)
+export const MARITAL_STATUS = ['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED'] as const;
+export const EMPLOYEE_STATUS = ['ACTIVE', 'TERMINATED', 'RESIGNED', 'PROBATION'] as const;
+export const GENDERS = ['MALE', 'FEMALE', 'OTHER'] as const;
+
+export type MaritalStatus = typeof MARITAL_STATUS[number];
+export type EmployeeStatus = typeof EMPLOYEE_STATUS[number];
+export type Gender = typeof GENDERS[number];
+
+export interface Department {
+    id: string;
+    name: string;
+}
+
+export interface Experience {
+    company_name: string;
+    description: string;
+    start_date: string;
+    end_date?: string;
+}
+
+export interface EmployeeData {
+    first_name: string;
+    last_name: string;
+    gender: Gender;
+    date_of_birth: string;
+    phone: string;
+    email: string;
+    address: string;
+    national_id: string;
+    position: string;
+    departmentId: string;
+    marital_status: MaritalStatus;
+    date_hired: string;
+    status: EmployeeStatus;
+    bank_account_number: string;
+    bank_name: string;
+    emergency_contact_name: string;
+    emergency_contact_phone: string;
+    experience: Experience[];
+    profile_picture?: string;
+    application_letter?: string;
+    cv?: string;
+}
+
+// Interface for employee (includes additional fields like id and timestamps)
+export interface Employee extends EmployeeData {
+    id: string;
+    contracts:Contract[];
+    created_at?: string; // ISO string
+    updated_at?: string; // ISO string
+}
+
+// ========================================================================================================
+
+// 2. ======/=> CONTRACT <=/========
+
+// Interface for contract data (used for create/update payloads)
+export interface ContractData {
+     id: string;
+    employeeId: string; // Allow string for form inputs, converted to number in API calls if needed
+    departmentId: string; // Allow string for form inputs, converted to number in API calls if needed
+    contractType: string;
+    startDate: string; // ISO string
+    endDate?: string; // ISO string, optional
+    salary: string;
+    currency?: string; // Optional
+    status?: "ACTIVE" | "PENDING" | "EXPIRED" | "TERMINATED" | string; // Optional, with specific values
+}
+
+export interface Contract {
+    id: string;
+    employeeId: string;
+    departmentId: string;
+    contractType:  "PERMANENT" | "PROBATION" | "TEMPORARY" | "INTERNSHIP" | string;
+    startDate: string;
+    endDate?: string;
+    salary: string;
+    currency?: string;
+    status?: "ACTIVE" | "PENDING" | "EXPIRED" | "TERMINATED" | string; // Optional, with specific values
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+
+
+// ========================================================================================================
+
+// 3. ======/=> JOB <=/========
+
+// Interface for Job
+export interface Job {
+  id: number;
+  title: string;
+  description: string;
+  location: string;
+  employment_type: string;
+  experience_level: string;
+  industry?: string;
+  companyId?: number;
+  skills_required?: string[];
+  status?: string;
+  posted_at?: string; // ISO string
+  expiry_date?: string; // ISO string
+  created_at?: string; // ISO string
+  updated_at?: string; // ISO string
+}
+
+// CreateJobInput: Job without id, created_at, updated_at
+export type CreateJobInput = Omit<Job, 'id' | 'created_at' | 'updated_at'>;
+
+// UpdateJobInput: Partial of CreateJobInput (all fields optional)
+export type UpdateJobInput = Partial<CreateJobInput>;
+
+
+
+
+type ApplicationStage =
+   'APPLIED'|
+ 'SHORTLISTED'|
+  'INTERVIEWED'|
+ 'HIRED'|
+  'REJECTED';
+
+
+export interface Applicant {
+  id: number;
+  jobId: number;
+  name: string;
+  email: string;
+  phone?: string;
+  cvUrl?: string;
+  skills?: any; // JSON can be typed more strictly if desired, e.g., string[]
+  experienceYears?: number;
+  stage: ApplicationStage;
+  created_at: string; // or Date if you parse it
+  updated_at: string; // or Date
+}
