@@ -91,14 +91,14 @@ const routes = createBrowserRouter([
               </SuspenseWrapper>
             ),
           },
-          {
-            path: 'jobs',
-            element: (
-              <SuspenseWrapper>
-                <JobsBoard />
-              </SuspenseWrapper>
-            ),
-          },
+          // {
+          //   path: 'jobs',
+          //   element: (
+          //     <SuspenseWrapper>
+          //       <JobsBoard />
+          //     </SuspenseWrapper>
+          //   ),
+          // },
           {
             path: 'contact',
             element: (
