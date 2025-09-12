@@ -1,73 +1,42 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, Delete } from '@nestjs/common';
 import { ContractService } from './contract.service';
-import { ContractStatus, ContractType } from '../../../generated/prisma';
+import { ContractGateway } from './contract.gateway';
 
 @Controller('contracts')
 export class ContractController {
-  constructor(private readonly contractService: ContractService) {}
+  constructor(
+    private readonly contractService: ContractService,
+    private readonly contractGateway: ContractGateway,
+  ) {}
 
   @Post()
-  create(@Body() createContractData: {
-    employeeId: string;
-    departmentId: string;
-    contractType: ContractType;
-    startDate: string;
-    endDate?: string;
-    salary: number;
-    currency?: string;
-    status?: ContractStatus;
-  }) {
-    return this.contractService.create({
-      ...createContractData,
-      startDate: new Date(createContractData.startDate),
-      endDate: createContractData.endDate ? new Date(createContractData.endDate) : undefined,
-    });
+  async create(@Body() data: any) {
+    const contract = await this.contractService.create(data);
+    this.contractGateway.emitContractCreated(contract); // notify real-time
+    return contract;
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.contractService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.contractService.findOne(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateContractData: {
-      employeeId?: string;
-      departmentId?: string;
-      contractType?: ContractType;
-      startDate?: string;
-      endDate?: string;
-      salary?: number;
-      currency?: string;
-      status?: ContractStatus;
-    },
-  ) {
-    return this.contractService.update(id, {
-      ...updateContractData,
-      startDate: updateContractData.startDate ? new Date(updateContractData.startDate) : undefined,
-      endDate: updateContractData.endDate ? new Date(updateContractData.endDate) : undefined,
-    });
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() data: any) {
+    const contract = await this.contractService.update(id, data);
+    this.contractGateway.emitContractUpdated(contract); // notify real-time
+    return contract;
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    return this.contractService.remove(id);
+  async remove(@Param('id') id: string) {
+    const contract = await this.contractService.remove(id);
+    this.contractGateway.emitContractDeleted(id); // notify real-time
+    return contract;
   }
 }
