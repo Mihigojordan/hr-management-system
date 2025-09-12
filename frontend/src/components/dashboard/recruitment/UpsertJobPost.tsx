@@ -174,9 +174,6 @@ const JobForm: React.FC<{
         else if (formData.title.length < 3) newErrors.title = 'Job title must be at least 3 characters';
         else if (formData.title.length > 100) newErrors.title = 'Job title must not exceed 100 characters';
 
-        if (!formData.description.trim()) newErrors.description = 'Job description is required';
-        else if (formData.description.length < 50) newErrors.description = 'Job description must be at least 50 characters';
-        else if (formData.description.length > 5000) newErrors.description = 'Job description must not exceed 5000 characters';
 
         if (!formData.location.trim()) newErrors.location = 'Location is required';
         if (!formData.employment_type) newErrors.employment_type = 'Employment type is required';
@@ -184,9 +181,12 @@ const JobForm: React.FC<{
         break;
 
       case 1: // Requirements
-        if (formData.skills_required.length === 0) {
-          newErrors.skills_required = 'At least one skill is required';
-        }
+       
+
+        
+        if (!formData.description.trim()) newErrors.description = 'Job description is required';
+        else if (formData.description.length < 10) newErrors.description = 'Job description must be at least 50 characters';
+        else if (formData.description.length > 5000) newErrors.description = 'Job description must not exceed 5000 characters';
         break;
 
       case 2: // Settings
@@ -219,13 +219,15 @@ const JobForm: React.FC<{
       setIsLoading(true);
       
       const submitData: CreateJobInput | UpdateJobInput = {
+        ...formData,
         title: formData.title,
         description: formData.description,
         location: formData.location,
         employment_type: formData.employment_type,
         experience_level: formData.experience_level,
         industry: formData.industry,
-       
+       posted_at: formData.posted_at ? new Date(formData.posted_at).toISOString() : new Date().toISOString(),
+          expiry_date: formData.expiry_date ? new Date(formData.expiry_date).toISOString() : '',
         skills_required: formData.skills_required,
         status: formData.status,
       };
@@ -267,24 +269,7 @@ const JobForm: React.FC<{
               {errors.title && <p className="text-sm text-red-600 mt-1">{errors.title}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Job Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={8}
-                placeholder="Provide a detailed description of the job role, responsibilities, and what makes this opportunity unique..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
-                <p className="text-xs text-gray-500 ml-auto">
-                  {formData.description.length}/5000 characters
-                </p>
-              </div>
-            </div>
+           
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -386,6 +371,9 @@ const JobForm: React.FC<{
                   Add
                 </button>
               </div>
+
+
+              
               
               {formData.skills_required.length === 0 ? (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
@@ -414,6 +402,25 @@ const JobForm: React.FC<{
               )}
               
               {errors.skills_required && <p className="text-sm text-red-600 mt-1">{errors.skills_required}</p>}
+            </div>
+
+             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Job Description <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                rows={8}
+                placeholder="Provide a detailed description of the job role, responsibilities, and what makes this opportunity unique..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <div className="flex justify-between items-center mt-1">
+                {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
+                <p className="text-xs text-gray-500 ml-auto">
+                  {formData.description.length}/5000 characters
+                </p>
+              </div>
             </div>
           </div>
         );

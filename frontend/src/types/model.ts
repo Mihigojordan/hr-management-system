@@ -102,6 +102,7 @@ export interface Job {
   companyId?: number;
   skills_required?: string[];
   status?: string;
+  applicants?:Applicant[];
   posted_at?: string; // ISO string
   expiry_date?: string; // ISO string
   created_at?: string; // ISO string
