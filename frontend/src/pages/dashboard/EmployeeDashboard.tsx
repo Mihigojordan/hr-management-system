@@ -16,11 +16,18 @@ import {
   XCircle,
   X,
   AlertCircle,
+  FileText,
 } from "lucide-react";
 import employeeService from "../../services/employeeService";
 import departmentService from "../../services/departmentService";
+import contractService from "../../services/contractService";
 import { useNavigate } from "react-router-dom";
-import type { Employee, Department } from "../../types/model";
+import type { Employee, Department, ContractData, Contract } from "../../types/model";
+import { useSocket, useSocketEvent } from "../../context/SocketContext";
+import AddContractModal from "../../components/dashboard/contract/AddContractModal";
+
+const CONTRACT_STATUSES = ['ACTIVE', 'EXPIRED', 'TERMINATED', 'PENDING'] as const;
+type ContractStatus = typeof CONTRACT_STATUSES[number];
 
 interface OperationStatus {
   type: "success" | "error" | "info";
@@ -36,13 +43,14 @@ const EmployeeDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sortBy, setSortBy] = useState<keyof Employee>("first_name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(5);
-  
   const [deleteConfirm, setDeleteConfirm] = useState<Employee | null>(null);
   const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
   const [operationLoading, setOperationLoading] = useState<boolean>(false);
+  const [isContractModalOpen, setIsContractModalOpen] = useState<boolean>(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [employeeContractStatus, setEmployeeContractStatus] = useState<{ [key: string]: boolean }>({});
 
   const navigate = useNavigate();
 
@@ -54,6 +62,27 @@ const EmployeeDashboard: React.FC = () => {
     handleFilterAndSort();
   }, [searchTerm, sortBy, sortOrder, allEmployees]);
 
+  // Real-time socket listeners
+  useSocketEvent('contractCreated', (contract: Contract) => {
+    showOperationStatus('info', `New contract created${contract.employeeId ? ` for employee ${contract.employeeId}` : ''}!`);
+    if (contract.employeeId) {
+      setEmployeeContractStatus((prev) => ({
+        ...prev,
+        [contract.employeeId]: true,
+      }));
+    }
+  });
+
+  useSocketEvent('contractUpdated', (contract: Contract) => {
+    showOperationStatus('info', `Contract ${contract.id} updated!`);
+  });
+
+  useSocketEvent('contractDeleted', ({ id }: { id: string }) => {
+    showOperationStatus('info', `Contract ${id} deleted!`);
+    // Optionally reload contract status for affected employee
+    loadData(); // Reload to ensure contract status is updated
+  });
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -64,6 +93,16 @@ const EmployeeDashboard: React.FC = () => {
       setAllEmployees(employeeData || []);
       setDepartments(departmentData || []);
       setError(null);
+
+      // Fetch contract status for all employees
+      const contractStatus: { [key: string]: boolean } = {};
+      for (const employee of employeeData || []) {
+        if (employee.id) {
+          const contracts = await contractService.getContractsByEmployeeId(employee.id);
+          contractStatus[employee.id] = contracts.length > 0;
+        }
+      }
+      setEmployeeContractStatus(contractStatus);
     } catch (err: any) {
       setError(err.message || "Failed to load data");
     } finally {
@@ -89,30 +128,30 @@ const EmployeeDashboard: React.FC = () => {
       );
     }
 
-filtered.sort((a, b) => {
-  let aValue = a[sortBy];
-  let bValue = b[sortBy];
+    filtered.sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
 
-  // Handle dates
-  if (sortBy === "date_hired" || sortBy === "date_of_birth") {
-    const aDate = typeof aValue === "string" || aValue instanceof Date
-      ? new Date(aValue)
-      : new Date(0); // fallback if value is not a date/string
-    const bDate = typeof bValue === "string" || bValue instanceof Date
-      ? new Date(bValue)
-      : new Date(0);
+      // Handle dates
+      if (sortBy === "date_hired" || sortBy === "date_of_birth") {
+        const aDate = typeof aValue === "string" || aValue instanceof Date
+          ? new Date(aValue)
+          : new Date(0);
+        const bDate = typeof bValue === "string" || bValue instanceof Date
+          ? new Date(bValue)
+          : new Date(0);
 
-    if (sortOrder === "asc") return aDate.getTime() - bDate.getTime();
-    else return bDate.getTime() - aDate.getTime();
-  }
+        if (sortOrder === "asc") return aDate.getTime() - bDate.getTime();
+        else return bDate.getTime() - aDate.getTime();
+      }
 
-  // Handle strings / numbers
-  const aStr = aValue ? aValue.toString().toLowerCase() : "";
-  const bStr = bValue ? bValue.toString().toLowerCase() : "";
+      // Handle strings / numbers
+      const aStr = aValue ? aValue.toString().toLowerCase() : "";
+      const bStr = bValue ? bValue.toString().toLowerCase() : "";
 
-  if (sortOrder === "asc") return aStr > bStr ? 1 : aStr < bStr ? -1 : 0;
-  else return aStr < bStr ? 1 : aStr > bStr ? -1 : 0;
-});
+      if (sortOrder === "asc") return aStr > bStr ? 1 : aStr < bStr ? -1 : 0;
+      else return aStr < bStr ? 1 : aStr > bStr ? -1 : 0;
+    });
 
     setEmployees(filtered);
     setCurrentPage(1);
@@ -143,6 +182,53 @@ filtered.sort((a, b) => {
       showOperationStatus("error", err.message || "Failed to delete employee");
     } finally {
       setOperationLoading(false);
+    }
+  };
+
+  const handleCreateContract = async (employee: Employee) => {
+    try {
+      setOperationLoading(true);
+      // Fetch employee's contracts to check if any exist
+      const contracts = await contractService.getContractsByEmployeeId(employee.id);
+      if (contracts.length > 0) {
+        showOperationStatus('error', 'This employee already has a contract.');
+        return;
+      }
+
+      setSelectedEmployee(employee);
+      setIsContractModalOpen(true);
+    } catch (err: any) {
+      showOperationStatus('error', err.message || 'Failed to check existing contracts');
+    } finally {
+      setOperationLoading(false);
+    }
+  };
+
+  const handleContractSubmit = async (data: ContractData) => {
+    try {
+      setOperationLoading(true);
+      const validation = contractService.validateContractData(data);
+      if (!validation.isValid) {
+        showOperationStatus('error', validation.errors.join(', '));
+        return;
+      }
+
+      const contract = await contractService.createContract(data);
+      if (selectedEmployee) {
+        await contractService.assignEmployeeToContract(contract.id, selectedEmployee.id);
+        setEmployeeContractStatus((prev) => ({
+          ...prev,
+          [selectedEmployee.id]: true,
+        }));
+      }
+
+      showOperationStatus('success', 'Contract created and assigned successfully!');
+    } catch (err: any) {
+      showOperationStatus('error', err.message || 'Failed to create contract');
+    } finally {
+      setOperationLoading(false);
+      setIsContractModalOpen(false);
+      setSelectedEmployee(null);
     }
   };
 
@@ -413,6 +499,14 @@ filtered.sort((a, b) => {
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
+                              onClick={() => handleCreateContract(employee)}
+                              disabled={operationLoading || (employee.id && employeeContractStatus[employee.id])}
+                              className="text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={employee.id && employeeContractStatus[employee.id] ? "Employee already has a contract" : "Create Contract"}
+                            >
+                              <FileText className="w-4 h-4" />
+                            </button>
+                            <button
                               onClick={() => setDeleteConfirm(employee)}
                               disabled={operationLoading}
                               className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
@@ -432,6 +526,18 @@ filtered.sort((a, b) => {
           </div>
         </div>
       </div>
+
+      <AddContractModal
+        isOpen={isContractModalOpen}
+        onClose={() => {
+          setIsContractModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        onSubmit={handleContractSubmit}
+        departments={departments}
+        loading={operationLoading}
+        employee={selectedEmployee}
+      />
 
       {operationStatus && (
         <div className="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-in-out">
@@ -505,7 +611,7 @@ filtered.sort((a, b) => {
               </button>
               <button
                 onClick={() => handleDeleteEmployee(deleteConfirm)}
-                className="w-full sm:w-auto px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 Delete Employee
               </button>

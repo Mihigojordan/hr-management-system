@@ -1,243 +1,289 @@
 import React, { type FC, useState } from 'react';
 import { X } from 'lucide-react';
-import Swal from 'sweetalert2';
 
-import type { Contract,Employee ,Department,ContractData } from '../../../types/model';
-
-
-
-// Interface for new contract data (aligned with ContractService's ContractData)
-interface NewContractData {
-  employeeId: string;
-  departmentId: string;
-  contractType: string;
-  startDate: string;
-  endDate?: string;
-  salary: string;
-  currency: string;
-  status: string;
-}
+import type { Contract, Department, ContractData } from '../../../types/model';
 
 // Props for AddContractModal
 interface AddContractModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (contractData: ContractData) => void;
-  employees: Employee[];
   departments: Department[];
   loading: boolean;
+  employee?: Employee;  // Added optional employee prop
 }
 
 /**
  * AddContractModal component
- * Modal for creating a new contract with employee and department selection
+ * Modal for creating a new contract
  */
 const AddContractModal: FC<AddContractModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  employees,
   departments,
   loading,
+  employee,  // Destructure the new prop
 }) => {
   const [newContract, setNewContract] = useState<Partial<ContractData>>({
-    employeeId: '',
-    departmentId: '',
-    contractType: '',
+    contractType: 'PERMANENT',
     startDate: '',
     endDate: '',
-    salary: '',
+    salary: 0,
     currency: 'RWF',
-    status: 'ACTIVE',
+    benefits: '',
+    workingHours: '',
+    probationPeriod: '',
+    terminationConditions: '',
+    terms: '',
   });
 
   /**
-   * Format date to a readable string
-   * @param dateString - Date string to format
-   * @returns Formatted date or "N/A" if empty
-   */
-  const formatDate = (dateString?: string): string => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
-  /**
-   * Handle form submission with active contract check
+   * Handle form submission
    */
   const handleSubmit = () => {
-    const selectedEmployee: Employee | undefined = employees.find((emp) => emp.id === newContract.employeeId);
-    const activeContract = selectedEmployee?.contracts?.find(
-      (contract) => contract.status === 'ACTIVE',
-    );
+    // Convert salary to number if it's a string
+    const contractData: ContractData = {
+      ...newContract as ContractData,
+      salary: typeof newContract.salary === 'string' ? parseFloat(newContract.salary) : (newContract.salary || 0),
+    };
 
-    if (activeContract && newContract.status === 'ACTIVE') {
-      Swal.fire({
-        title: 'Warning: Active Contract Exists',
-        html: `The employee <strong>${selectedEmployee?.first_name} ${selectedEmployee?.last_name}</strong> already has an active contract (${activeContract.contractType}). <br> <br> Started at <strong>${formatDate(activeContract.startDate)}</strong> and Ending at <strong>${formatDate(activeContract.endDate)}</strong> .<br/><br/>Creating a new active contract will terminate the existing one. Do you want to proceed?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, Create New Contract',
-        cancelButtonText: 'No, Cancel',
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          onSubmit(newContract);
-          onClose();
-        }
-      });
-    } else {
-      onSubmit(newContract);
-    }
+    onSubmit(contractData);
+    
+    // Reset form
+    setNewContract({
+      contractType: 'PERMANENT',
+      startDate: '',
+      endDate: '',
+      salary: 0,
+      currency: 'RWF',
+      benefits: '',
+      workingHours: '',
+      probationPeriod: '',
+      terminationConditions: '',
+      terms: '',
+    });
+    onClose();
+  };
+
+  const handleClose = () => {
+    // Reset form on close
+    setNewContract({
+      contractType: 'PERMANENT',
+      startDate: '',
+      endDate: '',
+      salary: 0,
+      currency: 'RWF',
+      benefits: '',
+      workingHours: '',
+      probationPeriod: '',
+      terminationConditions: '',
+      terms: '',
+    });
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Add New Contract</h3>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-400 hover:text-gray-600"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
+        {/* Display employee name if provided */}
+        {employee && (
+          <p className="text-sm text-gray-500 mb-4">
+            Creating contract for: {employee.first_name} {employee.last_name}
+          </p>
+        )}
         <div className="space-y-4">
+          {/* Contract Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Employee</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Contract Type <span className="text-red-500">*</span>
+            </label>
             <select
-              value={newContract.employeeId}
+              value={newContract.contractType || ''}
               onChange={(e) =>
-                setNewContract({ ...newContract, employeeId: e.target.value })
+                setNewContract({ ...newContract, contractType: e.target.value as any })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              required
             >
-              <option value="">Select Employee</option>
-              {employees.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.first_name} {emp.last_name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-            <select
-              value={newContract.departmentId}
-              onChange={(e) =>
-                setNewContract({ ...newContract, departmentId: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Select Department</option>
-              {departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type</label>
-            <select
-              value={newContract.contractType}
-              onChange={(e) =>
-                setNewContract({ ...newContract, contractType: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Select Contract Type</option>
-              <option value="PROBATION">Probation</option>
               <option value="PERMANENT">Permanent</option>
               <option value="TEMPORARY">Temporary</option>
               <option value="INTERNSHIP">Internship</option>
             </select>
           </div>
+
+          {/* Date Range */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Start Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={newContract.startDate || ''}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, startDate: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Date (Optional)
+              </label>
+              <input
+                type="date"
+                value={newContract.endDate || ''}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, endDate: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+
+          {/* Salary and Currency */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Salary <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={newContract.salary || ''}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, salary: parseFloat(e.target.value) || 0 })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="Enter salary amount"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+              <select
+                value={newContract.currency || 'RWF'}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, currency: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="RWF">RWF (Rwandan Franc)</option>
+                <option value="USD">USD (US Dollar)</option>
+                <option value="EUR">EUR (Euro)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Additional Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Working Hours
+              </label>
+              <input
+                type="text"
+                value={newContract.workingHours || ''}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, workingHours: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="e.g., 9 AM - 5 PM, Monday to Friday"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Probation Period
+              </label>
+              <input
+                type="text"
+                value={newContract.probationPeriod || ''}
+                onChange={(e) =>
+                  setNewContract({ ...newContract, probationPeriod: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="e.g., 3 months"
+              />
+            </div>
+          </div>
+
+          {/* Benefits */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-            <input
-              type="date"
-              value={newContract.startDate}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Benefits</label>
+            <textarea
+              value={newContract.benefits || ''}
               onChange={(e) =>
-                setNewContract({ ...newContract, startDate: e.target.value })
+                setNewContract({ ...newContract, benefits: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              placeholder="List employee benefits (health insurance, vacation days, etc.)"
+              rows={3}
             />
           </div>
+
+          {/* Terms and Conditions */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              End Date (Optional)
+              Terms and Conditions
             </label>
-            <input
-              type="date"
-              value={newContract.endDate}
+            <textarea
+              value={newContract.terms || ''}
               onChange={(e) =>
-                setNewContract({ ...newContract, endDate: e.target.value })
+                setNewContract({ ...newContract, terms: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              placeholder="Enter contract terms and conditions"
+              rows={4}
             />
           </div>
+
+          {/* Termination Conditions */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Salary</label>
-            <input
-              type="number"
-              value={newContract.salary}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Termination Conditions
+            </label>
+            <textarea
+              value={newContract.terminationConditions || ''}
               onChange={(e) =>
-                setNewContract({ ...newContract, salary: e.target.value })
+                setNewContract({ ...newContract, terminationConditions: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Enter salary"
+              placeholder="Specify conditions for contract termination"
+              rows={3}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-            <input
-              type="text"
-              value={newContract.currency}
-              onChange={(e) =>
-                setNewContract({ ...newContract, currency: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Enter currency (e.g., RWF)"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              value={newContract.status}
-              onChange={(e) =>
-                setNewContract({ ...newContract, status: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="ACTIVE">Active</option>
-              <option value="EXPIRED">Expired</option>
-              <option value="TERMINATED">Terminated</option>
-              <option value="PENDING">Pending</option>
-            </select>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6">
+
+        {/* Form Actions */}
+        <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-4 border-t">
           <button
-            onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+            onClick={handleClose}
+            className="w-full sm:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={loading}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
+            disabled={loading || !newContract.startDate || !newContract.salary}
+            className="w-full sm:w-auto px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Add Contract
+            {loading ? 'Creating...' : 'Create Contract'}
           </button>
         </div>
       </div>

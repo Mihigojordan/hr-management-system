@@ -25,6 +25,10 @@ export class ContractController {
   async findOne(@Param('id') id: string) {
     return this.contractService.findOne(id);
   }
+  @Get('employee/:employeeId')
+  async findByEmployeeId(@Param('employeeId') employeeId: string) {
+    return this.contractService.findByEmployeeId(employeeId);
+  }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() data: any) {
