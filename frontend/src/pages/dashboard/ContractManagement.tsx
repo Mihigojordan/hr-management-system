@@ -20,29 +20,16 @@ import {
 import contractService from "../../services/contractService";
 import employeeService from "../../services/employeeService";
 import departmentService from "../../services/departmentService";
+import { useSocket, useSocketEvent } from "../../context/SocketContext";
 import AddContractModal from "../../components/dashboard/contract/AddContractModal";
 import EditContractModal from "../../components/dashboard/contract/EditContractModal";
 import ViewContractModal from "../../components/dashboard/contract/ViewContractModal";
 import DeleteConfirmModal from "../../components/dashboard/contract/DeleteConfirmModal";
-import type { Contract,Employee, Department,ContractData } from "../../types/model";
-
+import type { Contract, Employee, Department, ContractData } from "../../types/model";
 
 interface OperationStatus {
   type: "success" | "error" | "info";
   message: string;
-}
-
-interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-}
-
-interface ContractService {
-  getAllContracts: () => Promise<Contract[]>;
-  createContract: (data: Partial<Contract>) => Promise<void>;
-  updateContract: (id: number, data: Partial<Contract>) => Promise<void>;
-  deleteContract: (id: number) => Promise<void>;
-  validateContractData: (data: Partial<Contract>) => ValidationResult;
 }
 
 const ContractDashboard: React.FC = () => {
@@ -63,6 +50,29 @@ const ContractDashboard: React.FC = () => {
   const [operationLoading, setOperationLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(5);
+
+  // Socket connection
+  const { isConnected, emit } = useSocket();
+
+  // Socket event listeners for real-time updates
+  useSocketEvent('contractCreated', (newContract: Contract) => {
+    setAllContracts(prev => [newContract, ...prev]);
+    showOperationStatus("info", "New contract added by another user");
+  });
+
+  useSocketEvent('contractUpdated', (updatedContract: Contract) => {
+    setAllContracts(prev => 
+      prev.map(contract => 
+        contract.id === updatedContract.id ? updatedContract : contract
+      )
+    );
+    showOperationStatus("info", "Contract updated by another user");
+  });
+
+  useSocketEvent('contractDeleted', (data: { id: string }) => {
+    setAllContracts(prev => prev.filter(contract => contract.id !== data.id));
+    showOperationStatus("info", "Contract deleted by another user");
+  });
 
   useEffect(() => {
     loadData();
@@ -102,46 +112,47 @@ const ContractDashboard: React.FC = () => {
     if (searchTerm.trim()) {
       filtered = filtered.filter(
         (contract) =>
+          contract.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           contract.contractType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          getEmployeeName(contract.employeeId)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          getDepartmentName(contract.departmentId)?.toLowerCase().includes(searchTerm.toLowerCase())
+          getAssignedEmployeesNames(contract.employeeIds).some(name => 
+            name.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       );
     }
 
-   filtered.sort((a, b) => {
-  let aValue: string | number = "";
-  let bValue: string | number = "";
+    filtered.sort((a, b) => {
+      let aValue: string | number = "";
+      let bValue: string | number = "";
 
-  // Handle date fields
-  if (sortBy === "startDate" || sortBy === "endDate" || sortBy === "createdAt") {
-    const aDate = new Date(a[sortBy as keyof Contract] as string | Date);
-    const bDate = new Date(b[sortBy as keyof Contract] as string | Date);
-    aValue = aDate.getTime();
-    bValue = bDate.getTime();
-  } 
-  // Handle employee name
-  else if (sortBy === "employee") {
-    aValue = getEmployeeName(a.employeeId).toLowerCase();
-    bValue = getEmployeeName(b.employeeId).toLowerCase();
-  } 
-  // Handle department name
-  else if (sortBy === "department") {
-    aValue = getDepartmentName(a.departmentId).toLowerCase();
-    bValue = getDepartmentName(b.departmentId).toLowerCase();
-  } 
-  // Default string comparison
-  else {
-    aValue = (a[sortBy as keyof Contract] ?? "").toString().toLowerCase();
-    bValue = (b[sortBy as keyof Contract] ?? "").toString().toLowerCase();
-  }
+      // Handle date fields
+      if (sortBy === "startDate" || sortBy === "endDate" || sortBy === "createdAt") {
+        const aDate = new Date(a[sortBy as keyof Contract] as string | Date);
+        const bDate = new Date(b[sortBy as keyof Contract] as string | Date);
+        aValue = aDate.getTime();
+        bValue = bDate.getTime();
+      } 
+      // Handle employee count
+      else if (sortBy === "employeeCount") {
+        aValue = (a.employeeIds?.length || 0);
+        bValue = (b.employeeIds?.length || 0);
+      } 
+      // Handle salary
+      else if (sortBy === "salary") {
+        aValue = a.salary || 0;
+        bValue = b.salary || 0;
+      }
+      // Default string comparison
+      else {
+        aValue = (a[sortBy as keyof Contract] ?? "").toString().toLowerCase();
+        bValue = (b[sortBy as keyof Contract] ?? "").toString().toLowerCase();
+      }
 
-  if (sortOrder === "asc") {
-    return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-  } else {
-    return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-  }
-});
-
+      if (sortOrder === "asc") {
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      } else {
+        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+      }
+    });
 
     setContracts(filtered);
     setCurrentPage(1);
@@ -156,8 +167,15 @@ const ContractDashboard: React.FC = () => {
         return;
       }
 
-      await contractService.createContract(contractData);
+      const newContract = await contractService.createContract(contractData);
       setShowAddModal(false);
+      
+      // Emit socket event for real-time updates
+      if (isConnected) {
+        emit('contractCreated', newContract);
+      }
+      
+      // Reload data to ensure consistency
       loadData();
       showOperationStatus("success", "Contract created successfully!");
     } catch (err: any) {
@@ -167,7 +185,7 @@ const ContractDashboard: React.FC = () => {
     }
   };
 
-  const handleEditContract = async (contractData: ContractData ) => {
+  const handleEditContract = async (contractData: ContractData) => {
     try {
       setOperationLoading(true);
       const validation = contractService.validateContractData(contractData);
@@ -176,8 +194,15 @@ const ContractDashboard: React.FC = () => {
         return;
       }
 
-      await contractService.updateContract(contractData.id, contractData);
+      const updatedContract = await contractService.updateContract(contractData.id, contractData);
       setEditingContract(null);
+      
+      // Emit socket event for real-time updates
+      if (isConnected) {
+        emit('contractUpdated', updatedContract);
+      }
+      
+      // Reload data to ensure consistency
       loadData();
       showOperationStatus("success", "Contract updated successfully!");
     } catch (err: any) {
@@ -191,9 +216,17 @@ const ContractDashboard: React.FC = () => {
     try {
       setOperationLoading(true);
       setDeleteConfirm(null);
+      
       await contractService.deleteContract(contract.id);
+      
+      // Emit socket event for real-time updates
+      if (isConnected) {
+        emit('contractDeleted', { id: contract.id });
+      }
+      
+      // Reload data to ensure consistency
       loadData();
-      showOperationStatus("success", `Contract for ${getEmployeeName(contract.employeeId)} deleted successfully!`);
+      showOperationStatus("success", `Contract "${contract.title}" deleted successfully!`);
     } catch (err: any) {
       showOperationStatus("error", err.message || "Failed to delete contract");
     } finally {
@@ -232,14 +265,44 @@ const ContractDashboard: React.FC = () => {
     });
   };
 
-  const getEmployeeName = (employeeId?: string): string => {
-    const employee = employees.find((emp) => emp.id === employeeId);
-    return employee ? `${employee.first_name} ${employee.last_name}` : "Unknown";
+  const formatCurrency = (amount: number, currency: string = "RWF"): string => {
+    return new Intl.NumberFormat('en-RW', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
-  const getDepartmentName = (departmentId?: string): string => {
-    const department = departments.find((dept) => dept.id === departmentId);
-    return department ? department.name : "Unknown";
+  const getAssignedEmployeesNames = (employeeIds?: string[]): string[] => {
+    if (!employeeIds || employeeIds.length === 0) return [];
+    return employeeIds
+      .map(id => {
+        const employee = employees.find(emp => emp.id === id);
+        return employee ? `${employee.first_name} ${employee.last_name}` : null;
+      })
+      .filter(Boolean) as string[];
+  };
+
+  const renderAssignedEmployees = (employeeIds?: string[], maxDisplay: number = 2): JSX.Element => {
+    const employeeNames = getAssignedEmployeesNames(employeeIds);
+    
+    if (employeeNames.length === 0) {
+      return <span className="text-gray-500 italic">No employees assigned</span>;
+    }
+
+    const displayNames = employeeNames.slice(0, maxDisplay);
+    const remainingCount = employeeNames.length - maxDisplay;
+
+    return (
+      <div className="flex flex-col">
+        {displayNames.map((name, index) => (
+          <span key={index} className="text-sm text-gray-700">{name}</span>
+        ))}
+        {remainingCount > 0 && (
+          <span className="text-xs text-gray-500">+{remainingCount} more</span>
+        )}
+      </div>
+    );
   };
 
   const totalPages = Math.ceil(contracts.length / itemsPerPage);
@@ -319,6 +382,9 @@ const ContractDashboard: React.FC = () => {
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 Contract Management
               </h1>
+              {/* Socket connection status indicator */}
+              <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} 
+                   title={isConnected ? 'Connected' : 'Disconnected'}></div>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
@@ -368,12 +434,14 @@ const ContractDashboard: React.FC = () => {
                   >
                     <option value="startDate-desc">Newest Start Date</option>
                     <option value="startDate-asc">Oldest Start Date</option>
+                    <option value="title-asc">Title (A-Z)</option>
+                    <option value="title-desc">Title (Z-A)</option>
                     <option value="contractType-asc">Contract Type (A-Z)</option>
                     <option value="contractType-desc">Contract Type (Z-A)</option>
-                    <option value="employee-asc">Employee Name (A-Z)</option>
-                    <option value="employee-desc">Employee Name (Z-A)</option>
-                    <option value="department-asc">Department (A-Z)</option>
-                    <option value="department-desc">Department (Z-A)</option>
+                    <option value="salary-desc">Highest Salary</option>
+                    <option value="salary-asc">Lowest Salary</option>
+                    <option value="employeeCount-desc">Most Employees</option>
+                    <option value="employeeCount-asc">Least Employees</option>
                   </select>
                 </div>
               </div>
@@ -402,11 +470,11 @@ const ContractDashboard: React.FC = () => {
                       </th>
                       <th
                         className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100"
-                        onClick={() => handleSort("employee")}
+                        onClick={() => handleSort("title")}
                       >
                         <div className="flex items-center space-x-1">
-                          <span>Employee</span>
-                          {getSortIcon("employee")}
+                          <span>Title</span>
+                          {getSortIcon("title")}
                         </div>
                       </th>
                       <th
@@ -414,26 +482,20 @@ const ContractDashboard: React.FC = () => {
                         onClick={() => handleSort("contractType")}
                       >
                         <div className="flex items-center space-x-1">
-                          <span>Contract Type</span>
+                          <span>Type</span>
                           {getSortIcon("contractType")}
                         </div>
                       </th>
-                      <th
-                        className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 hidden md:table-cell"
-                        onClick={() => handleSort("status")}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Status</span>
-                          {getSortIcon("status")}
-                        </div>
+                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
+                        Assigned Employees
                       </th>
                       <th
-                        className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 hidden lg:table-cell"
-                        onClick={() => handleSort("department")}
+                        className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 hidden sm:table-cell"
+                        onClick={() => handleSort("salary")}
                       >
                         <div className="flex items-center space-x-1">
-                          <span>Department</span>
-                          {getSortIcon("department")}
+                          <span>Salary</span>
+                          {getSortIcon("salary")}
                         </div>
                       </th>
                       <th
@@ -457,20 +519,23 @@ const ContractDashboard: React.FC = () => {
                           {startIndex + index + 1}
                         </td>
                         <td className="py-4 px-4 sm:px-6">
-                          <div className="flex items-center space-x-3">
+                          <div className="flex flex-col">
                             <span className="font-medium text-gray-900 text-sm sm:text-base">
-                              {getEmployeeName(contract.employeeId)}
+                              {contract.title || "Untitled"}
+                            </span>
+                            <span className="text-xs text-gray-500 md:hidden">
+                              {contract.contractType || "N/A"}
                             </span>
                           </div>
                         </td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden md:table-cell">
                           {contract.contractType || "N/A"}
                         </td>
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden md:table-cell">
-                          {contract.status || "N/A"}
-                        </td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden lg:table-cell">
-                          {getDepartmentName(contract.departmentId)}
+                          {renderAssignedEmployees(contract.employeeIds)}
+                        </td>
+                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
+                          {formatCurrency(contract.salary, contract.currency)}
                         </td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
                           {formatDate(contract.startDate)}
@@ -581,9 +646,9 @@ const ContractDashboard: React.FC = () => {
           isOpen={!!viewingContract}
           onClose={() => setViewingContract(null)}
           contract={viewingContract}
-          getEmployeeName={getEmployeeName}
-          getDepartmentName={getDepartmentName}
+          getAssignedEmployeesNames={(employeeIds) => getAssignedEmployeesNames(employeeIds)}
           formatDate={formatDate}
+          formatCurrency={formatCurrency}
         />
       )}
 
@@ -593,7 +658,7 @@ const ContractDashboard: React.FC = () => {
           onClose={() => setDeleteConfirm(null)}
           onConfirm={() => handleDeleteContract(deleteConfirm)}
           contract={deleteConfirm}
-          getEmployeeName={getEmployeeName}
+          contractTitle={deleteConfirm.title}
         />
       )}
     </div>

@@ -1,6 +1,7 @@
 import { type FC} from 'react';
 import { RouterProvider} from 'react-router-dom';
 import routes from './router';
+import { SocketProvider } from './context/SocketContext';
 
 /**
  * Main App component
@@ -9,7 +10,9 @@ import routes from './router';
 const App: FC = () => {
   return (
     <>
-      <RouterProvider router={routes} />
+      <SocketProvider serverUrl={"http://localhost:3000"} >
+        <RouterProvider router={routes} />
+      </SocketProvider>
     </>
   );
 };

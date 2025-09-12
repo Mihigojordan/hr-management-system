@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   User,
@@ -19,20 +18,26 @@ import {
   File,
   DollarSign,
   UserPlus,
+  Download,
+  Trash2,
+  Edit,
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import employeeService from '../../../services/employeeService';
-
+import contractService from '../../../services/contractService';
 import { API_URL } from '../../../api/api';
+import DeleteConfirmModal from '../contract/DeleteConfirmModal';
 
 // Define types and interfaces
 const MARITAL_STATUS = ['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED'] as const;
 const EMPLOYEE_STATUS = ['ACTIVE', 'TERMINATED', 'RESIGNED', 'PROBATION'] as const;
 const GENDERS = ['MALE', 'FEMALE', 'OTHER'] as const;
+const CONTRACT_STATUSES = ['ACTIVE', 'EXPIRED', 'TERMINATED', 'PENDING'] as const;
 
 type MaritalStatus = typeof MARITAL_STATUS[number];
 type EmployeeStatus = typeof EMPLOYEE_STATUS[number];
 type Gender = typeof GENDERS[number];
+type ContractStatus = typeof CONTRACT_STATUSES[number];
 
 interface Department {
   id: string;
@@ -49,10 +54,16 @@ interface Experience {
 interface Contract {
   id: string;
   contractType: string;
-  status: string;
+  status: ContractStatus;
   startDate: string;
   endDate?: string;
   salary: number;
+  currency: string;
+  benefits?: string;
+  workingHours?: string;
+  probationPeriod?: string;
+  terminationConditions?: string;
+  terms?: string;
   department?: Department;
 }
 
@@ -80,9 +91,9 @@ interface Employee {
   profile_picture?: string;
   application_letter?: string;
   cv?: string;
-  createdAt?: string; // ISO string
-  updatedAt?: string; // ISO string
-  contracts?: Contract[];
+  createdAt?: string;
+  updatedAt?: string;
+  contract?: Contract[];
 }
 
 interface Notification {
@@ -101,44 +112,51 @@ const ViewEmployee: React.FC = () => {
   const [previewType, setPreviewType] = useState<'image' | 'pdf' | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [contractsPerPage] = useState<number>(2);
+  const [downloadLoading, setDownloadLoading] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [formData, setFormData] = useState<Partial<Contract>>({});
+  const [deleteConfirmModalOpen, setDeleteConfirmModalOpen] = useState<boolean>(false);
+  const [contractToDelete, setContractToDelete] = useState<Contract | null>(null);
+
+  const fetchEmployee = async () => {
+    if (!id) {
+      setError('No employee ID provided');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const employeeData = await employeeService.getEmployeeById(id);
+      if (employeeData) {
+        let parsedExperience: Experience[] = [];
+        if (employeeData.experience && typeof employeeData.experience === 'string') {
+          try {
+            parsedExperience = JSON.parse(employeeData.experience);
+          } catch (parseError) {
+            console.error('Error parsing experience:', parseError);
+            parsedExperience = [];
+          }
+        } else if (!Array.isArray(employeeData.experience)) {
+          parsedExperience = [];
+        } else {
+          parsedExperience = employeeData.experience;
+        }
+        setEmployee({ ...employeeData, experience: parsedExperience });
+      } else {
+        setError('Employee not found');
+      }
+    } catch (err) {
+      console.error('Error fetching employee:', err);
+      setError('Failed to load employee details');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEmployee = async () => {
-      if (!id) {
-        setError('No employee ID provided');
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const employeeData = await employeeService.getEmployeeById(id);
-        if (employeeData) {
-          let parsedExperience: Experience[] = [];
-          if (employeeData.experience && typeof employeeData.experience === 'string') {
-            try {
-              parsedExperience = JSON.parse(employeeData.experience);
-            } catch (parseError) {
-              console.error('Error parsing experience:', parseError);
-              parsedExperience = [];
-            }
-          } else if (!Array.isArray(employeeData.experience)) {
-            parsedExperience = [];
-          } else {
-            parsedExperience = employeeData.experience;
-          }
-          setEmployee({ ...employeeData, experience: parsedExperience });
-        } else {
-          setError('Employee not found');
-        }
-      } catch (err) {
-        console.error('Error fetching employee:', err);
-        setError('Failed to load employee details');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEmployee();
   }, [id]);
 
@@ -182,10 +200,104 @@ const ViewEmployee: React.FC = () => {
     setPreviewType(null);
   };
 
+  const handleDownloadContractPDF = async (contractId: string) => {
+    try {
+      setDownloadLoading(contractId);
+      const pdfBlob = await contractService.downloadContractPDF(contractId);
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `contract_${contractId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showNotification('Contract PDF downloaded successfully', 'success');
+    } catch (err) {
+      console.error('Error downloading contract PDF:', err);
+      showNotification('Failed to download contract PDF', 'error');
+    } finally {
+      setDownloadLoading(null);
+    }
+  };
+
+  const handleDeleteContract = async (contract: Contract) => {
+    setContractToDelete(contract);
+    setDeleteConfirmModalOpen(true);
+  };
+
+  const confirmDeleteContract = async () => {
+    if (!contractToDelete) return;
+
+    try {
+      setDeleteLoading(contractToDelete.id);
+      await contractService.deleteContract(contractToDelete.id);
+      await fetchEmployee(); // Refresh employee data after deletion
+      showNotification('Contract deleted successfully', 'success');
+    } catch (err) {
+      console.error('Error deleting contract:', err);
+      showNotification('Failed to delete contract', 'error');
+    } finally {
+      setDeleteLoading(null);
+      setDeleteConfirmModalOpen(false);
+      setContractToDelete(null);
+    }
+  };
+
+  const handleOpenUpdateModal = (contract: Contract) => {
+    setSelectedContract(contract);
+    setFormData({
+      contractType: contract.contractType,
+      status: contract.status,
+      startDate: contract.startDate,
+      endDate: contract.endDate,
+      salary: contract.salary,
+      currency: contract.currency,
+      benefits: contract.benefits,
+      workingHours: contract.workingHours,
+      probationPeriod: contract.probationPeriod,
+      terms: contract.terms,
+      terminationConditions: contract.terminationConditions,
+    });
+    setUpdateModalOpen(true);
+  };
+
+  const handleCloseUpdateModal = () => {
+    setUpdateModalOpen(false);
+    setSelectedContract(null);
+    setFormData({});
+  };
+
+  const handleUpdateContract = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedContract) return;
+
+    try {
+      const updatedContract = await contractService.updateContract(selectedContract.id, formData);
+      await fetchEmployee(); // Refresh employee data after update
+      showNotification('Contract updated successfully', 'success');
+      handleCloseUpdateModal();
+    } catch (err) {
+      console.error('Error updating contract:', err);
+      showNotification('Failed to update contract', 'error');
+    }
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const getEmployeeName = (employeeId: string): string => {
+    return employee && employee.id === employeeId
+      ? `${employee.first_name} ${employee.last_name}`
+      : 'Unknown Employee';
+  };
+
   const indexOfLastContract = currentPage * contractsPerPage;
   const indexOfFirstContract = indexOfLastContract - contractsPerPage;
-  const currentContracts = employee?.contracts?.slice(indexOfFirstContract, indexOfLastContract) || [];
-  const totalPages = Math.ceil((employee?.contracts?.length || 0) / contractsPerPage);
+  const currentContracts = employee?.contract?.slice(indexOfFirstContract, indexOfLastContract) || [];
+  const totalPages = Math.ceil((employee?.contract?.length || 0) / contractsPerPage);
 
   const paginate = (pageNumber: number) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -265,6 +377,168 @@ const ViewEmployee: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+
+      {updateModalOpen && selectedContract && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-auto relative">
+            <button
+              onClick={handleCloseUpdateModal}
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Update Contract</h2>
+            <form onSubmit={handleUpdateContract} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Contract Type</label>
+                <input
+                  type="text"
+                  name="contractType"
+                  value={formData.contractType || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <select
+                  name="status"
+                  value={formData.status || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Select Status</option>
+                  {CONTRACT_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">End Date</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Salary</label>
+                <input
+                  type="number"
+                  name="salary"
+                  value={formData.salary || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Currency</label>
+                <input
+                  type="text"
+                  name="currency"
+                  value={formData.currency || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Benefits</label>
+                <textarea
+                  name="benefits"
+                  value={formData.benefits || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Working Hours</label>
+                <input
+                  type="text"
+                  name="workingHours"
+                  value={formData.workingHours || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Probation Period</label>
+                <input
+                  type="text"
+                  name="probationPeriod"
+                  value={formData.probationPeriod || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Terms and Conditions</label>
+                <textarea
+                  name="terms"
+                  value={formData.terms || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Termination Conditions</label>
+                <textarea
+                  name="terminationConditions"
+                  value={formData.terminationConditions || ''}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseUpdateModal}
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirmModalOpen && contractToDelete && (
+        <DeleteConfirmModal
+          isOpen={deleteConfirmModalOpen}
+          onClose={() => {
+            setDeleteConfirmModalOpen(false);
+            setContractToDelete(null);
+          }}
+          onConfirm={confirmDeleteContract}
+          contract={contractToDelete}
+          getEmployeeName={getEmployeeName}
+        />
       )}
 
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -506,51 +780,109 @@ const ViewEmployee: React.FC = () => {
                     <div className="space-y-6">
                       {currentContracts.map((contract) => (
                         <div key={contract.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">Contract Type</label>
-                              <p className="mt-1 text-sm text-gray-900">{contract.contractType || 'N/A'}</p>
+                          <div className="grid grid-cols-1 gap-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">Contract Type</label>
+                                <p className="mt-1 text-sm text-gray-900">{contract.contractType || 'N/A'}</p>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">Status</label>
+                                <p className="mt-1 text-sm text-gray-900">{contract.status || 'N/A'}</p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                                <div className="flex items-center mt-1">
+                                  <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                                  <p className="text-sm text-gray-900">{formatDate(contract.startDate)}</p>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">End Date</label>
+                                <div className="flex items-center mt-1">
+                                  <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                                  <p className="text-sm text-gray-900">
+                                    {contract.endDate ? formatDate(contract.endDate) : 'N/A'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">Salary</label>
+                                <div className="flex items-center mt-1">
+                                  <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
+                                  <p className="text-sm text-gray-900">
+                                    {formatCurrency(contract.salary, contract.currency || 'RWF')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">Department</label>
+                                <div className="flex items-center mt-1">
+                                  <Building2 className="w-4 h-4 text-gray-400 mr-1" />
+                                  <p className="text-sm text-gray-900">{contract.department?.name || 'N/A'}</p>
+                                </div>
+                              </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Status</label>
-                              <p className="mt-1 text-sm text-gray-900">{contract.status || 'N/A'}</p>
+                              <label className="block text-sm font-medium text-gray-700">Benefits</label>
+                              <p className="mt-1 text-sm text-gray-900">{contract.benefits || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Working Hours</label>
+                              <div className="flex items-center mt-1">
+                                <Clock className="w-4 h-4 text-gray-400 mr-1" />
+                                <p className="text-sm text-gray-900">{contract.workingHours || 'N/A'}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Probation Period</label>
+                              <p className="mt-1 text-sm text-gray-900">{contract.probationPeriod || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Terms and Conditions</label>
+                              <p className="mt-1 text-sm text-gray-900">{contract.terms || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Termination Conditions</label>
+                              <p className="mt-1 text-sm text-gray-900">{contract.terminationConditions || 'N/A'}</p>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                              <div className="flex items-center mt-1">
-                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                                <p className="text-sm text-gray-900">{formatDate(contract.startDate)}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">End Date</label>
-                              <div className="flex items-center mt-1">
-                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                                <p className="text-sm text-gray-900">
-                                  {contract.endDate ? formatDate(contract.endDate) : 'N/A'}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">Salary</label>
-                              <div className="flex items-center mt-1">
-                                <CreditCard className="w-4 h-4 text-gray-400 mr-1" />
-                                <p className="text-sm text-gray-900">
-                                  {formatCurrency(contract.salary, 'RWF')}
-                                </p>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">Department</label>
-                              <div className="flex items-center mt-1">
-                                <Building2 className="w-4 h-4 text-gray-400 mr-1" />
-                                <p className="text-sm text-gray-900">{contract.department?.name || 'N/A'}</p>
-                              </div>
-                            </div>
+                          <div className="mt-4 flex gap-2">
+                            <button
+                              onClick={() => handleDownloadContractPDF(contract.id)}
+                              disabled={downloadLoading === contract.id}
+                              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
+                                downloadLoading === contract.id
+                                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                              }`}
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              {downloadLoading === contract.id ? 'Downloading...' : 'Download Contract PDF'}
+                            </button>
+                            <button
+                              onClick={() => handleOpenUpdateModal(contract)}
+                              className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-yellow-500 text-white hover:bg-yellow-600"
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Update
+                            </button>
+                            <button
+                              onClick={() => handleDeleteContract(contract)}
+                              disabled={deleteLoading === contract.id}
+                              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
+                                deleteLoading === contract.id
+                                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                  : 'bg-red-600 text-white hover:bg-red-700'
+                              }`}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              {deleteLoading === contract.id ? 'Deleting...' : 'Delete'}
+                            </button>
                           </div>
                         </div>
                       ))}
