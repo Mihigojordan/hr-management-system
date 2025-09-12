@@ -74,16 +74,15 @@ model Employee {
   experience              Json?
   emergency_contact_name  String?
   emergency_contact_phone String?
-
-  contractId    String?
-  Contract      Contract?      @relation(fields: [contractId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  contract              Contract[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
 
 model Contract {
   id                     String       @id @default(uuid())
-  title                  String       // e.g., "Internship April 2025"
+  employeeId             String?
+  employee               Employee?    @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   contractType           ContractType
   startDate              DateTime
   endDate                DateTime?
@@ -94,7 +93,6 @@ model Contract {
   probationPeriod        String?      // e.g., "3 months"
   terminationConditions  String?
   terms                  String?      // General terms text
-  employees              Employee[]   // Linked employees
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
 }

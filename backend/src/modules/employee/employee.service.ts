@@ -94,7 +94,7 @@ export class EmployeeService {
     return this.prisma.employee.findMany({
       include: {
         department: true,
-        Contract: true,
+        contract: true,
       },
     });
   }
@@ -104,7 +104,7 @@ export class EmployeeService {
       where: { id },
       include: {
         department: true,
-       Contract: true
+       contract: true
       },
     });
 
