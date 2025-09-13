@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -9,11 +9,9 @@ import {
   Users,
   Briefcase,
   Clock,
-  DollarSign,
   Eye,
   UserCheck,
   UserX,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   AlertTriangle,
@@ -23,12 +21,13 @@ import {
   AlertCircle,
   Mail,
   Phone,
-  Download,
-  ExternalLink,
+  Search,
 } from "lucide-react";
+import DOMPurify from "dompurify";
 import jobService from "../../../services/jobService";
 import applicantService from "../../../services/applicantService";
-import type { Job,  Applicant } from "../../../types/model";
+import { useSocketEvent } from "../../../context/SocketContext";
+import type { Job, Applicant } from "../../../types/model";
 import Swal from "sweetalert2";
 
 interface OperationStatus {
@@ -36,34 +35,98 @@ interface OperationStatus {
   message: string;
 }
 
+// Helper function to strip HTML tags for truncation
+const stripHtml = (html: string): string => {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+};
+
 const JobView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [job, setJob] = useState<Job | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [applicantsLoading, setApplicantsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+  const [showFullJobDescription, setShowFullJobDescription] = useState<boolean>(false);
+
   // Pagination for applicants
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(10);
-  
+
   // Operation states
   const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
   const [operationLoading, setOperationLoading] = useState<boolean>(false);
   const [actionConfirm, setActionConfirm] = useState<{
     applicant: Applicant;
-    action: 'hire' | 'reject';
+    action: "hire" | "reject";
   } | null>(null);
+
+  // Filter applicants based on search term
+  const filteredApplicants = useMemo(() => {
+    if (!job?.applicants ) return [];
+    if (!applicants ) return [];
+    if (!searchTerm.trim()) return job.applicants;
+
+    return applicants.filter((applicant) =>
+      [
+        applicant.name?.toLowerCase(),
+        applicant.email?.toLowerCase(),
+        applicant.phone?.toLowerCase(),
+      ].some((field) => field && field.includes(searchTerm.toLowerCase()))
+    );
+  }, [job?.applicants, searchTerm]);
 
   useEffect(() => {
     if (id) {
       loadJobData();
-     
     }
   }, [id]);
+
+  // WebSocket event handlers
+  useSocketEvent("applicantCreated", (newApplicant: Applicant) => {
+    if (newApplicant.jobId === id) {
+      setApplicants((prev) => [...prev, newApplicant]);
+      setJob((prev) =>
+        prev ? { ...prev, applicants: [...(prev.applicants || []), newApplicant] } : prev
+      );
+      showOperationStatus("success", `New applicant ${newApplicant.name} added!`);
+    }
+  });
+
+  useSocketEvent("applicantUpdated", (updatedApplicant: Applicant) => {
+    
+    if (updatedApplicant.jobId === id) {
+      setApplicants((prev) =>
+        prev.map((app) => (app.id === updatedApplicant.id ? updatedApplicant : app))
+      );
+      setJob((prev) =>
+        prev
+          ? {
+              ...prev,
+              applicants: prev.applicants?.map((app) =>
+                app.id === updatedApplicant.id ? updatedApplicant : app
+              ),
+            }
+          : prev
+      );
+      showOperationStatus("info", `Applicant ${updatedApplicant.name} updated!`);
+    }
+  });
+
+  useSocketEvent("applicantDeleted", ({ id: deletedId }: { id: string }) => {
+    setApplicants((prev) => prev.filter((app) => app.id !== deletedId));
+    setJob((prev) =>
+      prev
+        ? { ...prev, applicants: prev.applicants?.filter((app) => app.id !== deletedId) }
+        : prev
+    );
+    showOperationStatus("info", `Applicant deleted.`);
+  });
 
   const loadJobData = async () => {
     try {
@@ -71,6 +134,7 @@ const JobView: React.FC = () => {
       const jobData = await jobService.getJobById(id!);
       if (jobData) {
         setJob(jobData);
+        setApplicants(jobData.applicants || []);
         setError(null);
       } else {
         setError("Job not found");
@@ -82,8 +146,6 @@ const JobView: React.FC = () => {
     }
   };
 
-
-
   const showOperationStatus = (type: OperationStatus["type"], message: string, duration: number = 3000) => {
     setOperationStatus({ type, message });
     setTimeout(() => setOperationStatus(null), duration);
@@ -93,58 +155,60 @@ const JobView: React.FC = () => {
     navigate(`/admin/dashboard/recruiting-management/update/${id}`);
   };
 
+  const handleDeleteJob = async () => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone. Do you really want to delete this job?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
 
-const handleDeleteJob = async () => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "This action cannot be undone. Do you really want to delete this job?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Yes, delete it!",
-    cancelButtonText: "Cancel",
-  });
+    if (result.isConfirmed) {
+      try {
+        setOperationLoading(true);
+        await jobService.deleteJob(id!);
 
-  if (result.isConfirmed) {
-    try {
-      setOperationLoading(true);
-      await jobService.deleteJob(id!);
-
-      await Swal.fire(
-        "Deleted!",
-        "Job deleted successfully.",
-        "success"
-      );
-
-      
+        await Swal.fire("Deleted!", "Job deleted successfully.", "success");
         navigate("/admin/dashboard/recruiting-management");
-     
-    } catch (err: any) {
-      await Swal.fire(
-        "Error",
-        err.message || "Failed to delete job",
-        "error"
-      );
-    } finally {
-      setOperationLoading(false);
+      } catch (err: any) {
+        await Swal.fire("Error", err.message || "Failed to delete job", "error");
+      } finally {
+        setOperationLoading(false);
+      }
     }
-  }
-};
+  };
 
-  const handleApplicantAction = async (applicant: Applicant, action: 'hire' | 'reject') => {
+  const handleApplicantAction = async (applicant: Applicant, action: "hire" | "reject") => {
     try {
       setOperationLoading(true);
       setActionConfirm(null);
-      
-      const newStage = action === 'hire' ? 'HIRED' : 'REJECTED';
-      await applicantService.updateApplicantStage(applicant.id, newStage);
-      
-     
-      
+
+      const newStage = action === "hire" ? "HIRED" : "REJECTED";
+      await applicantService.updateApplicantStage(applicant.id, { stage: newStage });
+
+      setApplicants((prev) =>
+        prev.map((app) =>
+          app.id === applicant.id ? { ...app, stage: newStage } : app
+        )
+      );
+      setJob((prev) =>
+        prev
+          ? {
+              ...prev,
+              applicants: prev.applicants?.map((app) =>
+                app.id === applicant.id ? { ...app, stage: newStage } : app
+              ),
+            }
+          : prev
+      );
+
       showOperationStatus(
-        "success", 
-        `${applicant.name} has been ${action === 'hire' ? 'hired' : 'rejected'} successfully!`
+        "success",
+        `${applicant.name} has been ${action === "hire" ? "hired" : "rejected"} successfully!`
       );
     } catch (err: any) {
       showOperationStatus("error", err.message || `Failed to ${action} applicant`);
@@ -154,7 +218,7 @@ const handleDeleteJob = async () => {
   };
 
   const handleViewApplicant = (applicant: Applicant) => {
-    navigate(`/admin/dashboard/recruiting-management/applicants/${applicant.id}`);
+    navigate(`/admin/dashboard/recruiting-management/${id}/applicants/${applicant.id}`);
   };
 
   const formatDate = (dateString?: string): string => {
@@ -168,6 +232,13 @@ const handleDeleteJob = async () => {
     });
   };
 
+  // Truncate text to a specified length
+  const truncateText = (text: string, maxLength: number): string => {
+    const plainText = stripHtml(text);
+    if (plainText.length <= maxLength) return text;
+    return plainText.substring(0, maxLength) + "...";
+  };
+
   const getStatusBadge = (status: string) => {
     const statusStyles = {
       OPEN: "bg-green-100 text-green-800 border-green-200",
@@ -177,7 +248,11 @@ const handleDeleteJob = async () => {
     };
 
     return (
-      <span className={`px-3 py-1 text-sm font-medium rounded-full border ${statusStyles[status as keyof typeof statusStyles] || statusStyles.DRAFT}`}>
+      <span
+        className={`px-3 py-1 text-sm font-medium rounded-full border ${
+          statusStyles[status as keyof typeof statusStyles] || statusStyles.DRAFT
+        }`}
+      >
         {status}
       </span>
     );
@@ -193,8 +268,12 @@ const handleDeleteJob = async () => {
     };
 
     return (
-      <span className={`px-3 py-1 text-sm font-medium rounded-full ${typeStyles[type as keyof typeof typeStyles] || "bg-gray-100 text-gray-800"}`}>
-        {type.replace('_', ' ')}
+      <span
+        className={`px-3 py-1 text-sm font-medium rounded-full ${
+          typeStyles[type as keyof typeof typeStyles] || "bg-gray-100 text-gray-800"
+        }`}
+      >
+        {type.replace("_", " ")}
       </span>
     );
   };
@@ -208,7 +287,11 @@ const handleDeleteJob = async () => {
     };
 
     return (
-      <span className={`px-3 py-1 text-sm font-medium rounded-full ${levelStyles[level as keyof typeof levelStyles] || "bg-gray-100 text-gray-800"}`}>
+      <span
+        className={`px-3 py-1 text-sm font-medium rounded-full ${
+          levelStyles[level as keyof typeof levelStyles] || "bg-gray-100 text-gray-800"
+        }`}
+      >
         {level}
       </span>
     );
@@ -224,16 +307,20 @@ const handleDeleteJob = async () => {
     };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full border ${stageStyles[stage as keyof typeof stageStyles] || "bg-gray-100 text-gray-800 border-gray-200"}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full border ${
+          stageStyles[stage as keyof typeof stageStyles] || "bg-gray-100 text-gray-800 border-gray-200"
+        }`}
+      >
         {stage}
       </span>
     );
   };
 
-  const totalPages = Math.ceil((job?.applicants?.length || 0) / itemsPerPage);
+  const totalPages = Math.ceil(filteredApplicants.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentApplicants = job?.applicants?.slice(startIndex, endIndex);
+  const currentApplicants = filteredApplicants.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -257,8 +344,8 @@ const handleDeleteJob = async () => {
       <div className="flex flex-col sm:flex-row items-center justify-between bg-white px-4 py-3 border-t">
         <div className="flex items-center text-sm text-gray-700 mb-4 sm:mb-0">
           <span>
-            Showing {startIndex + 1} to {Math.min(endIndex, (job?.applicants?.length || 0))} of{" "}
-            {job?.applicants?.length} applicants
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredApplicants.length)} of{" "}
+            {filteredApplicants.length} applicants
           </span>
         </div>
         <div className="flex items-center space-x-2">
@@ -319,7 +406,7 @@ const handleDeleteJob = async () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Job</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => navigate('/admin/dashboard/recruiting-management')}
+            onClick={() => navigate("/admin/dashboard/recruiting-management")}
             className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
             Back to Jobs
@@ -339,7 +426,7 @@ const handleDeleteJob = async () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Job Not Found</h2>
           <p className="text-gray-600 mb-4">The job you're looking for doesn't exist.</p>
           <button
-            onClick={() => navigate('/admin/dashboard/recruiting-management')}
+            onClick={() => navigate("/admin/dashboard/recruiting-management")}
             className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
             Back to Jobs
@@ -357,7 +444,7 @@ const handleDeleteJob = async () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center space-x-3 mb-4 sm:mb-0">
               <button
-                onClick={() => navigate('/admin/dashboard/recruiting-management')}
+                onClick={() => navigate("/admin/dashboard/recruiting-management")}
                 className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 mr-1" />
@@ -392,12 +479,8 @@ const handleDeleteJob = async () => {
           <div className="p-6">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6">
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                  {job.title}
-                </h1>
-                {job.industry && (
-                  <p className="text-lg text-gray-600 mb-4">{job.industry}</p>
-                )}
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
+                {job.industry && <p className="text-lg text-gray-600 mb-4">{job.industry}</p>}
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                 {getStatusBadge(job.status!)}
@@ -422,15 +505,31 @@ const handleDeleteJob = async () => {
               </div>
               <div className="flex items-center text-gray-600">
                 <Users className="w-5 h-5 mr-2 text-gray-400" />
-                <span>{job?.applicants?.length} Applicant{job?.applicants?.length !== 1 ? 's' : ''}</span>
+                <span>
+                  {filteredApplicants.length} Applicant{filteredApplicants.length !== 1 ? "s" : ""}
+                </span>
               </div>
             </div>
 
             {/* Job Description */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Description</h3>
-              <div className="">
-              <div className="bg-white p-4 rounded border text-sm" dangerouslySetInnerHTML={{ __html: job.description }} />
+              <div className="bg-white p-4 rounded border text-sm text-gray-700 leading-relaxed">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: showFullJobDescription
+                      ? DOMPurify.sanitize(job.description || "No description available")
+                      : DOMPurify.sanitize(truncateText(job.description || "No description available", 100)),
+                  }}
+                />
+                {job.description && stripHtml(job.description).length > 100 && (
+                  <button
+                    onClick={() => setShowFullJobDescription(!showFullJobDescription)}
+                    className="mt-2 text-sm text-primary-600 hover:text-primary-800 underline"
+                  >
+                    {showFullJobDescription ? "Show Less" : "Show More"}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -456,10 +555,23 @@ const handleDeleteJob = async () => {
         {/* Applicants Section */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <h2 className="text-xl font-semibold text-gray-900">
-                Applicants ({job?.applicants?.length || 0})
+                Applicants ({filteredApplicants.length})
               </h2>
+              <div className="relative flex-1 sm:flex-none">
+                <input
+                  type="text"
+                  placeholder="Search applicants..."
+                  value={searchTerm}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              </div>
             </div>
           </div>
 
@@ -471,61 +583,54 @@ const handleDeleteJob = async () => {
                   <span>Loading applicants...</span>
                 </div>
               </div>
-            ) : currentApplicants?.length === 0 ? (
+            ) : filteredApplicants.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p>No applicants yet for this position</p>
+                <p>
+                  {searchTerm.trim()
+                    ? "No applicants found matching your search"
+                    : "No applicants yet for this position"}
+                </p>
               </div>
             ) : (
-              <>
-                <table className="w-full min-w-full">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
-                        #
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
-                        Applicant
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden md:table-cell">
-                        Contact
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
-                        Experience
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
-                        Stage
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden sm:table-cell">
-                        Applied
-                      </th>
-                      <th className="text-right py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    { currentApplicants && currentApplicants?.map((applicant, index) => (
-                      <tr key={applicant.id} className="hover:bg-gray-50">
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm">
-                          {startIndex + index + 1}
-                        </td>
-                        <td className="py-4 px-4 sm:px-6">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-gray-900 text-sm sm:text-base">
-                              {applicant.name}
-                            </span>
-                            <span className="text-xs text-gray-500 mt-1">
-                              {applicant.email}
-                            </span>
-                            <div className="md:hidden mt-1">
-                              {applicant.phone && (
-                                <div className="flex items-center text-xs text-gray-500">
-                                  <Phone className="w-3 h-3 mr-1" />
-                                  {applicant.phone}
-                                </div>
-                              )}
-                            </div>
+              <table className="w-full min-w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
+                      #
+                    </th>
+                    <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
+                      Applicant
+                    </th>
+                    <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden md:table-cell">
+                      Contact
+                    </th>
+                    <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
+                      Experience
+                    </th>
+                    <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
+                      Stage
+                    </th>
+                    <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden sm:table-cell">
+                      Applied
+                    </th>
+                    <th className="text-right py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {currentApplicants.map((applicant, index) => (
+                    <tr key={applicant.id} className="hover:bg-gray-50">
+                      <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm">
+                        {startIndex + index + 1}
+                      </td>
+                      <td className="py-4 px-4 sm:px-6">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900 text-sm sm:text-base">
+                            {applicant.name}
+                          </span>
+                         
                           </div>
                         </td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden md:table-cell">
@@ -543,11 +648,9 @@ const handleDeleteJob = async () => {
                           </div>
                         </td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden lg:table-cell">
-                          {applicant.experienceYears ? `${applicant.experienceYears} years` : 'Not specified'}
+                          {applicant.experienceYears ? `${applicant.experienceYears} years` : "Not specified"}
                         </td>
-                        <td className="py-4 px-4 sm:px-6">
-                          {getStageBadge(applicant.stage)}
-                        </td>
+                        <td className="py-4 px-4 sm:px-6">{getStageBadge(applicant.stage)}</td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
                           <div className="flex items-center">
                             <Calendar className="w-4 h-4 text-gray-400 mr-1" />
@@ -563,10 +666,10 @@ const handleDeleteJob = async () => {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            {applicant.stage !== 'HIRED' && applicant.stage !== 'REJECTED' && (
+                            {applicant.stage !== "HIRED" && applicant.stage !== "REJECTED" && (
                               <>
                                 <button
-                                  onClick={() => setActionConfirm({ applicant, action: 'hire' })}
+                                  onClick={() => setActionConfirm({ applicant, action: "hire" })}
                                   disabled={operationLoading}
                                   className="text-gray-400 hover:text-green-600 transition-colors disabled:opacity-50"
                                   title="Hire"
@@ -574,7 +677,7 @@ const handleDeleteJob = async () => {
                                   <UserCheck className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => setActionConfirm({ applicant, action: 'reject' })}
+                                  onClick={() => setActionConfirm({ applicant, action: "reject" })}
                                   disabled={operationLoading}
                                   className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
                                   title="Reject"
@@ -585,12 +688,17 @@ const handleDeleteJob = async () => {
                             )}
                           </div>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {totalPages > 1 && renderPagination()}
-              </>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="bg-gray-50 border-b">
+                  <tr>
+                    <td colSpan={7} className="py-3 px-4 sm:px-6">
+                      {totalPages > 1 && renderPagination()}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             )}
           </div>
         </div>
@@ -608,20 +716,11 @@ const handleDeleteJob = async () => {
                 : "bg-primary-50 border-primary-200 text-primary-800"
             }`}
           >
-            {operationStatus.type === "success" && (
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            )}
-            {operationStatus.type === "error" && (
-              <XCircle className="w-5 h-5 text-red-600" />
-            )}
-            {operationStatus.type === "info" && (
-              <AlertCircle className="w-5 h-5 text-primary-600" />
-            )}
+            {operationStatus.type === "success" && <CheckCircle className="w-5 h-5 text-green-600" />}
+            {operationStatus.type === "error" && <XCircle className="w-5 h-5 text-red-600" />}
+            {operationStatus.type === "info" && <AlertCircle className="w-5 h-5 text-primary-600" />}
             <span className="font-medium">{operationStatus.message}</span>
-            <button
-              onClick={() => setOperationStatus(null)}
-              className="ml-2 hover:opacity-70"
-            >
+            <button onClick={() => setOperationStatus(null)} className="ml-2 hover:opacity-70">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -645,12 +744,12 @@ const handleDeleteJob = async () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex items-center space-x-3 mb-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                actionConfirm.action === 'hire' 
-                  ? 'bg-green-100' 
-                  : 'bg-red-100'
-              }`}>
-                {actionConfirm.action === 'hire' ? (
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  actionConfirm.action === "hire" ? "bg-green-100" : "bg-red-100"
+                }`}
+              >
+                {actionConfirm.action === "hire" ? (
                   <UserCheck className="w-6 h-6 text-green-600" />
                 ) : (
                   <UserX className="w-6 h-6 text-red-600" />
@@ -658,7 +757,7 @@ const handleDeleteJob = async () => {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {actionConfirm.action === 'hire' ? 'Hire' : 'Reject'} Applicant
+                  {actionConfirm.action === "hire" ? "Hire" : "Reject"} Applicant
                 </h3>
                 <p className="text-sm text-gray-500">This action will update the applicant's status</p>
               </div>
@@ -666,13 +765,12 @@ const handleDeleteJob = async () => {
             <div className="mb-6">
               <p className="text-gray-700">
                 Are you sure you want to {actionConfirm.action}{" "}
+                <span className="font-semibold">{actionConfirm?.applicant?.name}</span>? This will
+                change their application status to{" "}
                 <span className="font-semibold">
-                  {actionConfirm?.applicant?.name}
+                  {actionConfirm.action === "hire" ? "HIRED" : "REJECTED"}
                 </span>
-                ? This will change their application status to{" "}
-                <span className="font-semibold">
-                  {actionConfirm.action === 'hire' ? 'HIRED' : 'REJECTED'}
-                </span>.
+                .
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
@@ -686,12 +784,12 @@ const handleDeleteJob = async () => {
                 onClick={() => handleApplicantAction(actionConfirm.applicant, actionConfirm.action)}
                 disabled={operationLoading}
                 className={`w-full sm:w-auto px-4 py-2 ${
-                  actionConfirm.action === 'hire'
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-red-500 hover:bg-red-600 text-white'
+                  actionConfirm.action === "hire"
+                    ? "bg-green-500 hover:bg-green-600 text-white"
+                    : "bg-red-500 hover:bg-red-600 text-white"
                 } rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {actionConfirm.action === 'hire' ? 'Hire' : 'Reject'}
+                {actionConfirm.action === "hire" ? "Hire" : "Reject"}
               </button>
             </div>
           </div>

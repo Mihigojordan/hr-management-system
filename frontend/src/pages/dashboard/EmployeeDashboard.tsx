@@ -500,7 +500,7 @@ const EmployeeDashboard: React.FC = () => {
                             </button>
                             <button
                               onClick={() => handleCreateContract(employee)}
-                              disabled={operationLoading || (employee.id && employeeContractStatus[employee.id])}
+                              disabled={!!operationLoading || !!(employee.id && employeeContractStatus[employee.id])}
                               className="text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               title={employee.id && employeeContractStatus[employee.id] ? "Employee already has a contract" : "Create Contract"}
                             >

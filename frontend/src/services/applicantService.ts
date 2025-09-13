@@ -13,7 +13,7 @@ export interface Applicant {
   email: string;
   phone?: string;
   cvUrl?: string;
-  skills?: string[];
+  skills: string[];
   experienceYears?: number;
   education?:any;
   stage: ApplicationStage;
@@ -48,7 +48,7 @@ class ApplicantService {
    * @param applicantData - Applicant data
    * @returns Created applicant
    */
-  async createApplicant(applicantData: CreateApplicantInput): Promise<Applicant> {
+  async createApplicant(applicantData: any): Promise<Applicant> {
     try {
       const response: AxiosResponse<Applicant> = await this.api.post('/applicants', applicantData,{
        headers: {
@@ -99,6 +99,30 @@ class ApplicantService {
       throw new Error(errorMessage);
     }
   }
+  /**
+   * Get applicant by Job ID
+   * @param id - Job ID
+   * @returns Applicant or null if not found
+   */
+  async getApplicantsByJobId(id: number | string): Promise<any[] | null> {
+    try {
+      const response: AxiosResponse<Applicant[]> = await this.api.get(`/applicants`);
+      if(response.data){
+
+        const result = response.data.filter((ap)=> ap.jobId == id);
+        return result
+      }
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      console.error('Error fetching applicant by ID:', error);
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Failed to fetch applicant';
+      throw new Error(errorMessage);
+    }
+  }
 
   /**
    * Update an applicant
@@ -109,6 +133,23 @@ class ApplicantService {
   async updateApplicant(id: number | string, updateData: UpdateApplicantInput): Promise<Applicant> {
     try {
       const response: AxiosResponse<Applicant> = await this.api.put(`/applicants/${id}`, updateData);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error updating applicant:', error);
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Failed to update applicant';
+      throw new Error(errorMessage);
+    }
+  }
+  /**
+   * Update an applicant status
+   * @param id - Applicant ID
+   * @param updateData - Data to update
+   * @returns Updated applicant
+   */
+  async updateApplicantStage(id: number | string, updateData: UpdateApplicantInput): Promise<Applicant> {
+    try {
+      const response: AxiosResponse<Applicant> = await this.api.put(`/applicants/status/${id}`, updateData);
       return response.data;
     } catch (error: any) {
       console.error('Error updating applicant:', error);

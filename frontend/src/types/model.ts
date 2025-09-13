@@ -90,7 +90,7 @@ export interface Contract extends ContractData {
 
 // Interface for Job
 export interface Job {
-  id: number;
+  id: string;
   title: string;
   description: string;
   location: string;
@@ -125,8 +125,8 @@ type ApplicationStage =
 
 
 export interface Applicant {
-  id: number;
-  jobId: number;
+  id: string;
+  jobId: string;
   name: string;
   email: string;
   phone?: string;
