@@ -29,7 +29,6 @@ model Department {
   name        String?
   description String?    @db.VarChar(1000)
   employee    Employee[]
-  contracts   Contract[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
@@ -75,51 +74,40 @@ model Employee {
   experience              Json?
   emergency_contact_name  String?
   emergency_contact_phone String?
-
-  contracts Contract[]
+  contract              Contract[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
 
 model Contract {
-  id String @id @default(uuid())
-
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  employeeId String // 👈 Use String if Employee.id is String (UUID). Change to Int if Employee.id is Int
-
-  department   Department @relation(fields: [departmentId], references: [id])
-  departmentId String // 👈 Same here: match Department.id type
-
-  contractType ContractType
-  startDate    DateTime
-  endDate      DateTime?
-  salary       Float
-  currency     String         @default("RWF")
-  status       ContractStatus @default(ACTIVE)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                     String       @id @default(uuid())
+  employeeId             String?
+  employee               Employee?    @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  contractType           ContractType
+  startDate              DateTime
+  endDate                DateTime?
+  salary                 Float
+  currency               String       @default("RWF")
+  benefits               String?      // e.g., health insurance, PTO
+  workingHours           String?      // e.g., "40 hours/week"
+  probationPeriod        String?      // e.g., "3 months"
+  terminationConditions  String?
+  terms                  String?      // General terms text
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
 }
 
 enum ContractType {
-  PROBATION
   PERMANENT
   TEMPORARY
   INTERNSHIP
 }
 
-enum ContractStatus {
-  ACTIVE
-  EXPIRED
-  TERMINATED
-  PENDING
-}
-
 
 model Job {
-  id               Int              @id @default(autoincrement())
+  id                String       @id @default(uuid())
   title            String
-  description      String
+  description      String?      @db.Text
   location         String
   employment_type  EmploymentType
   experience_level ExperienceLevel
@@ -131,7 +119,7 @@ model Job {
   posted_at        DateTime?         @default(now())
   expiry_date      DateTime?
 
-  appplicants       Applicant[]
+  applicants       Applicant[]
 
   created_at       DateTime          @default(now())
   updated_at       DateTime          @updatedAt
@@ -166,8 +154,8 @@ enum ApplicationStage {
 }
 
 model Applicant {
-  id              Int               @id @default(autoincrement())
-  jobId           Int               // FK → Job.id
+  id               String       @id @default(uuid())
+  jobId           String               // FK → Job.id
   job             Job               @relation(fields: [jobId], references: [id],onDelete:Cascade,onUpdate:Cascade)
 
   name            String
@@ -176,11 +164,11 @@ model Applicant {
   cvUrl           String?           // link to uploaded CV
   skills          Json?             // array of candidate’s skills
   experienceYears Int?              // number of years experience
+  education       Json?             // [{ degree: "BSc CS", school: "XYZ", year: 2023 }]
+  coverLetter     String?      @db.Text
 
   stage           ApplicationStage  @default(APPLIED)
 
   created_at      DateTime          @default(now())
-  updated_at      DateTime          @updatedAt
-
-  
+  updated_at      DateTime          @updatedAt 
 }

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import jobService from "../../services/jobService";
 import { useNavigate } from "react-router-dom";
+import { useSocketEvent,useSocket } from "../../context/SocketContext"; // Import useSocketEvent
 import type { Job } from "../../types/model";
 
 interface OperationStatus {
@@ -43,17 +44,47 @@ const JobDashboard: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(5);
-  
+
   const [deleteConfirm, setDeleteConfirm] = useState<Job | null>(null);
   const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
   const [operationLoading, setOperationLoading] = useState<boolean>(false);
+  const {socket} =useSocket()
 
   const navigate = useNavigate();
 
+  // Load initial job data
   useEffect(() => {
     loadData();
   }, []);
 
+  // Handle WebSocket events for job updates
+  useSocketEvent("jobCreated", (job: Job) => {
+    if(job){
+
+      setAllJobs((prev) => [...prev, job]);
+      showOperationStatus("success", `New job "${job.title}" created!`);
+    }
+  }, [setAllJobs]);
+
+  useSocketEvent("jobUpdated", (updatedJob: Job) => {
+    if(updatedJob){
+
+      setAllJobs((prev) =>
+        prev.map((job) => (job.id === updatedJob.id ? updatedJob : job))
+    );
+    showOperationStatus("success", `Job "${updatedJob.title}" updated!`);
+  }
+  }, [setAllJobs]);
+
+  useSocketEvent("jobDeleted", ({ id }: { id: string }) => {
+    if(id){
+
+      setAllJobs((prev) => prev.filter((job:Job) => job.id !== id));
+      showOperationStatus("success", `Job deleted successfully!`);
+    }
+  }, [setAllJobs]);
+
+  // Apply filters and sorting whenever dependencies change
   useEffect(() => {
     handleFilterAndSort();
   }, [searchTerm, sortBy, sortOrder, statusFilter, employmentTypeFilter, allJobs]);
@@ -106,13 +137,16 @@ const JobDashboard: React.FC = () => {
       let bValue = b[sortBy];
 
       // Handle dates
-      if (sortBy === "posted_at" || sortBy === "expiry_date" || sortBy === "created_at" || sortBy === "updated_at") {
-        const aDate = typeof aValue === "string" || aValue instanceof Date
-          ? new Date(aValue)
-          : new Date(0);
-        const bDate = typeof bValue === "string" || bValue instanceof Date
-          ? new Date(bValue)
-          : new Date(0);
+      if (
+        sortBy === "posted_at" ||
+        sortBy === "expiry_date" ||
+        sortBy === "created_at" ||
+        sortBy === "updated_at"
+      ) {
+        const aDate =
+          typeof aValue === "string" || aValue instanceof Date ? new Date(aValue) : new Date(0);
+        const bDate =
+          typeof bValue === "string" || bValue instanceof Date ? new Date(bValue) : new Date(0);
 
         if (sortOrder === "asc") return aDate.getTime() - bDate.getTime();
         else return bDate.getTime() - aDate.getTime();
@@ -131,7 +165,7 @@ const JobDashboard: React.FC = () => {
   };
 
   const handleAddJob = () => {
-    navigate('/admin/dashboard/recruiting-management/create');
+    navigate("/admin/dashboard/recruiting-management/create");
   };
 
   const handleEditJob = (job: Job) => {
@@ -149,7 +183,7 @@ const JobDashboard: React.FC = () => {
       setOperationLoading(true);
       setDeleteConfirm(null);
       await jobService.deleteJob(job.id);
-      loadData();
+      // Note: No need to call loadData() since jobDeleted event will update allJobs
       showOperationStatus("success", `"${job.title}" deleted successfully!`);
     } catch (err: any) {
       showOperationStatus("error", err.message || "Failed to delete job");
@@ -198,7 +232,11 @@ const JobDashboard: React.FC = () => {
     };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full border ${statusStyles[status as keyof typeof statusStyles] || statusStyles.DRAFT}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full border ${
+          statusStyles[status as keyof typeof statusStyles] || statusStyles.DRAFT
+        }`}
+      >
         {status}
       </span>
     );
@@ -214,8 +252,12 @@ const JobDashboard: React.FC = () => {
     };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${typeStyles[type as keyof typeof typeStyles] || "bg-gray-100 text-gray-800"}`}>
-        {type.replace('_', ' ')}
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${
+          typeStyles[type as keyof typeof typeStyles] || "bg-gray-100 text-gray-800"
+        }`}
+      >
+        {type.replace("_", " ")}
       </span>
     );
   };
@@ -252,8 +294,7 @@ const JobDashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-center justify-between bg-white px-4 py-3 border-t">
         <div className="flex items-center text-sm text-gray-700 mb-4 sm:mb-0">
           <span>
-            Showing {startIndex + 1} to {Math.min(endIndex, jobs.length)} of{" "}
-            {jobs.length} results
+            Showing {startIndex + 1} to {Math.min(endIndex, jobs.length)} of {jobs.length} results
           </span>
         </div>
         <div className="flex items-center space-x-2">
@@ -336,7 +377,7 @@ const JobDashboard: React.FC = () => {
                   />
                   <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
-                
+
                 <div className="flex space-x-2">
                   <select
                     value={statusFilter}
@@ -349,7 +390,7 @@ const JobDashboard: React.FC = () => {
                     <option value="PAUSED">Paused</option>
                     <option value="DRAFT">Draft</option>
                   </select>
-                  
+
                   <select
                     value={employmentTypeFilter}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEmploymentTypeFilter(e.target.value)}
@@ -364,7 +405,7 @@ const JobDashboard: React.FC = () => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">Sort By:</span>
                 <div className="relative">
@@ -401,8 +442,8 @@ const JobDashboard: React.FC = () => {
               </div>
             ) : currentJobs.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
-                {searchTerm || statusFilter !== "all" || employmentTypeFilter !== "all" 
-                  ? "No jobs found matching your filters" 
+                {searchTerm || statusFilter !== "all" || employmentTypeFilter !== "all"
+                  ? "No jobs found matching your filters"
                   : "No jobs found"}
               </div>
             ) : (
@@ -435,7 +476,7 @@ const JobDashboard: React.FC = () => {
                         Type
                       </th>
                       <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
-                         Status
+                        Status
                       </th>
                       <th
                         className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 hidden sm:table-cell"
@@ -466,9 +507,7 @@ const JobDashboard: React.FC = () => {
                               {job.title}
                             </span>
                             {job.industry && (
-                              <span className="text-xs text-gray-500 mt-1">
-                                {job.industry}
-                              </span>
+                              <span className="text-xs text-gray-500 mt-1">{job.industry}</span>
                             )}
                             <div className="md:hidden mt-1">
                               <div className="flex items-center text-xs text-gray-500">
@@ -487,13 +526,11 @@ const JobDashboard: React.FC = () => {
                         <td className="py-4 px-4 sm:px-6 hidden lg:table-cell">
                           <div className="flex flex-col space-y-1">
                             {getEmploymentTypeBadge(job.employment_type)}
-                           
                           </div>
                         </td>
                         <td className="py-4 px-4 sm:px-6 hidden lg:table-cell">
                           <div className="flex flex-col space-y-1">
                             {getStatusBadge(job.status!)}
-                           
                           </div>
                         </td>
                         <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
@@ -567,10 +604,7 @@ const JobDashboard: React.FC = () => {
               <AlertCircle className="w-5 h-5 text-primary-600" />
             )}
             <span className="font-medium">{operationStatus.message}</span>
-            <button
-              onClick={() => setOperationStatus(null)}
-              className="ml-2 hover:opacity-70"
-            >
+            <button onClick={() => setOperationStatus(null)} className="ml-2 hover:opacity-70">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -603,10 +637,8 @@ const JobDashboard: React.FC = () => {
             <div className="mb-6">
               <p className="text-gray-700">
                 Are you sure you want to delete the job{" "}
-                <span className="font-semibold">
-                  "{deleteConfirm.title}"
-                </span>
-                ? This will permanently remove the job posting and all associated data.
+                <span className="font-semibold">"{deleteConfirm.title}"</span>? This will permanently
+                remove the job posting and all associated data.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
