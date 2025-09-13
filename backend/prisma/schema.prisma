@@ -119,7 +119,7 @@ model Job {
   posted_at        DateTime?         @default(now())
   expiry_date      DateTime?
 
-  appplicants       Applicant[]
+  applicants       Applicant[]
 
   created_at       DateTime          @default(now())
   updated_at       DateTime          @updatedAt
@@ -165,7 +165,7 @@ model Applicant {
   skills          Json?             // array of candidate’s skills
   experienceYears Int?              // number of years experience
   education       Json?             // [{ degree: "BSc CS", school: "XYZ", year: 2023 }]
-  coverLetter     String?
+  coverLetter     String?      @db.Text
 
   stage           ApplicationStage  @default(APPLIED)
 

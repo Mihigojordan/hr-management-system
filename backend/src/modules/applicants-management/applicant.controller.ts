@@ -2,10 +2,14 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseInterceptors, Uploa
 import { ApplicantService } from './applicant.service';
 import { ApplicantFileFields, ApplicantUploadConfig } from 'src/common/utils/file-upload.utils';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApplicantGateway } from './applicant.gateway';
 
 @Controller('applicants')
 export class ApplicantController {
-  constructor(private readonly applicantService: ApplicantService) { }
+  constructor(
+    private readonly applicantService: ApplicantService,
+     private readonly applicantGateway: ApplicantGateway,
+  ) { }
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(ApplicantFileFields, ApplicantUploadConfig),
@@ -20,9 +24,12 @@ export class ApplicantController {
   ) {
     try {
       if (files?.cvFile?.[0]?.filename) {
-        body.cvUrl = `/uploads/application_letters/${files.cvFile[0].filename}`;
+        body.cvUrl = `/uploads/cv_files/${files.cvFile[0].filename}`;
       }
-      return await this.applicantService.create(body);
+      const applicant = await this.applicantService.create(body);
+      this.applicantGateway.emitApplicantCreated(applicant);
+      return applicant
+
     } catch (error) {
       throw error;
     }
@@ -57,9 +64,11 @@ export class ApplicantController {
     try {
 
       if (files?.cvFile?.[0]?.filename) {
-        body.cvUrl = `/uploads/application_letters/${files.cvFile[0].filename}`;
+        body.cvUrl = `/uploads/cv_files/${files.cvFile[0].filename}`;
       }
-      return await this.applicantService.update(id, body);
+      const applicant =  await this.applicantService.update(id, body);
+      this.applicantGateway.emitApplicantUpdated(applicant);
+      return applicant
     } catch (error) {
       throw error;
     }
@@ -68,7 +77,9 @@ export class ApplicantController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      return await this.applicantService.remove(id);
+    const  applicant = await this.applicantService.remove(id);
+    this.applicantGateway.emitApplicantDeleted(id);
+      return applicant
     } catch (error) {
       throw error;
     }
