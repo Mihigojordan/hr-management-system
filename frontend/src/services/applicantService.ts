@@ -15,6 +15,7 @@ export interface Applicant {
   cvUrl?: string;
   skills?: string[];
   experienceYears?: number;
+  education?:any;
   stage: ApplicationStage;
   created_at?: Date;
   updated_at?: Date;
@@ -49,7 +50,11 @@ class ApplicantService {
    */
   async createApplicant(applicantData: CreateApplicantInput): Promise<Applicant> {
     try {
-      const response: AxiosResponse<Applicant> = await this.api.post('/applicants', applicantData);
+      const response: AxiosResponse<Applicant> = await this.api.post('/applicants', applicantData,{
+       headers: {
+    'Content-Type': 'multipart/form-data'
+  }
+      });
       return response.data;
     } catch (error: any) {
       console.error('Error creating applicant:', error);

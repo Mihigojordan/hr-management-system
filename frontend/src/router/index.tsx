@@ -20,6 +20,8 @@ import RecruitementManagement from '../pages/dashboard/RecruitementManagement';
 import UpserJobPost from '../components/dashboard/recruitment/UpsertJobPost';
 import JobView from '../components/dashboard/recruitment/JobView';
 import JobBoard from '../pages/landing/JobBoard';
+import JobPostView from '../components/landing/JobViewPage';
+import JobApplicationForm from '../components/landing/ApplyJob';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -97,6 +99,30 @@ const routes = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <JobBoard />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: 'jobs',
+            element: (
+              <SuspenseWrapper>
+                <JobBoard />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: 'jobs/:id',
+            element: (
+              <SuspenseWrapper>
+                <JobPostView />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: '/jobs/apply-job/:id',
+            element: (
+              <SuspenseWrapper>
+                <JobApplicationForm />
               </SuspenseWrapper>
             ),
           },

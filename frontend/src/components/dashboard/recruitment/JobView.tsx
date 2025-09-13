@@ -429,8 +429,8 @@ const handleDeleteJob = async () => {
             {/* Job Description */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Description</h3>
-              <div className="prose prose-sm max-w-none">
-                <p className="text-gray-700 whitespace-pre-wrap">{job.description}</p>
+              <div className="">
+              <div className="bg-white p-4 rounded border text-sm" dangerouslySetInnerHTML={{ __html: job.description }} />
               </div>
             </div>
 
