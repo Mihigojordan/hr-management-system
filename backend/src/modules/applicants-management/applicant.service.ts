@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ApplicationStage, Prisma } from '../../../generated/prisma';
+import { EmailService } from 'src/global/email/email.service';
 
 @Injectable()
 export class ApplicantService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+     private email: EmailService,
+  ) { }
 
 
   async create(applicantData: {
@@ -173,6 +177,92 @@ export class ApplicantService {
           job:true
         }
       });
+
+      return updated;
+    } catch (error) {
+      console.error(error);
+      throw error instanceof NotFoundException || error instanceof BadRequestException
+        ? error
+        : new InternalServerErrorException('Failed to update applicant');
+    }
+  }
+  async updateStage(
+    id: string,
+    applicantData: {
+      start_date?:string;
+      stage?: ApplicationStage;
+    },
+  ) {
+    try {
+
+      const applicant = await this.prisma.applicant.findUnique({
+         where: { id },
+         include:{
+          job:true,
+         }
+          });
+      if (!applicant) {
+        throw new NotFoundException('Applicant not found');
+      }
+      
+
+      // Prepare Prisma data
+      const dataToUpdate: Prisma.ApplicantUpdateInput = {
+        stage: applicantData.stage || undefined,
+      };
+
+
+      //  Update applicant
+      const updated = await this.prisma.applicant.update({
+        where: { id },
+        data: dataToUpdate,
+        include:{
+          job:true
+        }
+      });
+
+      if(updated){
+        const formatDate = (dateString?: string) => {
+  if (!dateString) return "Not set";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+        
+        // Decide subject and template based on status
+if (applicantData.stage === 'HIRED') {
+  await this.email.sendEmail(
+    String(applicant.email),
+    `You’re Hired – ${applicant.job.title}`, // subject
+    'Applicant-hired-notification',         // template
+    {
+      firstname:  applicant.name.split(' ')[0] || 'Applicant',
+      lastname: applicant.name.split(' ').slice(1).join(' ') || '',
+      jobTitle: applicant.job.title,
+      startDate: formatDate(applicantData.start_date),
+      companyName: 'Aby HR',
+      year: new Date().getFullYear().toString(),
+    }
+  );
+} else if (applicantData.stage === 'REJECTED') {
+  await this.email.sendEmail(
+    String(applicant.email),
+    `Application Rejected – ${applicant.job.title}`, // subject
+    'Applicant-rejection-notification',             // template
+    {
+      firstname: applicant.name.split(' ')[0] || 'Applicant',
+      lastname:  applicant.name.split(' ').slice(1).join(' ') || '',
+      jobTitle: applicant.job.title,
+      companyName: 'Aby HR',
+      year: new Date().getFullYear().toString(),
+    }
+  );
+}
+
+
+      }
 
       return updated;
     } catch (error) {

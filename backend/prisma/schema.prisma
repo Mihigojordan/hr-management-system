@@ -166,6 +166,7 @@ model Applicant {
   experienceYears Int?              // number of years experience
   education       Json?             // [{ degree: "BSc CS", school: "XYZ", year: 2023 }]
   coverLetter     String?      @db.Text
+  start_date      DateTime?
 
   stage           ApplicationStage  @default(APPLIED)
 
