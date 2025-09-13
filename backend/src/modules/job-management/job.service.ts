@@ -10,7 +10,7 @@ export class JobService {
         try {
            const {id,...jobData } = data;
            
-            return await this.prisma.job.create({ data:jobData });
+            return await this.prisma.job.create({ data:jobData,include:{applicants:true} });
         } catch (error) {
             console.error(error);
             throw new InternalServerErrorException('Failed to create job');
@@ -20,7 +20,7 @@ export class JobService {
     async findAll() {
         try {
             return await this.prisma.job.findMany({
-                include: { appplicants: true }, // fetch company info if exists
+                include: { applicants: true }, // fetch company info if exists
             });
         } catch (error) {
             console.error(error);
@@ -32,7 +32,7 @@ export class JobService {
         try {
             const job = await this.prisma.job.findUnique({
                 where: { id },
-                include: { appplicants: true },
+                include: { applicants: true },
             });
             if (!job) throw new NotFoundException('Job not found');
             return job;
@@ -49,6 +49,9 @@ export class JobService {
             const updated = await this.prisma.job.update({
                 where: { id },
                 data,
+                include:{
+                    applicants:true
+                }
             });
             return updated;
         } catch (error) {
