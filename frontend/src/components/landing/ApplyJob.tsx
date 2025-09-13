@@ -26,7 +26,21 @@ import jobService from '../../services/jobService';
 import type { Job } from '../../types/model';
 import type { CreateApplicantInput } from '../../services/applicantService';
 import Swal from 'sweetalert2';
-import { nav } from 'framer-motion/client';
+
+// Define type for form data to ensure consistency
+type FormData = CreateApplicantInput & {
+  coverLetter: string;
+  cvFile: File | null;
+  agreedToTerms: boolean;
+  marketingConsent: boolean;
+};
+
+// Valid MIME types for CV file upload
+const VALID_CV_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+] as const;
 
 const JobApplicationForm: React.FC = () => {
   const { id: jobId } = useParams<{ id: string }>();
@@ -38,8 +52,8 @@ const JobApplicationForm: React.FC = () => {
   const [job, setJob] = useState<Job | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Application form data based on Applicant model
-  const [formData, setFormData] = useState<CreateApplicantInput & { coverLetter: string, cvFile: File | null, agreedToTerms: boolean, marketingConsent: boolean }>({
+  // Initial form data with explicit type
+  const initialFormData: FormData = {
     jobId: jobId ? parseInt(jobId) : 0,
     name: '',
     email: '',
@@ -51,7 +65,10 @@ const JobApplicationForm: React.FC = () => {
     coverLetter: '',
     agreedToTerms: false,
     marketingConsent: false,
-  });
+  };
+
+  // Application form data
+  const [formData, setFormData] = useState<FormData>(initialFormData);
 
   const steps = [
     { id: 1, title: 'Basic Information', icon: User },
@@ -82,25 +99,26 @@ const JobApplicationForm: React.FC = () => {
         const savedDraft = localStorage.getItem(draftKey);
         
         if (savedDraft) {
-          const draft = JSON.parse(savedDraft);
+          const draft = JSON.parse(savedDraft) as Partial<FormData & { currentStep: number }>;
           setFormData({
-            jobId: draft.jobId,
-            name: draft.name || '',
-            email: draft.email || '',
-            phone: draft.phone || '',
+            jobId: draft.jobId ?? initialFormData.jobId,
+            name: draft.name ?? '',
+            email: draft.email ?? '',
+            phone: draft.phone ?? '',
             cvFile: null, // CV file cannot be stored in localStorage
-            skills: draft.skills || [],
-            experienceYears: draft.experienceYears || 0,
-            education: draft.education || [{ degree: '', school: '', year: '', field: '' }],
-            coverLetter: draft.coverLetter || '',
-            agreedToTerms: draft.agreedToTerms || false,
-            marketingConsent: draft.marketingConsent || false,
+            skills: draft.skills ?? [],
+            experienceYears: draft.experienceYears ?? 0,
+            education: draft.education ?? [{ degree: '', school: '', year: '', field: '' }],
+            coverLetter: draft.coverLetter ?? '',
+            agreedToTerms: draft.agreedToTerms ?? false,
+            marketingConsent: draft.marketingConsent ?? false,
           });
-          setCurrentStep(draft.currentStep || 1);
+          setCurrentStep(draft.currentStep ?? 1);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error fetching job:', error);
-        setErrors({ general: error.message || 'Failed to load job' });
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load job';
+        setErrors({ general: errorMessage });
       } finally {
         setLoading(false);
       }
@@ -120,11 +138,11 @@ const JobApplicationForm: React.FC = () => {
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
         break;
       case 2:
-        if (!formData.experienceYears) newErrors.experienceYears = 'Experience years is required';
+        if (formData.experienceYears ==undefined || formData.experienceYears == null) newErrors.experienceYears = 'Experience years is required';
         if (formData.skills.length === 0) newErrors.skills = 'At least one skill is required';
         break;
       case 3:
-        if (formData.education.some(edu => !edu.degree || !edu.school)) {
+        if (formData.education.some((edu:any) => !edu.degree || !edu.school)) {
           newErrors.education = 'Please complete all education entries or remove empty ones';
         }
         break;
@@ -143,13 +161,13 @@ const JobApplicationForm: React.FC = () => {
   };
 
   // Handle input changes
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = <T extends keyof FormData>(field: T, value: FormData[T]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+    if (errors[field as string]) {
+      setErrors(prev => ({ ...prev, [field as string]: '' }));
     }
   };
 
@@ -171,7 +189,7 @@ const JobApplicationForm: React.FC = () => {
   };
 
   // Handle education
-  const handleEducationChange = (index: number, field: string, value: string) => {
+  const handleEducationChange = (index: number, field: keyof FormData['education'][0], value: string) => {
     const newEducation = [...formData.education];
     newEducation[index] = { ...newEducation[index], [field]: value };
     setFormData(prev => ({
@@ -191,7 +209,7 @@ const JobApplicationForm: React.FC = () => {
     if (formData.education.length > 1) {
       setFormData(prev => ({
         ...prev,
-        education: prev.education.filter((_, i) => i !== index),
+        education: prev.education.filter((_:any, i:number) => i !== index),
       }));
     }
   };
@@ -200,7 +218,7 @@ const JobApplicationForm: React.FC = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type === 'application/pdf' || file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      if (VALID_CV_MIME_TYPES.includes(file.type as typeof VALID_CV_MIME_TYPES[number])) {
         setFormData(prev => ({
           ...prev,
           cvFile: file,
@@ -223,18 +241,69 @@ const JobApplicationForm: React.FC = () => {
         email: formData.email,
         phone: formData.phone,
         skills: formData.skills,
-        experienceYears: parseInt(formData.experienceYears.toString()) || 0,
-        education: formData.education.filter(edu => edu.degree && edu.school),
+        experienceYears: parseInt(formData.experienceYears!.toString()) || 0,
+        education: formData.education.filter((edu:any) => edu.degree && edu.school),
         coverLetter: formData.coverLetter,
         agreedToTerms: formData.agreedToTerms,
         marketingConsent: formData.marketingConsent,
         currentStep,
       };
       localStorage.setItem(draftKey, JSON.stringify(draftData));
-      alert('Draft saved successfully!');
-    } catch (error: any) {
+      Swal.fire({
+        title: 'Draft Saved!',
+        text: 'Your application draft has been saved successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        timer: 2000,
+        timerProgressBar: true,
+      });
+    } catch (error: unknown) {
       console.error('Error saving draft:', error);
-      alert('Failed to save draft. Please try again.');
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to save draft. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
+  };
+
+  // Clear draft from localStorage and reset form
+  const handleClearDraft = async () => {
+    const result = await Swal.fire({
+      title: 'Clear Draft?',
+      text: 'Are you sure you want to clear your application draft? This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, clear it',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const userEmail = 'user@example.com'; // Replace with actual user email from auth context
+        const draftKey = `jobApplicationDraft_${jobId}_${userEmail}`;
+        localStorage.removeItem(draftKey);
+        setFormData(initialFormData);
+        setCurrentStep(1);
+        setErrors({});
+        Swal.fire({
+          title: 'Draft Cleared!',
+          text: 'Your application draft has been cleared.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (error: unknown) {
+        console.error('Error clearing draft:', error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to clear draft. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
     }
   };
 
@@ -251,33 +320,34 @@ const JobApplicationForm: React.FC = () => {
       submissionData.append('email', formData.email);
       if (formData.phone) submissionData.append('phone', formData.phone);
       submissionData.append('skills', JSON.stringify(formData.skills));
-      submissionData.append('experienceYears', formData.experienceYears.toString());
-      submissionData.append('education', JSON.stringify(formData.education.filter(edu => edu.degree && edu.school)));
+      submissionData.append('experienceYears', formData.experienceYears!.toString());
+      submissionData.append('education', JSON.stringify(formData.education.filter((edu:any) => edu.degree && edu.school)));
       submissionData.append('coverLetter', formData.coverLetter);
       if (formData.cvFile) {
         submissionData.append('cvFile', formData.cvFile);
       }
 
       // Submit application
-      await applicantService.createApplicant(submissionData as any);
+      await applicantService.createApplicant(submissionData);
       
       // Clear draft from localStorage on successful submission
       const userEmail = 'user@example.com'; // Replace with actual user email
       const draftKey = `jobApplicationDraft_${jobId}_${userEmail}`;
       localStorage.removeItem(draftKey);
       
-    Swal.fire({
-  title: 'Success!',
-  text: 'The operation was completed successfully.',
-  icon: 'success',
-  confirmButtonText: 'OK',
-  timer: 2000,       // optional, auto-close after 2s
-  timerProgressBar: true
-});
-navigate('/jobs',{replace:true})
-    } catch (error: any) {
+      Swal.fire({
+        title: 'Success!',
+        text: 'The operation was completed successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      navigate('/jobs', { replace: true });
+    } catch (error: unknown) {
       console.error('Error submitting application:', error);
-      setErrors({ general: 'Failed to submit application. Please try again.' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit application. Please try again.';
+      setErrors({ general: errorMessage });
     } finally {
       setSubmitting(false);
     }
@@ -295,10 +365,10 @@ navigate('/jobs',{replace:true})
   };
 
   // Skill input component
-  const SkillInput = () => {
-    const [skillInput, setSkillInput] = useState('');
+  const SkillInput: React.FC = () => {
+    const [skillInput, setSkillInput] = useState<string>('');
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
         handleSkillAdd(skillInput);
@@ -345,7 +415,7 @@ navigate('/jobs',{replace:true})
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => navigate(`/jobs/${jobId}`)}
+              onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -544,7 +614,7 @@ navigate('/jobs',{replace:true})
               </div>
 
               <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
-                {formData.education.map((edu, index) => (
+                {formData.education.map((edu : any, index:number) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-medium text-gray-900">Education {index + 1}</h3>
@@ -716,7 +786,7 @@ navigate('/jobs',{replace:true})
 
                 <div>
                   <h3 className="font-semibold text-gray-900">Education</h3>
-                  {formData.education.filter(edu => edu.degree && edu.school).map((edu, index) => (
+                  {formData.education.filter((edu:any) => edu.degree && edu.school).map((edu:any, index:number) => (
                     <p key={index} className="text-gray-600">
                       {edu.degree} {edu.field && `in ${edu.field}`} from {edu.school} {edu.year && `(${edu.year})`}
                     </p>
@@ -797,7 +867,14 @@ navigate('/jobs',{replace:true})
                 <Save className="w-4 h-4" />
                 Save Draft
               </button>
-
+              <button
+                type="button"
+                onClick={handleClearDraft}
+                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear Draft
+              </button>
               {currentStep < 5 ? (
                 <button
                   type="button"

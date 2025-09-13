@@ -22,6 +22,7 @@ import JobView from '../components/dashboard/recruitment/JobView';
 import JobBoard from '../pages/landing/JobBoard';
 import JobPostView from '../components/landing/JobViewPage';
 import JobApplicationForm from '../components/landing/ApplyJob';
+import ApplicantView from '../components/dashboard/recruitment/ApplicantView';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -266,6 +267,14 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+              {
+                path: 'recruiting-management/:jobId/applicants/:applicantId',
+                element: (
+                  <SuspenseWrapper>
+                    <ApplicantView />
+                  </SuspenseWrapper>
+                ),
+              },
             ],
           },
         ],
@@ -297,3 +306,4 @@ const routes = createBrowserRouter([
 ]);
 
 export default routes;
+

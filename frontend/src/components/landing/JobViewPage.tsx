@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -53,9 +54,10 @@ const JobDetailView: React.FC = () => {
         } else {
           setJob(jobData);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching job:', err);
-        setError(err.message || 'Failed to fetch job details');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch job details';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -84,6 +86,18 @@ const JobDetailView: React.FC = () => {
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
     return `${Math.floor(diffDays / 30)} months ago`;
+  };
+
+  const getDaysLeft = (expiryDate: string): string => {
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    const diffTime = expiry.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (isNaN(diffDays) || !expiryDate) return 'Unknown';
+    if (diffDays < 0) return 'Expired';
+    if (diffDays === 0) return 'Today';
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} left`;
   };
 
   const getEmploymentTypeColor = (type: string): string => {
@@ -115,8 +129,7 @@ const JobDetailView: React.FC = () => {
   };
 
   const handleApply = async () => {
-  navigate(`/jobs/apply-job/${id}`)
-  
+    navigate(`/jobs/apply-job/${id}`);
   };
 
   const handleSave = () => {
@@ -133,12 +146,10 @@ const JobDetailView: React.FC = () => {
         });
       } catch (err) {
         console.error('Error sharing:', err);
-        // Fallback to copying to clipboard
         navigator.clipboard.writeText(window.location.href);
         alert('Link copied to clipboard!');
       }
     } else {
-      // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
@@ -151,7 +162,7 @@ const JobDetailView: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className=" w-full xl:w-11/12  mx-auto px-4 py-8">
+        <div className="w-full xl:w-11/12 mx-auto px-4 py-8">
           <div className="animate-pulse">
             {/* Header skeleton */}
             <div className="bg-white rounded-xl shadow-sm border p-8 mb-8">
@@ -212,7 +223,7 @@ const JobDetailView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className=" w-full xl:w-11/12  mx-auto px-4 py-8">
+      <div className="w-full xl:w-11/12 mx-auto px-4 py-8">
         {/* Back Button */}
         <button
           onClick={() => window.history.back()}
@@ -272,7 +283,7 @@ const JobDetailView: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-blue-500" />
-                  <span>Expires {formatDate(job.expiry_date!)}</span>
+                  <span>{getDaysLeft(job.expiry_date!)}</span>
                 </div>
                 {job.industry && (
                   <div className="flex items-center gap-2">
@@ -309,14 +320,14 @@ const JobDetailView: React.FC = () => {
           {/* Job Details */}
           <div className="lg:col-span-2 space-y-8">
             {/* Job Description */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200  p-4 xl:p-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 xl:p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Job Description</h2>
               <div className="prose max-w-none text-gray-700 leading-relaxed">
                 {job.description ? (
                   <div>
                     <div className={`${isDescriptionExpanded ? '' : 'max-h-48 overflow-hidden'}`}>
                       {job.description.split('\n').map((paragraph, index) => (
-                    <div key={index} className="bg-white p-4 rounded border text-sm" dangerouslySetInnerHTML={{ __html: paragraph }} />
+                        <div key={index} className="bg-white p-4 rounded border text-sm" dangerouslySetInnerHTML={{ __html: paragraph }} />
                       ))}
                     </div>
                     {job.description.length > 300 && (
@@ -425,7 +436,7 @@ const JobDetailView: React.FC = () => {
                 <div>
                   <button
                     onClick={handleApply}
-                    disabled={isApplying}
+                    disabled={isApplying || getDaysLeft(job.expiry_date!) === 'Expired'}
                     className="w-full bg-gradient-to-r from-primary-600 to-red-600 text-white font-bold py-4 px-6 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4"
                   >
                     {isApplying ? (

@@ -8,6 +8,7 @@ import {
   X,
   Building,
   FileBadge,
+  Briefcase,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -45,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     {
       id: "recruiting",
       label: "Recruiting Management",
-      icon: Users,
+      icon: Briefcase,
       path: "/admin/dashboard/recruiting-management",
     },
     {

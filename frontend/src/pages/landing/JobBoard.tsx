@@ -1,36 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, Users, Briefcase, Calendar, ChevronRight, ChevronLeft } from 'lucide-react';
-import company_logo from '../../../src/assets/images/aby_hr.png'
+import { MapPin, Clock, Users, Briefcase, Calendar, ChevronRight, ChevronLeft, CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import company_logo from '../../../src/assets/images/aby_hr.png';
 import jobService from '../../services/jobService';
-
+import { useSocketEvent } from '../../context/SocketContext';
 import type { Job } from '../../types/model';
 import { useNavigate } from 'react-router-dom';
 
-interface Company {
-  name: string;
-  logo: string;
+interface OperationStatus {
+  type: 'success' | 'error' | 'info';
+  message: string;
 }
 
 const JobBoard: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<string>('all');
+  const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [jobsPerPage] = useState<number>(9); // 3x3 grid
 
-
-  const navigate =  useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulate API call
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        // In real app: const jobs = await jobService.getAllJobs();
-       const Jobs = await jobService.getAllJobs();
-        setJobs(Jobs);
+        const jobsData = await jobService.getAllJobs();
+        setJobs(jobsData);
       } catch (error) {
         console.error('Error fetching jobs:', error);
       } finally {
@@ -41,10 +39,31 @@ const JobBoard: React.FC = () => {
     fetchJobs();
   }, []);
 
-  // Reset to page 1 when filter changes
+  // WebSocket event handlers
+  useSocketEvent('jobCreated', (newJob: Job) => {
+    setJobs((prev) => [...prev, newJob]);
+    showOperationStatus('success', `New job "${newJob.title}" added!`);
+  });
+
+  useSocketEvent('jobUpdated', (updatedJob: Job) => {
+    setJobs((prev) => prev.map((job) => (job.id === updatedJob.id ? updatedJob : job)));
+    showOperationStatus('info', `Job "${updatedJob.title}" updated!`);
+  });
+
+  useSocketEvent('jobDeleted', ({ id }: { id: string }) => {
+    setJobs((prev) => prev.filter((job) => job.id !== id));
+    showOperationStatus('info', `Job deleted.`);
+  });
+
+  // Reset to page 1 when filter changes or jobs are updated
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter]);
+  }, [filter, jobs]);
+
+  const showOperationStatus = (type: OperationStatus['type'], message: string, duration: number = 3000) => {
+    setOperationStatus({ type, message });
+    setTimeout(() => setOperationStatus(null), duration);
+  };
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -61,13 +80,13 @@ const JobBoard: React.FC = () => {
 
   const getEmploymentTypeColor = (type: string): string => {
     switch (type.toLowerCase()) {
-      case 'full-time':
+      case 'full_time':
         return 'bg-green-100 text-green-800';
-      case 'part-time':
+      case 'part_time':
         return 'bg-primary-100 text-primary-800';
       case 'contract':
         return 'bg-red-100 text-red-800';
-      case 'freelance':
+      case 'internship':
         return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -76,9 +95,9 @@ const JobBoard: React.FC = () => {
 
   const getExperienceLevelColor = (level: string): string => {
     switch (level.toLowerCase()) {
-      case 'entry-level':
+      case 'entry':
         return 'bg-emerald-100 text-emerald-800';
-      case 'mid-level':
+      case 'mid':
         return 'bg-amber-100 text-amber-800';
       case 'senior':
         return 'bg-red-100 text-red-800';
@@ -97,6 +116,15 @@ const JobBoard: React.FC = () => {
   const startIndex = (currentPage - 1) * jobsPerPage;
   const endIndex = startIndex + jobsPerPage;
   const currentJobs = filteredJobs.slice(startIndex, endIndex);
+
+  // Adjust currentPage if it exceeds totalPages after a job deletion
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (filteredJobs.length === 0) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages, filteredJobs]);
 
   // Pagination handlers
   const goToPage = (page: number) => {
@@ -197,7 +225,7 @@ const JobBoard: React.FC = () => {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-8 justify-center">
-          {(['all', 'FULL_TIME', 'PART_TIME', 'CONTRACT','INTERNSHIP'] as const).map((filterType) => (
+          {(['all', 'FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP'] as const).map((filterType) => (
             <button
               key={filterType}
               onClick={() => setFilter(filterType)}
@@ -233,7 +261,7 @@ const JobBoard: React.FC = () => {
                     <div className="flex-shrink-0">
                       <img
                         src={company_logo}
-                        alt={`logo`}
+                        alt="company logo"
                         className="w-14 h-14 rounded-xl object-cover shadow-sm border border-gray-100"
                       />
                     </div>
@@ -244,8 +272,6 @@ const JobBoard: React.FC = () => {
                       <p className="text-gray-600 font-medium">Aby Hr management</p>
                     </div>
                   </div>
-
-              
 
                   {/* Job Details */}
                   <div className="space-y-3 mb-6">
@@ -298,16 +324,22 @@ const JobBoard: React.FC = () => {
 
                   <div className="flex gap-2">
                     {/* Apply Button */}
-                  <button className="w-full bg-gradient-to-r from-primary-600 to-red-600 text-white font-medium py-3 px-4 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group-hover:shadow-lg">
-                    <span>Apply Now</span>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <button 
-                  onClick={()=> navigate(`${job.id}`)}
-                  className="w-full border border-primary-300  hover:bg-primary-50 text-primary-600  font-medium py-3 px-4 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group-hover:shadow-lg">
-                    <span> Read More</span>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
+                    <button
+                      disabled={!job.id}
+                      className="w-full bg-gradient-to-r from-primary-600 to-red-600 text-white font-medium py-3 px-4 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group-hover:shadow-lg"
+                      onClick={() => navigate(`/jobs/apply-job/${job.id}`)}
+                    >
+                      <span>Apply Now</span>
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                    <button
+                      disabled={!job.id}
+                      onClick={() => navigate(`${job.id}`)}
+                      className="w-full border border-primary-300 hover:bg-primary-50 text-primary-600 font-medium py-3 px-4 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group-hover:shadow-lg"
+                    >
+                      <span>Read More</span>
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -382,6 +414,29 @@ const JobBoard: React.FC = () => {
               >
                 Next
                 <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Operation Status Toast */}
+        {operationStatus && (
+          <div className="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-in-out">
+            <div
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg shadow-lg border ${
+                operationStatus.type === 'success'
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : operationStatus.type === 'error'
+                  ? 'bg-red-50 border-red-200 text-red-800'
+                  : 'bg-primary-50 border-primary-200 text-primary-800'
+              }`}
+            >
+              {operationStatus.type === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
+              {operationStatus.type === 'error' && <XCircle className="w-5 h-5 text-red-600" />}
+              {operationStatus.type === 'info' && <AlertCircle className="w-5 h-5 text-primary-600" />}
+              <span className="font-medium">{operationStatus.message}</span>
+              <button onClick={() => setOperationStatus(null)} className="ml-2 hover:opacity-70">
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
