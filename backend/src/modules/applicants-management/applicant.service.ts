@@ -8,16 +8,23 @@ export class ApplicantService {
 
 
   async create(applicantData: {
-    jobId: number;
+    jobId: string;
     name: string;
     email: string;
     phone?: string;
     cvUrl?: string;
+    coverLetter?: string;
     skills?: string[];
+    education: any[];
     experienceYears?: number;
     stage?: ApplicationStage;
   }) {
     try {
+
+      console.log(applicantData);
+      
+
+
    
       const job = await this.prisma.job.findUnique({
         where: { id: applicantData.jobId },
@@ -29,9 +36,9 @@ export class ApplicantService {
 
      
       const now = new Date();
-      if (job.status !== 'OPEN' || (job.expiry_date && job.expiry_date < now)) {
-        throw new BadRequestException('Job is closed or expired');
-      }
+      // if (job.status !== 'OPEN' || (job.expiry_date && job.expiry_date > now)) {
+      //   throw new BadRequestException('Job is closed or expired');
+      // }
 
       //  Prepare data for Prisma
       const dataToInsert: Prisma.ApplicantCreateInput = {
@@ -40,8 +47,10 @@ export class ApplicantService {
         email: applicantData.email,
         phone: applicantData.phone,
         cvUrl: applicantData.cvUrl,
+        coverLetter: applicantData.coverLetter,
         skills: applicantData.skills ? applicantData.skills : undefined,
-        experienceYears: applicantData.experienceYears,
+        education: applicantData.education ? applicantData.education : undefined,
+        experienceYears: Number(applicantData.experienceYears),
         stage: applicantData.stage || ApplicationStage.APPLIED,
       };
 
@@ -69,7 +78,7 @@ export class ApplicantService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     try {
       const applicant = await this.prisma.applicant.findUnique({
         where: { id },
@@ -86,14 +95,16 @@ export class ApplicantService {
   }
 
  async update(
-  id: number,
+  id: string,
   applicantData: {
-    jobId?: number;
+    jobId?: string;
     name?: string;
     email?: string;
     phone?: string;
     cvUrl?: string;
+    coverLetter?: string;
     skills?: string[];
+    education?: any[];
     experienceYears?: number;
     stage?: ApplicationStage;
   },
@@ -124,7 +135,10 @@ export class ApplicantService {
       email: applicantData.email,
       phone: applicantData.phone,
       cvUrl: applicantData.cvUrl,
+      coverLetter: applicantData.coverLetter,
       skills: applicantData.skills ? applicantData.skills : undefined,
+      education: applicantData.education ? applicantData.education : undefined,
+      
       experienceYears: applicantData.experienceYears,
       stage: applicantData.stage,
       ...(applicantData.jobId ? { job: { connect: { id: applicantData.jobId } } } : {}),
@@ -145,7 +159,7 @@ export class ApplicantService {
   }
 }
 
-async remove(id: number) {
+async remove(id: string) {
   try {
     
     const applicant = await this.prisma.applicant.findUnique({ where: { id } });

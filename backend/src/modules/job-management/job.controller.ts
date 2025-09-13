@@ -43,7 +43,7 @@ export class JobController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      return await this.jobService.findOne(Number(id));
+      return await this.jobService.findOne(id);
     } catch (error) {
       throw error;
     }
@@ -68,7 +68,7 @@ export class JobController {
     },
   ) {
     try {
-      return await this.jobService.update(Number(id), body);
+      return await this.jobService.update(id, body);
     } catch (error) {
       throw error;
     }
@@ -77,7 +77,7 @@ export class JobController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      return await this.jobService.remove(Number(id));
+      return await this.jobService.remove(id);
     } catch (error) {
       throw error;
     }

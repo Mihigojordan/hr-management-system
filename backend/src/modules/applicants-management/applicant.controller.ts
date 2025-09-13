@@ -1,13 +1,27 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { ApplicantService } from './applicant.service';
+import { ApplicantFileFields, ApplicantUploadConfig } from 'src/common/utils/file-upload.utils';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('applicants')
 export class ApplicantController {
-  constructor(private readonly applicantService: ApplicantService) {}
-
+  constructor(private readonly applicantService: ApplicantService) { }
   @Post()
-  async create(@Body() body: any) {
+  @UseInterceptors(
+    FileFieldsInterceptor(ApplicantFileFields, ApplicantUploadConfig),
+  )
+  async create(
+    @UploadedFiles()
+    files: {
+      cvFile?: Express.Multer.File[];
+    },
+    @Body() body: any,
+
+  ) {
     try {
+      if (files?.cvFile?.[0]?.filename) {
+        body.cvUrl = `/uploads/application_letters/${files.cvFile[0].filename}`;
+      }
       return await this.applicantService.create(body);
     } catch (error) {
       throw error;
@@ -26,16 +40,26 @@ export class ApplicantController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      return await this.applicantService.findOne(Number(id));
+      return await this.applicantService.findOne(id);
     } catch (error) {
       throw error;
     }
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(
+    @UploadedFiles()
+    files: {
+      cvFile?: Express.Multer.File[];
+    },
+    @Param('id') id: string,
+    @Body() body: any) {
     try {
-      return await this.applicantService.update(Number(id), body);
+
+      if (files?.cvFile?.[0]?.filename) {
+        body.cvUrl = `/uploads/application_letters/${files.cvFile[0].filename}`;
+      }
+      return await this.applicantService.update(id, body);
     } catch (error) {
       throw error;
     }
@@ -44,7 +68,7 @@ export class ApplicantController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      return await this.applicantService.remove(Number(id));
+      return await this.applicantService.remove(id);
     } catch (error) {
       throw error;
     }

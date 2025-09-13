@@ -105,9 +105,9 @@ enum ContractType {
 
 
 model Job {
-  id               Int              @id @default(autoincrement())
+  id                String       @id @default(uuid())
   title            String
-  description      String
+  description      String?      @db.Text
   location         String
   employment_type  EmploymentType
   experience_level ExperienceLevel
@@ -154,8 +154,8 @@ enum ApplicationStage {
 }
 
 model Applicant {
-  id              Int               @id @default(autoincrement())
-  jobId           Int               // FK → Job.id
+  id               String       @id @default(uuid())
+  jobId           String               // FK → Job.id
   job             Job               @relation(fields: [jobId], references: [id],onDelete:Cascade,onUpdate:Cascade)
 
   name            String
@@ -164,6 +164,8 @@ model Applicant {
   cvUrl           String?           // link to uploaded CV
   skills          Json?             // array of candidate’s skills
   experienceYears Int?              // number of years experience
+  education       Json?             // [{ degree: "BSc CS", school: "XYZ", year: 2023 }]
+  coverLetter     String?
 
   stage           ApplicationStage  @default(APPLIED)
 

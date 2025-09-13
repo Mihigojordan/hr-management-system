@@ -1,108 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, Users, Briefcase, Calendar, ChevronRight } from 'lucide-react';
+import { MapPin, Clock, Users, Briefcase, Calendar, ChevronRight, ChevronLeft } from 'lucide-react';
 import company_logo from '../../../src/assets/images/aby_hr.png'
 import jobService from '../../services/jobService';
 
 import type { Job } from '../../types/model';
+import { useNavigate } from 'react-router-dom';
 
 interface Company {
   name: string;
   logo: string;
 }
 
-// Mock data with explicit types
-const mockJobs: Job[] = [
-  {
-    id: 1,
-    title: "Senior Frontend Developer",
-    description: "We are looking for an experienced Frontend Developer to join our dynamic team. You'll be working on cutting-edge web applications using React, TypeScript, and modern development tools.",
-    location: "San Francisco, CA",
-    employment_type: "Full-time",
-    experience_level: "Senior",
-    industry: "Technology",
-    companyId: 1,
-    skills_required: ["React", "TypeScript", "JavaScript", "CSS", "Git"],
-    status: "active",
-    posted_at: "2024-09-01T10:00:00Z",
-    expiry_date: "2024-10-01T23:59:59Z",
-  },
-  {
-    id: 2,
-    title: "Product Manager",
-    description: "Join our product team to drive innovation and strategy. You'll work closely with engineering, design, and business teams to deliver exceptional user experiences.",
-    location: "New York, NY",
-    employment_type: "Full-time",
-    experience_level: "Mid-level",
-    industry: "Technology",
-    companyId: 2,
-    skills_required: ["Product Management", "Analytics", "Agile", "Strategy"],
-    status: "active",
-    posted_at: "2024-08-28T09:30:00Z",
-    expiry_date: "2024-09-28T23:59:59Z",
-  },
-  {
-    id: 3,
-    title: "UX/UI Designer",
-    description: "We're seeking a creative UX/UI Designer to help shape the future of our digital products. You'll be responsible for user research, wireframing, and creating beautiful interfaces.",
-    location: "Remote",
-    employment_type: "Contract",
-    experience_level: "Mid-level",
-    industry: "Design",
-    companyId: 3,
-    skills_required: ["Figma", "Adobe Creative Suite", "User Research", "Prototyping"],
-    status: "active",
-    posted_at: "2024-09-05T14:15:00Z",
-    expiry_date: "2024-10-05T23:59:59Z",
-  },
-  {
-    id: 4,
-    title: "Data Scientist",
-    description: "Looking for a Data Scientist to analyze complex datasets and build machine learning models. You'll work with large-scale data to drive business insights.",
-    location: "Austin, TX",
-    employment_type: "Full-time",
-    experience_level: "Senior",
-    industry: "Technology",
-    companyId: 4,
-    skills_required: ["Python", "Machine Learning", "SQL", "Statistics", "TensorFlow"],
-    status: "active",
-    posted_at: "2024-09-03T11:45:00Z",
-    expiry_date: "2024-10-03T23:59:59Z",
-  },
-  {
-    id: 5,
-    title: "Marketing Specialist",
-    description: "We need a creative Marketing Specialist to develop and execute marketing campaigns. You'll work across digital channels to increase brand awareness and drive growth.",
-    location: "Chicago, IL",
-    employment_type: "Part-time",
-    experience_level: "Entry-level",
-    industry: "Marketing",
-    companyId: 5,
-    skills_required: ["Digital Marketing", "Content Creation", "SEO", "Analytics"],
-    status: "active",
-    posted_at: "2024-09-07T16:20:00Z",
-    expiry_date: "2024-10-07T23:59:59Z",
-  },
-  {
-    id: 6,
-    title: "DevOps Engineer",
-    description: "Join our infrastructure team as a DevOps Engineer. You'll be responsible for CI/CD pipelines, cloud infrastructure, and ensuring system reliability.",
-    location: "Seattle, WA",
-    employment_type: "Full-time",
-    experience_level: "Senior",
-    industry: "Technology",
-    companyId: 6,
-    skills_required: ["AWS", "Docker", "Kubernetes", "Terraform", "Python"],
-    status: "active",
-    posted_at: "2024-09-02T08:30:00Z",
-    expiry_date: "2024-10-02T23:59:59Z",
-  },
-];
-
-
 const JobBoard: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<string>('all');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [jobsPerPage] = useState<number>(9); // 3x3 grid
+
+
+  const navigate =  useNavigate()
 
   useEffect(() => {
     // Simulate API call
@@ -121,6 +40,11 @@ const JobBoard: React.FC = () => {
 
     fetchJobs();
   }, []);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -168,6 +92,67 @@ const JobBoard: React.FC = () => {
     return job.employment_type.toLowerCase() === filter.toLowerCase();
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+  const startIndex = (currentPage - 1) * jobsPerPage;
+  const endIndex = startIndex + jobsPerPage;
+  const currentJobs = filteredJobs.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of job listings
+    document.querySelector('.job-grid')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      goToPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -184,7 +169,7 @@ const JobBoard: React.FC = () => {
                       <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                     </div>
                   </div>
-                  <div className="h-4 bg--200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
                   <div className="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
                   <div className="flex flex-wrap gap-2 mb-4">
                     <div className="h-6 bg-gray-200 rounded-full w-16"></div>
@@ -230,15 +215,13 @@ const JobBoard: React.FC = () => {
         {/* Stats */}
         <div className="text-center mb-8">
           <p className="text-gray-600">
-            Showing <span className="font-semibold text-primary-600">{filteredJobs.length}</span> job opportunities
+            Showing <span className="font-semibold text-primary-600">{startIndex + 1}-{Math.min(endIndex, filteredJobs.length)}</span> of <span className="font-semibold text-primary-600">{filteredJobs.length}</span> job opportunities
           </p>
         </div>
 
         {/* Job Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredJobs.map((job) => {
-            
-
+        <div className="job-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {currentJobs.map((job) => {
             return (
               <div
                 key={job.id}
@@ -262,10 +245,7 @@ const JobBoard: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Job Description */}
-                  <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
-                    {job.description}
-                  </p>
+              
 
                   {/* Job Details */}
                   <div className="space-y-3 mb-6">
@@ -316,11 +296,19 @@ const JobBoard: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Apply Button */}
+                  <div className="flex gap-2">
+                    {/* Apply Button */}
                   <button className="w-full bg-gradient-to-r from-primary-600 to-red-600 text-white font-medium py-3 px-4 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group-hover:shadow-lg">
                     <span>Apply Now</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
+                  <button 
+                  onClick={()=> navigate(`${job.id}`)}
+                  className="w-full border border-primary-300  hover:bg-primary-50 text-primary-600  font-medium py-3 px-4 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group-hover:shadow-lg">
+                    <span> Read More</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                  </div>
                 </div>
               </div>
             );
@@ -336,12 +324,66 @@ const JobBoard: React.FC = () => {
           </div>
         )}
 
-        {/* Load More Button */}
-        {filteredJobs.length > 0 && (
-          <div className="text-center mt-12">
-            <button className="bg-white text-gray-700 font-medium py-3 px-8 rounded-xl border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm">
-              Load More Jobs
-            </button>
+        {/* Pagination */}
+        {filteredJobs.length > 0 && totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Page Info */}
+            <div className="text-sm text-gray-600">
+              Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center gap-2">
+              {/* Previous Button */}
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  currentPage === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {getPageNumbers().map((page, index) => (
+                  <React.Fragment key={index}>
+                    {page === '...' ? (
+                      <span className="px-3 py-2 text-gray-400">...</span>
+                    ) : (
+                      <button
+                        onClick={() => goToPage(page as number)}
+                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${
+                          currentPage === page
+                            ? 'bg-primary-600 text-white shadow-lg'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  currentPage === totalPages
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
       </div>
