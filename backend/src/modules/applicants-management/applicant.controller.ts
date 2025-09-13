@@ -73,6 +73,26 @@ export class ApplicantController {
       throw error;
     }
   }
+  @Put('/status/:id')
+  async updateStage(
+    @UploadedFiles()
+    files: {
+      cvFile?: Express.Multer.File[];
+    },
+    @Param('id') id: string,
+    @Body() body: any) {
+    try {
+
+      if (files?.cvFile?.[0]?.filename) {
+        body.cvUrl = `/uploads/cv_files/${files.cvFile[0].filename}`;
+      }
+      const applicant =  await this.applicantService.updateStage(id, body);
+      this.applicantGateway.emitApplicantUpdated(applicant);
+      return applicant
+    } catch (error) {
+      throw error;
+    }
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
