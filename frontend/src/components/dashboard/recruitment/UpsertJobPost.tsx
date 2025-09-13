@@ -15,6 +15,8 @@ import {
   Building
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import ReactQuill from 'react-quill-new'; // Import ReactQuill
+import 'react-quill-new/dist/quill.snow.css'; // Import Quill styles
 import jobService, { type CreateJobInput, type UpdateJobInput } from '../../../services/jobService';
 import Swal from 'sweetalert2';
 
@@ -40,7 +42,6 @@ interface Job {
   employment_type: EmploymentType;
   experience_level: ExperienceLevel;
   industry?: Industry;
-
   skills_required?: string[];
   status?: JobStatus;
   posted_at?: string;
@@ -56,7 +57,6 @@ interface JobFormData {
   employment_type: EmploymentType;
   experience_level: ExperienceLevel;
   industry: Industry;
-  
   skills_required: string[];
   status: JobStatus;
   posted_at: string;
@@ -88,7 +88,6 @@ const JobForm: React.FC<{
     employment_type: 'FULL_TIME',
     experience_level: 'ENTRY',
     industry: 'Technology',
-    
     skills_required: [],
     status: 'DRAFT',
     posted_at: new Date().toISOString().split('T')[0],
@@ -126,7 +125,6 @@ const JobForm: React.FC<{
           employment_type: job.employment_type as EmploymentType,
           experience_level: job.experience_level as ExperienceLevel,
           industry: (job.industry as Industry) || 'Technology',
-          
           skills_required: job.skills_required || [],
           status: (job.status as JobStatus) || 'DRAFT',
           posted_at: job.posted_at ? new Date(job.posted_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
@@ -173,20 +171,17 @@ const JobForm: React.FC<{
         if (!formData.title.trim()) newErrors.title = 'Job title is required';
         else if (formData.title.length < 3) newErrors.title = 'Job title must be at least 3 characters';
         else if (formData.title.length > 100) newErrors.title = 'Job title must not exceed 100 characters';
-
-
         if (!formData.location.trim()) newErrors.location = 'Location is required';
         if (!formData.employment_type) newErrors.employment_type = 'Employment type is required';
         if (!formData.experience_level) newErrors.experience_level = 'Experience level is required';
         break;
 
       case 1: // Requirements
-       
-
-        
-        if (!formData.description.trim()) newErrors.description = 'Job description is required';
-        else if (formData.description.length < 10) newErrors.description = 'Job description must be at least 50 characters';
-        else if (formData.description.length > 5000) newErrors.description = 'Job description must not exceed 5000 characters';
+        // Strip HTML tags for length validation
+        const strippedDescription = formData.description.replace(/<[^>]+>/g, '');
+        if (!strippedDescription.trim()) newErrors.description = 'Job description is required';
+        else if (strippedDescription.length < 10) newErrors.description = 'Job description must be at least 50 characters';
+        else if (strippedDescription.length > 5000) newErrors.description = 'Job description must not exceed 5000 characters';
         break;
 
       case 2: // Settings
@@ -194,7 +189,6 @@ const JobForm: React.FC<{
         if (formData.expiry_date && new Date(formData.expiry_date) <= new Date(formData.posted_at)) {
           newErrors.expiry_date = 'Expiry date must be after posted date';
         }
-       
         break;
     }
 
@@ -221,13 +215,13 @@ const JobForm: React.FC<{
       const submitData: CreateJobInput | UpdateJobInput = {
         ...formData,
         title: formData.title,
-        description: formData.description,
+        description: formData.description, // Rich text HTML content
         location: formData.location,
         employment_type: formData.employment_type,
         experience_level: formData.experience_level,
         industry: formData.industry,
-       posted_at: formData.posted_at ? new Date(formData.posted_at).toISOString() : new Date().toISOString(),
-          expiry_date: formData.expiry_date ? new Date(formData.expiry_date).toISOString() : '',
+        posted_at: formData.posted_at ? new Date(formData.posted_at).toISOString() : new Date().toISOString(),
+        expiry_date: formData.expiry_date ? new Date(formData.expiry_date).toISOString() : '',
         skills_required: formData.skills_required,
         status: formData.status,
       };
@@ -250,6 +244,17 @@ const JobForm: React.FC<{
     }
   };
 
+  // Quill modules configuration for toolbar
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline'],
+      [{'list': 'ordered'}, {'list': 'bullet'}],
+      ['link'],
+      ['clean']
+    ],
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0: // Basic Info
@@ -268,8 +273,6 @@ const JobForm: React.FC<{
               />
               {errors.title && <p className="text-sm text-red-600 mt-1">{errors.title}</p>}
             </div>
-
-           
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -372,9 +375,6 @@ const JobForm: React.FC<{
                 </button>
               </div>
 
-
-              
-              
               {formData.skills_required.length === 0 ? (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                   <FileText className="mx-auto h-12 w-12 text-gray-400 mb-3" />
@@ -404,21 +404,22 @@ const JobForm: React.FC<{
               {errors.skills_required && <p className="text-sm text-red-600 mt-1">{errors.skills_required}</p>}
             </div>
 
-             <div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Job Description <span className="text-red-500">*</span>
               </label>
-              <textarea
+              <ReactQuill
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={8}
+                onChange={(value) => handleInputChange('description', value)}
+                modules={quillModules}
                 placeholder="Provide a detailed description of the job role, responsibilities, and what makes this opportunity unique..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="border border-gray-300 rounded-md"
+                theme="snow"
               />
               <div className="flex justify-between items-center mt-1">
                 {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
                 <p className="text-xs text-gray-500 ml-auto">
-                  {formData.description.length}/5000 characters
+                  {formData.description.replace(/<[^>]+>/g, '').length}/5000 characters
                 </p>
               </div>
             </div>
@@ -429,8 +430,6 @@ const JobForm: React.FC<{
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -499,7 +498,6 @@ const JobForm: React.FC<{
                   <p><span className="font-medium">Employment Type:</span> {formData.employment_type.replace('_', ' ')}</p>
                   <p><span className="font-medium">Experience Level:</span> {formData.experience_level}</p>
                   <p><span className="font-medium">Status:</span> {formData.status}</p>
-                  
                   <p><span className="font-medium">Posted Date:</span> {formData.posted_at}</p>
                   {formData.expiry_date && <p><span className="font-medium">Expiry Date:</span> {formData.expiry_date}</p>}
                 </div>
@@ -507,9 +505,7 @@ const JobForm: React.FC<{
 
               <div>
                 <h4 className="font-medium mb-2">Description</h4>
-                <div className="bg-white p-4 rounded border text-sm whitespace-pre-wrap">
-                  {formData.description}
-                </div>
+                <div className="bg-white p-4 rounded border text-sm" dangerouslySetInnerHTML={{ __html: formData.description }} />
               </div>
 
               <div>
@@ -553,7 +549,7 @@ const JobForm: React.FC<{
   }
 
   return (
-    <div className="w-full mx-auto  bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="w-full mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="bg-primary-600 px-6 py-4">
         <h1 className="text-xl font-semibold text-white">
           {(jobId || paramsJobId) ? 'Update Job Post' : 'Create New Job Post'}
@@ -654,32 +650,28 @@ const JobForm: React.FC<{
 const UpserJobPost: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(true);
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
-  const navigate =  useNavigate()
+  const navigate = useNavigate();
 
-
-
-const handleSuccess = (response: Job | null) => {
-  if (response) {
-    // Success case
-    Swal.fire({
-      title: 'Success!',
-      text: 'The job has been processed successfully.',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    }).then(() => {
-      setShowForm(false);
-      navigate('/admin/dashboard/recruiting-management/', { replace: true });
-    });
-  } else {
-    // Failure case
-    Swal.fire({
-      title: 'Error!',
-      text: 'Failed to process the job. Please try again.',
-      icon: 'error',
-      confirmButtonText: 'OK'
-    });
-  }
-};
+  const handleSuccess = (response: Job | null) => {
+    if (response) {
+      Swal.fire({
+        title: 'Success!',
+        text: 'The job has been processed successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        setShowForm(false);
+        navigate('/admin/dashboard/recruiting-management/', { replace: true });
+      });
+    } else {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to process the job. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  };
 
   const handleCancel = () => {
     setShowForm(false);
@@ -705,21 +697,19 @@ const handleSuccess = (response: Job | null) => {
               Your job posting has been saved and is now ready for candidates to view.
             </p>
             <div className="space-x-4">
-            {
-                !editingJobId && (
-                      <button
-                onClick={() => {
-                  setEditingJobId(null);
-                  setShowForm(true);
-                }}
-                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
-              >
-                Create Another Job Post
-              </button>
-                )
-            }
+              {!editingJobId && (
                 <button
-                onClick={() =>  navigate('/admin/dashboard/recruiting-management/',{replace:true})}
+                  onClick={() => {
+                    setEditingJobId(null);
+                    setShowForm(true);
+                  }}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+                >
+                  Create Another Job Post
+                </button>
+              )}
+              <button
+                onClick={() => navigate('/admin/dashboard/recruiting-management/', { replace: true })}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
               >
                 Go Back to Recruitment Management Page

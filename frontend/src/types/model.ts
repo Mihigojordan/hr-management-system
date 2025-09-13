@@ -4,6 +4,7 @@
 export const MARITAL_STATUS = ['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED'] as const;
 export const EMPLOYEE_STATUS = ['ACTIVE', 'TERMINATED', 'RESIGNED', 'PROBATION'] as const;
 export const GENDERS = ['MALE', 'FEMALE', 'OTHER'] as const;
+export type ContractType = 'PERMANENT' | 'TEMPORARY' | 'INTERNSHIP';
 
 export type MaritalStatus = typeof MARITAL_STATUS[number];
 export type EmployeeStatus = typeof EMPLOYEE_STATUS[number];
@@ -48,7 +49,7 @@ export interface EmployeeData {
 // Interface for employee (includes additional fields like id and timestamps)
 export interface Employee extends EmployeeData {
     id: string;
-    contracts:Contract[];
+    contract?: Contract; // Assuming one-to-one relationship for simplicity
     created_at?: string; // ISO string
     updated_at?: string; // ISO string
 }
@@ -58,31 +59,28 @@ export interface Employee extends EmployeeData {
 // 2. ======/=> CONTRACT <=/========
 
 // Interface for contract data (used for create/update payloads)
+// Contract data for creating/updating
 export interface ContractData {
-     id: string;
-    employeeId: string; // Allow string for form inputs, converted to number in API calls if needed
-    departmentId: string; // Allow string for form inputs, converted to number in API calls if needed
-    contractType: string;
-    startDate: string; // ISO string
-    endDate?: string; // ISO string, optional
-    salary: string;
-    currency?: string; // Optional
-    status?: "ACTIVE" | "PENDING" | "EXPIRED" | "TERMINATED" | string; // Optional, with specific values
+    contractType: ContractType;
+    startDate: string;           // ISO string
+    endDate?: string;            // optional ISO string
+    salary: number;              // numeric value
+    currency?: string;           // optional, default RWF
+    benefits?: string;           // optional
+    workingHours?: string;       // optional
+    probationPeriod?: string;    // optional
+    terminationConditions?: string; // optional
+    terms?: string;              // optional
+    employeeId: string;      // array of employee IDs assigned to this contract
 }
 
-export interface Contract {
+// Contract interface for data coming from backend
+export interface Contract extends ContractData {
     id: string;
-    employeeId: string;
-    departmentId: string;
-    contractType:  "PERMANENT" | "PROBATION" | "TEMPORARY" | "INTERNSHIP" | string;
-    startDate: string;
-    endDate?: string;
-    salary: string;
-    currency?: string;
-    status?: "ACTIVE" | "PENDING" | "EXPIRED" | "TERMINATED" | string; // Optional, with specific values
     createdAt?: string;
     updatedAt?: string;
 }
+
 
 
 
@@ -92,7 +90,7 @@ export interface Contract {
 
 // Interface for Job
 export interface Job {
-  id: number;
+  id: string;
   title: string;
   description: string;
   location: string;
@@ -127,8 +125,8 @@ type ApplicationStage =
 
 
 export interface Applicant {
-  id: number;
-  jobId: number;
+  id: string;
+  jobId: string;
   name: string;
   email: string;
   phone?: string;

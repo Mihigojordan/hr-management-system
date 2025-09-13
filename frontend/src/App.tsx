@@ -1,6 +1,8 @@
 import { type FC} from 'react';
 import { RouterProvider} from 'react-router-dom';
 import routes from './router';
+import { SocketProvider } from './context/SocketContext';
+import { API_URL } from './api/api';
 
 /**
  * Main App component
@@ -9,7 +11,9 @@ import routes from './router';
 const App: FC = () => {
   return (
     <>
-      <RouterProvider router={routes} />
+      <SocketProvider serverUrl={API_URL} >
+        <RouterProvider router={routes} />
+      </SocketProvider>
     </>
   );
 };
