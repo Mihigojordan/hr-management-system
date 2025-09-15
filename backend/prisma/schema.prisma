@@ -22,6 +22,8 @@ model Admin {
   isLocked   Boolean? @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  Activity Activity[]
 }
 
 model Department {
@@ -173,3 +175,16 @@ model Applicant {
   created_at      DateTime          @default(now())
   updated_at      DateTime          @updatedAt 
 }
+
+
+model Activity {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  adminId     String   // must match Admin.id type
+  admin       Admin    @relation(fields: [adminId], references: [id])
+}
+
