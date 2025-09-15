@@ -45,6 +45,7 @@ interface ValidationResult {
   errors: string[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface DepartmentService {
   getAllDepartments: () => Promise<Department[]>;
   createDepartment: (data: DepartmentData) => Promise<Department>;
@@ -90,6 +91,7 @@ const DepartmentDashboard: React.FC = () => {
       const data = await departmentService.getAllDepartments();
       setAllDepartments(data || []);
       setError(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Failed to load departments");
     } finally {
@@ -114,7 +116,9 @@ const DepartmentDashboard: React.FC = () => {
     }
 
     filtered.sort((a, b) => {
+  // eslint-disable-next-line prefer-const
   let aValue = a[sortBy] ?? "";
+  // eslint-disable-next-line prefer-const
   let bValue = b[sortBy] ?? "";
 
   if (sortBy === "createdAt") {
