@@ -18,10 +18,20 @@ model Admin {
   id         String   @id @unique @default(uuid())
   adminName  String?
   adminEmail String?  @unique
+  phone     String?
   password   String?
+  profileImage  String?
+  status       AdminStatus    @default(ACTIVE)
+  google_id    String?
+  is2FA   Boolean? @default(false)
   isLocked   Boolean? @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+enum AdminStatus{
+    ACTIVE
+    INACTIVE
 }
 
 model Department {
@@ -172,4 +182,24 @@ model Applicant {
 
   created_at      DateTime          @default(now())
   updated_at      DateTime          @updatedAt 
+}
+
+
+model Client {
+  id           String       @id @default(uuid())
+  firstname    String
+  lastname     String
+  email        String  @unique
+  phone        String?
+  address      String?
+  status       ClientStatus    @default(ACTIVE)
+  profileImage String? // store URL or file path
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+
+enum ClientStatus{
+    ACTIVE
+    INACTIVE
 }

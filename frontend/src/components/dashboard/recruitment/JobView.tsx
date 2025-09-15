@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -53,23 +54,22 @@ const JobView: React.FC = () => {
   const [applicantsLoading, setApplicantsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullJobDescription, setShowFullJobDescription] = useState<boolean>(false);
-
   // Pagination for applicants
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(10);
-
   // Operation states
   const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
   const [operationLoading, setOperationLoading] = useState<boolean>(false);
   const [actionConfirm, setActionConfirm] = useState<{
     applicant: Applicant;
     action: "hire" | "reject";
+    start_date?: string; // Added for hire action
   } | null>(null);
 
   // Filter applicants based on search term
   const filteredApplicants = useMemo(() => {
-    if (!job?.applicants ) return [];
-    if (!applicants ) return [];
+    if (!job?.applicants) return [];
+    if (!applicants) return [];
     if (!searchTerm.trim()) return job.applicants;
 
     return applicants.filter((applicant) =>
@@ -99,7 +99,6 @@ const JobView: React.FC = () => {
   });
 
   useSocketEvent("applicantUpdated", (updatedApplicant: Applicant) => {
-    
     if (updatedApplicant.jobId === id) {
       setApplicants((prev) =>
         prev.map((app) => (app.id === updatedApplicant.id ? updatedApplicant : app))
@@ -171,7 +170,6 @@ const JobView: React.FC = () => {
       try {
         setOperationLoading(true);
         await jobService.deleteJob(id!);
-
         await Swal.fire("Deleted!", "Job deleted successfully.", "success");
         navigate("/admin/dashboard/recruiting-management");
       } catch (err: any) {
@@ -182,17 +180,19 @@ const JobView: React.FC = () => {
     }
   };
 
-  const handleApplicantAction = async (applicant: Applicant, action: "hire" | "reject") => {
+  const handleApplicantAction = async (applicant: Applicant, action: "hire" | "reject", start_date?: string) => {
     try {
       setOperationLoading(true);
       setActionConfirm(null);
 
       const newStage = action === "hire" ? "HIRED" : "REJECTED";
-      await applicantService.updateApplicantStage(applicant.id, { stage: newStage });
+      // Include start_date only for hire action
+      const payload = action === "hire" ? { stage: newStage, start_date } : { stage: newStage };
+      await applicantService.updateApplicantStage(applicant.id, payload);
 
       setApplicants((prev) =>
         prev.map((app) =>
-          app.id === applicant.id ? { ...app, stage: newStage } : app
+          app.id === applicant.id ? { ...app, stage: newStage, start_date } : app
         )
       );
       setJob((prev) =>
@@ -200,7 +200,7 @@ const JobView: React.FC = () => {
           ? {
               ...prev,
               applicants: prev.applicants?.map((app) =>
-                app.id === applicant.id ? { ...app, stage: newStage } : app
+                app.id === applicant.id ? { ...app, stage: newStage, start_date } : app
               ),
             }
           : prev
@@ -630,64 +630,63 @@ const JobView: React.FC = () => {
                           <span className="font-medium text-gray-900 text-sm sm:text-base">
                             {applicant.name}
                           </span>
-                         
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden md:table-cell">
-                          <div className="flex flex-col space-y-1">
-                            <div className="flex items-center">
-                              <Mail className="w-4 h-4 text-gray-400 mr-1" />
-                              <span className="text-xs">{applicant.email}</span>
-                            </div>
-                            {applicant.phone && (
-                              <div className="flex items-center">
-                                <Phone className="w-4 h-4 text-gray-400 mr-1" />
-                                <span className="text-xs">{applicant.phone}</span>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden lg:table-cell">
-                          {applicant.experienceYears ? `${applicant.experienceYears} years` : "Not specified"}
-                        </td>
-                        <td className="py-4 px-4 sm:px-6">{getStageBadge(applicant.stage)}</td>
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden md:table-cell">
+                        <div className="flex flex-col space-y-1">
                           <div className="flex items-center">
-                            <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                            {formatDate(applicant.created_at)}
+                            <Mail className="w-4 h-4 text-gray-400 mr-1" />
+                            <span className="text-xs">{applicant.email}</span>
                           </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6">
-                          <div className="flex items-center justify-end space-x-2">
-                            <button
-                              onClick={() => handleViewApplicant(applicant)}
-                              className="text-gray-400 hover:text-primary-600 transition-colors"
-                              title="View Details"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            {applicant.stage !== "HIRED" && applicant.stage !== "REJECTED" && (
-                              <>
-                                <button
-                                  onClick={() => setActionConfirm({ applicant, action: "hire" })}
-                                  disabled={operationLoading}
-                                  className="text-gray-400 hover:text-green-600 transition-colors disabled:opacity-50"
-                                  title="Hire"
-                                >
-                                  <UserCheck className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => setActionConfirm({ applicant, action: "reject" })}
-                                  disabled={operationLoading}
-                                  className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                                  title="Reject"
-                                >
-                                  <UserX className="w-4 h-4" />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
+                          {applicant.phone && (
+                            <div className="flex items-center">
+                              <Phone className="w-4 h-4 text-gray-400 mr-1" />
+                              <span className="text-xs">{applicant.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden lg:table-cell">
+                        {applicant.experienceYears ? `${applicant.experienceYears} years` : "Not specified"}
+                      </td>
+                      <td className="py-4 px-4 sm:px-6">{getStageBadge(applicant.stage)}</td>
+                      <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                          {formatDate(applicant.created_at)}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 sm:px-6">
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => handleViewApplicant(applicant)}
+                            className="text-gray-400 hover:text-primary-600 transition-colors"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          {applicant.stage !== "HIRED" && applicant.stage !== "REJECTED" && (
+                            <>
+                              <button
+                                onClick={() => setActionConfirm({ applicant, action: "hire" })}
+                                disabled={operationLoading}
+                                className="text-gray-400 hover:text-green-600 transition-colors disabled:opacity-50"
+                                title="Hire"
+                              >
+                                <UserCheck className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setActionConfirm({ applicant, action: "reject" })}
+                                disabled={operationLoading}
+                                className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                title="Reject"
+                              >
+                                <UserX className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -772,6 +771,25 @@ const JobView: React.FC = () => {
                 </span>
                 .
               </p>
+              {actionConfirm.action === "hire" && (
+                <div className="mt-4">
+                  <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    id="start_date"
+                    required
+                      min={new Date().toISOString().split('T')[0]} // min date = today
+                    onChange={(e) =>
+                      setActionConfirm((prev) =>
+                        prev ? { ...prev, start_date: e.target.value } : prev
+                      )
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+              )}
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
@@ -781,8 +799,14 @@ const JobView: React.FC = () => {
                 Cancel
               </button>
               <button
-                onClick={() => handleApplicantAction(actionConfirm.applicant, actionConfirm.action)}
-                disabled={operationLoading}
+                onClick={() =>
+                  handleApplicantAction(
+                    actionConfirm.applicant,
+                    actionConfirm.action,
+                    actionConfirm.start_date
+                  )
+                }
+                disabled={operationLoading || (actionConfirm.action === "hire" && !actionConfirm.start_date)}
                 className={`w-full sm:w-auto px-4 py-2 ${
                   actionConfirm.action === "hire"
                     ? "bg-green-500 hover:bg-green-600 text-white"
