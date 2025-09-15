@@ -90,7 +90,15 @@ export const EmployeeFileFields = [
 export const ApplicantFileFields = [
   { name: 'cvFile', maxCount:1 },
 ]
+export const ClientFileFields = [
+  { name: 'profileImg', maxCount:1 },
+]
+export const AdminFileFields = [
+  { name: 'profileImg', maxCount:1 },
+]
 
 
 export const EmployeeUploadConfig = createUnifiedUploadConfig()
 export const ApplicantUploadConfig = createUnifiedUploadConfig()
+export const ClientUploadConfig = createUnifiedUploadConfig()
+export const AdminUploadConfig = createUnifiedUploadConfig()

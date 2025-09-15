@@ -13,7 +13,6 @@ import {
   GraduationCap,
   Star,
   Download,
- 
   Building,
   Users,
   ArrowLeft,
@@ -21,6 +20,12 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  UserCheck,
+  UserX,
+  X,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
 } from "lucide-react";
 import DOMPurify from "dompurify";
 import applicantService from "../../../services/applicantService";
@@ -63,6 +68,12 @@ interface Applicant {
   stage: ApplicationStage;
   created_at?: string;
   updated_at?: string;
+  start_date?: string;
+}
+
+interface OperationStatus {
+  type: "success" | "error" | "info";
+  message: string;
 }
 
 // Helper function to strip HTML tags for truncation
@@ -85,6 +96,13 @@ const ApplicantView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sidebarCurrentPage, setSidebarCurrentPage] = useState<number>(1);
   const [sidebarItemsPerPage] = useState<number>(6);
+  const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
+  const [operationLoading, setOperationLoading] = useState<boolean>(false);
+  const [actionConfirm, setActionConfirm] = useState<{
+    applicant: Applicant;
+    action: "hire" | "reject";
+    start_date?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (jobId) {
@@ -129,8 +147,6 @@ const ApplicantView: React.FC = () => {
     }
   });
 
-
-
   const loadApplicants = async () => {
     try {
       setLoading(true);
@@ -152,6 +168,42 @@ const ApplicantView: React.FC = () => {
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const showOperationStatus = (type: OperationStatus["type"], message: string, duration: number = 3000) => {
+    setOperationStatus({ type, message });
+    setTimeout(() => setOperationStatus(null), duration);
+  };
+
+  const handleApplicantAction = async (applicant: Applicant, action: "hire" | "reject", start_date?: string) => {
+    try {
+      setOperationLoading(true);
+      setActionConfirm(null);
+
+      const newStage = action === "hire" ? "HIRED" : "REJECTED";
+      const payload = action === "hire" ? { stage: newStage, start_date } : { stage: newStage };
+      await applicantService.updateApplicantStage(applicant.id, payload);
+
+      setApplicants((prev) =>
+        prev.map((app) =>
+          app.id === applicant.id ? { ...app, stage: newStage, start_date } : app
+        )
+      );
+      if (selectedApplicant?.id === applicant.id) {
+        setSelectedApplicant((prev) =>
+          prev ? { ...prev, stage: newStage, start_date } : prev
+        );
+      }
+
+      showOperationStatus(
+        "success",
+        `${applicant.name} has been ${action === "hire" ? "hired" : "rejected"} successfully!`
+      );
+    } catch (err: any) {
+      showOperationStatus("error", err.message || `Failed to ${action} applicant`);
+    } finally {
+      setOperationLoading(false);
     }
   };
 
@@ -212,7 +264,7 @@ const ApplicantView: React.FC = () => {
     );
   }, [applicants, searchTerm]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (applicants.length > 0) {
       if (applicantId) {
         const foundApplicant = applicants.find((app) => app.id === applicantId);
@@ -408,6 +460,26 @@ const ApplicantView: React.FC = () => {
                   </div>
                 </div>
               </div>
+              {selectedApplicant.stage !== "HIRED" && selectedApplicant.stage !== "REJECTED" && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setActionConfirm({ applicant: selectedApplicant, action: "hire" })}
+                    disabled={operationLoading}
+                    className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                    <span>Hire</span>
+                  </button>
+                  <button
+                    onClick={() => setActionConfirm({ applicant: selectedApplicant, action: "reject" })}
+                    disabled={operationLoading}
+                    className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <UserX className="w-4 h-4" />
+                    <span>Reject</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -463,6 +535,12 @@ const ApplicantView: React.FC = () => {
                   <Clock className="w-5 h-5 text-gray-400 mr-3" />
                   <span className="text-sm text-gray-900">Updated {formatDate(selectedApplicant.updated_at)}</span>
                 </div>
+                {selectedApplicant.stage === "HIRED" && selectedApplicant.start_date && (
+                  <div className="flex items-center">
+                    <Calendar className="w-5 h-5 text-gray-400 mr-3" />
+                    <span className="text-sm text-gray-900">Start Date {formatDate(selectedApplicant.start_date)}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -600,6 +678,123 @@ const ApplicantView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Operation Status Toast */}
+      {operationStatus && (
+        <div className="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-in-out">
+          <div
+            className={`flex items-center space-x-3 px-4 py-3 rounded-lg shadow-lg border ${
+              operationStatus.type === "success"
+                ? "bg-green-50 border-green-200 text-green-800"
+                : operationStatus.type === "error"
+                ? "bg-red-50 border-red-200 text-red-800"
+                : "bg-primary-50 border-primary-200 text-primary-800"
+            }`}
+          >
+            {operationStatus.type === "success" && <CheckCircle className="w-5 h-5 text-green-600" />}
+            {operationStatus.type === "error" && <XCircle className="w-5 h-5 text-red-600" />}
+            {operationStatus.type === "info" && <AlertCircle className="w-5 h-5 text-primary-600" />}
+            <span className="font-medium">{operationStatus.message}</span>
+            <button onClick={() => setOperationStatus(null)} className="ml-2 hover:opacity-70">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Operation Loading Overlay */}
+      {operationLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40">
+          <div className="bg-white rounded-lg p-6 shadow-xl">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-gray-700 font-medium">Processing...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Action Confirmation Modal */}
+      {actionConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center space-x-3 mb-4">
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  actionConfirm.action === "hire" ? "bg-green-100" : "bg-red-100"
+                }`}
+              >
+                {actionConfirm.action === "hire" ? (
+                  <UserCheck className="w-6 h-6 text-green-600" />
+                ) : (
+                  <UserX className="w-6 h-6 text-red-600" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {actionConfirm.action === "hire" ? "Hire" : "Reject"} Applicant
+                </h3>
+                <p className="text-sm text-gray-500">This action will update the applicant's status</p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-gray-700">
+                Are you sure you want to {actionConfirm.action}{" "}
+                <span className="font-semibold">{actionConfirm.applicant.name}</span>? This will
+                change their application status to{" "}
+                <span className="font-semibold">
+                  {actionConfirm.action === "hire" ? "HIRED" : "REJECTED"}
+                </span>
+                .
+              </p>
+              {actionConfirm.action === "hire" && (
+                <div className="mt-4">
+                  <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date
+                  </label>
+                 <input
+  type="date"
+  id="start_date"
+  required
+  min={new Date().toISOString().split('T')[0]} // min date = today
+  onChange={(e) =>
+    setActionConfirm((prev) =>
+      prev ? { ...prev, start_date: e.target.value } : prev
+    )
+  }
+  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+/>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+              <button
+                onClick={() => setActionConfirm(null)}
+                className="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>
+                  handleApplicantAction(
+                    actionConfirm.applicant,
+                    actionConfirm.action,
+                    actionConfirm.start_date
+                  )
+                }
+                disabled={operationLoading || (actionConfirm.action === "hire" && !actionConfirm.start_date)}
+                className={`w-full sm:w-auto px-4 py-2 ${
+                  actionConfirm.action === "hire"
+                    ? "bg-green-500 hover:bg-green-600 text-white"
+                    : "bg-red-500 hover:bg-red-600 text-white"
+                } rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {actionConfirm.action === "hire" ? "Hire" : "Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

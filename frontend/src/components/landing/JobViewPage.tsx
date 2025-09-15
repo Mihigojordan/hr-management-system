@@ -36,6 +36,9 @@ const JobDetailView: React.FC = () => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  // Current date and time (September 14, 2025, 12:08 AM CAT)
+  const currentDate = new Date('2025-09-14T00:08:00+02:00');
+
   useEffect(() => {
     const fetchJob = async () => {
       if (!id) {
@@ -77,7 +80,7 @@ const JobDetailView: React.FC = () => {
 
   const getTimeAgo = (dateString: string): string => {
     const date = new Date(dateString);
-    const now = new Date();
+    const now = currentDate;
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
@@ -88,13 +91,13 @@ const JobDetailView: React.FC = () => {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
-  const getDaysLeft = (expiryDate: string): string => {
+  const getDaysLeft = (expiryDate?: string): string => {
+    if (!expiryDate) return 'Unknown';
     const expiry = new Date(expiryDate);
-    const now = new Date();
-    const diffTime = expiry.getTime() - now.getTime();
+    const diffTime = expiry.getTime() - currentDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (isNaN(diffDays) || !expiryDate) return 'Unknown';
+    if (isNaN(diffDays)) return 'Unknown';
     if (diffDays < 0) return 'Expired';
     if (diffDays === 0) return 'Today';
     return `${diffDays} day${diffDays === 1 ? '' : 's'} left`;
@@ -117,11 +120,11 @@ const JobDetailView: React.FC = () => {
 
   const getExperienceLevelColor = (level: string): string => {
     switch (level.toLowerCase()) {
-      case 'entry_level':
+      case 'entry':
         return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'mid_level':
+      case 'mid':
         return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'senior_level':
+      case 'senior':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -158,6 +161,12 @@ const JobDetailView: React.FC = () => {
   const toggleDescription = () => {
     setIsDescriptionExpanded(!isDescriptionExpanded);
   };
+
+  // Check if job is closed or expired
+  const isJobUnavailable = job && (
+    job.status === 'CLOSED' || 
+    (job.expiry_date && new Date(job.expiry_date) < currentDate)
+  );
 
   if (loading) {
     return (
@@ -212,10 +221,51 @@ const JobDetailView: React.FC = () => {
           <p className="text-gray-600 mb-6">{error || 'The job you are looking for does not exist.'}</p>
           <button
             onClick={() => window.history.back()}
-            className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+            className="bg Primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors"
           >
             Go Back
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isJobUnavailable) {
+    return (
+      <div className="min-h-[70vh] overflow-y-auto bg-gray-50">
+        <div className="border-b border-gray-200">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-primary-600 rounded-lg">
+                    <Briefcase className="w-6 h-6 text-white" />
+                  </div>
+                  <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
+                </div>
+                <p className="text-gray-600 mt-1">Aby Hr Management</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center min-h-96 p-4">
+          <div className="text-center max-w-md mx-auto">
+            <div className="mb-6">
+              <AlertCircle className="w-16 sm:w-24 h-16 sm:h-24 text-red-300 mx-auto mb-4" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-4">Job Unavailable</h2>
+            <p className="text-gray-500 mb-6 leading-relaxed text-sm sm:text-base">
+              ⚠️ This job is {job.status === 'CLOSED' ? 'closed' : 'expired'} and is no longer accepting applications. Please explore other opportunities.
+            </p>
+            <button
+              onClick={() => window.history.back()}
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Go Back</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -283,7 +333,7 @@ const JobDetailView: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-blue-500" />
-                  <span>{getDaysLeft(job.expiry_date!)}</span>
+                  <span>{getDaysLeft(job.expiry_date)}</span>
                 </div>
                 {job.industry && (
                   <div className="flex items-center gap-2">
@@ -436,7 +486,7 @@ const JobDetailView: React.FC = () => {
                 <div>
                   <button
                     onClick={handleApply}
-                    disabled={isApplying || getDaysLeft(job.expiry_date!) === 'Expired'}
+                    disabled={isApplying || getDaysLeft(job.expiry_date) === 'Expired'}
                     className="w-full bg-gradient-to-r from-primary-600 to-red-600 text-white font-bold py-4 px-6 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4"
                   >
                     {isApplying ? (

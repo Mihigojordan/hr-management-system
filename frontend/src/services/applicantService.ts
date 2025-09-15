@@ -16,6 +16,7 @@ export interface Applicant {
   skills: string[];
   experienceYears?: number;
   education?:any;
+  start_date?:any;
   stage: ApplicationStage;
   created_at?: Date;
   updated_at?: Date;
@@ -147,7 +148,7 @@ class ApplicantService {
    * @param updateData - Data to update
    * @returns Updated applicant
    */
-  async updateApplicantStage(id: number | string, updateData: UpdateApplicantInput): Promise<Applicant> {
+  async updateApplicantStage(id: number | string, updateData: any): Promise<Applicant> {
     try {
       const response: AxiosResponse<Applicant> = await this.api.put(`/applicants/status/${id}`, updateData);
       return response.data;
