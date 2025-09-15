@@ -27,6 +27,8 @@ model Admin {
   isLocked   Boolean? @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  Activity Activity[]
 }
 
 enum AdminStatus{
@@ -203,3 +205,14 @@ enum ClientStatus{
     ACTIVE
     INACTIVE
 }
+model Activity {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  adminId     String   // must match Admin.id type
+  admin       Admin    @relation(fields: [adminId], references: [id])
+}
+

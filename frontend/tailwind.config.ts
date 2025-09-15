@@ -9,17 +9,17 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#fff3e6', // very light orange tint
+          50: '#fff3e6', 
           100: '#ffe0bf',
           200: '#ffc680',
           300: '#ffa94d',
-          400: '#ff8c1a', // strong orange
-          500: '#ff7300', // core brand orange
+          400: '#ff8c1a',
+          500: '#ff7300',
           600: '#e66300',
           700: '#cc5500',
           800: '#b34700',
-          900: '#802f00', // dark orange
-          950: '#4d1b00', // deepest orange-brown
+          900: '#802f00',
+          950: '#4d1b00',
         },
         red: {
           50: '#fef2f2',
@@ -34,6 +34,10 @@ module.exports = {
           900: '#7f1d1d',
           950: '#450a0a'
         }
+      },
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+        roboto: ['Roboto', 'sans-serif'],
       },
       animation: {
         'float': 'float 3s ease-in-out infinite',

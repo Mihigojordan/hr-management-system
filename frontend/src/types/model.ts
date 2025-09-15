@@ -48,6 +48,7 @@ export interface EmployeeData {
 
 // Interface for employee (includes additional fields like id and timestamps)
 export interface Employee extends EmployeeData {
+    profile_image: string | undefined;
     id: string;
     contract?: Contract; // Assuming one-to-one relationship for simplicity
     created_at?: string; // ISO string

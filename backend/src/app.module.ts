@@ -10,6 +10,7 @@ import { ApplicantModule } from './modules/applicants-management/applicant.modul
 import { EmailModule } from './global/email/email.module';
 import { ClientModule } from './modules/client-management/client.module';
 
+import { ActivityModule } from './modules/activity-management/activity.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ClientModule } from './modules/client-management/client.module';
     ApplicantModule,
     EmailModule,
     ClientModule,
+    ActivityModule
   ],
   controllers: [AppController],
 })
