@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -8,14 +9,18 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
+import { OTPService } from 'src/global/otp/otp.service';
+import { EmailService } from 'src/global/email/email.service';
 
 @Injectable()
 export class AdminService {
   private emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtServices: JwtService
-  ) {}
+    private readonly jwtServices: JwtService,
+    private readonly otpService: OTPService,
+    private readonly email: EmailService,
+  ) { }
 
   async findAdminById(id: string) {
     try {
@@ -89,26 +94,66 @@ export class AdminService {
     }
   }
 
-  async adminLogin(data: { adminEmail: string; password: string }) {
-    try {
-      const { adminEmail, password } = data;
-     
-
-      const admin = await this.findAdminByEmail(adminEmail);
-
-      if (!admin) throw new UnauthorizedException('this admin doesnt exist');
-
-      const isMatch = await bcrypt.compare(password, admin.password ?? '');
-
-      if (!isMatch) throw new UnauthorizedException('Invalid credentials');
-
-      const token = this.jwtServices.sign({ id: admin.id });
-      return token;
-    } catch (error) {
-      console.error('error finding admin', error);
-      throw new Error(error.message);
-    }
+  async findAdminByLogin(login: string) {
+    const admin = await this.prisma.admin.findFirst({
+      where: { OR: [{ adminEmail: login }, { phone: login }] },
+    });
+    if (!admin) throw new UnauthorizedException('Admin not found');
+    return admin;
   }
+  async adminLogin(data: { identifier: string; password: string }) {
+    const { identifier, password } = data;
+    const admin = await this.findAdminByLogin(identifier);
+
+    const isPasswordValid = await bcrypt.compare(password, admin.password ?? '');
+    if (!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
+
+    // Step 2: Check if 2FA is enabled
+    if (admin.is2FA) {
+      const otp = await this.otpService.generateOTP(admin.id);
+
+      // Send OTP to the correct channel
+      if (admin.adminEmail === identifier) {
+        await this.email.sendEmail(
+          String(admin.adminEmail),
+          'Your OTP Code',
+          'User-Otp-notification',
+          {
+            firstname: admin.adminName,
+            otp: otp, // e.g., 6-digit code
+            validityMinutes: 5, // optional, e.g., 10 minutes
+            companyName: 'Aby HR',
+            year: new Date().getFullYear().toString(),
+          }
+        );
+
+        ;
+      }
+      //  else if (admin.phone === identifier) {
+      //   await this.otpService.sendOTPSMS(admin.phone, otp);
+      // }
+
+      return {
+        twoFARequired: true,
+        message: `OTP sent to your ${admin.adminEmail === identifier ? 'email' : 'phone'}`,
+        adminId: admin.id,
+      };
+    }
+
+    // Step 3: If 2FA is disabled, return JWT immediately
+    const token = this.jwtServices.sign({ id: admin.id });
+    return { token, twoFARequired: false, authenticated:true, message: 'Login successful' };
+  }
+
+  async verifyOTP(adminId: string, otp: string) {
+    await this.otpService.verifyOTP(adminId, otp);
+    const admin = await this.prisma.admin.findUnique({ where: { id: adminId } , });
+    if (!admin) throw new NotFoundException('Admin not found');
+
+    const token = this.jwtServices.sign({ id: admin.id });
+    return { token, admin, message: 'Login successful', authenticated: true };
+  }
+
 
   async lockAdmin(id: string) {
     try {
@@ -172,6 +217,70 @@ export class AdminService {
     }
   }
 
+
+  // admin.service.ts
+  async updateAdmin(
+    id: string,
+    data: {
+      adminName?: string;
+      adminEmail?: string;
+      password?: string;
+      profileImage?: string;
+      status?: 'ACTIVE' | 'INACTIVE';
+    },
+  ) {
+    try {
+      if (!id) throw new BadRequestException('Admin ID is required');
+
+      const existing = await this.findAdminById(id);
+      if (!existing) throw new NotFoundException('Admin not found');
+
+      // Prevent duplicate email
+      if (data.adminEmail) {
+        if (!this.emailRegex.test(data.adminEmail)) {
+          throw new BadRequestException('Invalid email format');
+        }
+        const emailExists = await this.prisma.admin.findFirst({
+          where: { adminEmail: data.adminEmail, NOT: { id } },
+        });
+        if (emailExists) throw new ConflictException('Email already taken');
+      }
+
+      // Hash password if provided
+
+      const updatedAdmin = await this.prisma.admin.update({
+        where: { id },
+        data,
+      });
+
+      return {
+        message: 'Admin updated successfully',
+        admin: updatedAdmin,
+      };
+    } catch (error) {
+      console.error('Error updating admin:', error);
+      throw new Error(error.message);
+    }
+  }
+
+  async deleteAdmin(id: string) {
+    try {
+      if (!id) throw new BadRequestException('Admin ID is required');
+
+      const admin = await this.findAdminById(id);
+      if (!admin) throw new NotFoundException('Admin not found');
+
+      await this.prisma.admin.delete({ where: { id } });
+
+      return { message: 'Admin deleted successfully' };
+    } catch (error) {
+      console.error('Error deleting admin:', error);
+      throw new Error(error.message);
+    }
+  }
+
+
+
   async logout(res: Response, adminId: string) {
     try {
       if (!adminId) {
@@ -193,7 +302,7 @@ export class AdminService {
         });
       }
 
-      res.clearCookie('AccessHostToken', {
+      res.clearCookie('AccessAdminToken', {
         httpOnly: true,
         secure: true, // <-- Required for SameSite=None in production
         sameSite: 'none', // <-- Required for cross-origin cookies
@@ -205,5 +314,7 @@ export class AdminService {
       console.log('error logging out:', error);
       throw new Error(error.message);
     }
+
   }
+
 }

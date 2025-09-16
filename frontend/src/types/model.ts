@@ -114,7 +114,9 @@ export type CreateJobInput = Omit<Job, 'id' | 'created_at' | 'updated_at'>;
 // UpdateJobInput: Partial of CreateJobInput (all fields optional)
 export type UpdateJobInput = Partial<CreateJobInput>;
 
+// ========================================================================================================
 
+// 4. ======/=> Applicant <=/========
 
 
 type ApplicationStage =
@@ -137,4 +139,20 @@ export interface Applicant {
   stage: ApplicationStage;
   created_at: string; // or Date if you parse it
   updated_at: string; // or Date
+}
+
+// ========================================================================================================
+
+// 5. ======/=> Client <=/========
+export interface Client {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone?: string | null;
+  address?: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
+  profileImage?: string | null;
+  createdAt: string; // ISO date string from backend
+  updatedAt: string; // ISO date string from backend
 }
