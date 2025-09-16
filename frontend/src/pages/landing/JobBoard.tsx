@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Users, Briefcase, Calendar, ChevronRight, ChevronLeft, CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
 import company_logo from '../../../src/assets/images/aby_hr.png';
@@ -23,14 +24,24 @@ const JobBoard: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // Current date for expiry check (September 13, 2025)
+  const currentDate = new Date('2025-09-13');
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
         const jobsData = await jobService.getAllJobs();
-        setJobs(jobsData);
+        // Filter jobs that are OPEN and not expired
+        const validJobs = jobsData.filter(
+          (job) =>
+            job.status === 'OPEN' &&
+            (!job.expiry_date || new Date(job.expiry_date) >= currentDate)
+        );
+        setJobs(validJobs);
       } catch (error) {
         console.error('Error fetching jobs:', error);
+        setOperationStatus({ type: 'error', message: 'Failed to load jobs' });
       } finally {
         setLoading(false);
       }
@@ -41,13 +52,33 @@ const JobBoard: React.FC = () => {
 
   // WebSocket event handlers
   useSocketEvent('jobCreated', (newJob: Job) => {
-    setJobs((prev) => [...prev, newJob]);
-    showOperationStatus('success', `New job "${newJob.title}" added!`);
+    // Only add job if it is OPEN and not expired
+    if (
+      newJob.status === 'OPEN' &&
+      (!newJob.expiry_date || new Date(newJob.expiry_date) >= currentDate)
+    ) {
+      setJobs((prev) => [...prev, newJob]);
+      showOperationStatus('success', `New job "${newJob.title}" added!`);
+    }
   });
 
   useSocketEvent('jobUpdated', (updatedJob: Job) => {
-    setJobs((prev) => prev.map((job) => (job.id === updatedJob.id ? updatedJob : job)));
-    showOperationStatus('info', `Job "${updatedJob.title}" updated!`);
+    setJobs((prev) =>
+      // Only include updated job if it is OPEN and not expired
+      prev
+        .map((job) => (job.id === updatedJob.id ? updatedJob : job))
+        .filter(
+          (job) =>
+            job.status === 'OPEN' &&
+            (!job.expiry_date || new Date(job.expiry_date) >= currentDate)
+        )
+    );
+    if (
+      updatedJob.status === 'OPEN' &&
+      (!updatedJob.expiry_date || new Date(updatedJob.expiry_date) >= currentDate)
+    ) {
+      showOperationStatus('info', `Job "${updatedJob.title}" updated!`);
+    }
   });
 
   useSocketEvent('jobDeleted', ({ id }: { id: string }) => {
@@ -67,7 +98,7 @@ const JobBoard: React.FC = () => {
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    const now = new Date();
+    const now = new Date('2025-09-13'); // Use fixed current date
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 

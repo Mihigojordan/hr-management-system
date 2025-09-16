@@ -1,119 +1,123 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import adminAuthService from '../services/adminAuthService';
 
-// Interface for Admin user data
 interface Admin {
   id: string;
   adminName: string;
   adminEmail: string;
+  profileImage?: string;
+  phone?: string;
   isLocked?: boolean;
-  [key: string]: unknown; // Allow additional fields
+  [key: string]: unknown;
 }
 
-// Interface for login data
 interface LoginData {
-  adminEmail: string;
+  identifier: string; // email or phone
   password: string;
 }
 
-// Interface for unlock data
+interface OTPVerifyData {
+  adminId: string;
+  otp: string;
+}
+
 interface UnlockData {
   password: string;
 }
 
-// Interface for auth context values
 interface AdminAuthContextType {
   user: Admin | null;
   login: (data: LoginData) => Promise<unknown>;
+  verifyOTP: (data: OTPVerifyData) => Promise<unknown>;
   logout: () => Promise<unknown>;
   lockAdmin: () => Promise<unknown>;
   unlockAdmin: (password: string) => Promise<unknown>;
+  updateAdmin: (updateData: Partial<Admin>) => Promise<Admin>;
+  deleteAdmin: () => Promise<unknown>;
+  handleSetIsOTPRequired: (data: { otpRequired: boolean; adminId?: string }) => Promise<unknown>;
   isAuthenticated: boolean;
   isLocked: boolean;
   isLoading: boolean;
+  isOTPRequired: boolean;
+  pendingAdminId: string | null;
 }
 
-// Create context with default values
 export const AdminAuthContext = createContext<AdminAuthContextType>({
   user: null,
   login: () => Promise.resolve(),
+  verifyOTP: () => Promise.resolve(),
   logout: () => Promise.resolve(),
   lockAdmin: () => Promise.resolve(),
   unlockAdmin: () => Promise.resolve(),
+  updateAdmin: () => Promise.resolve({} as Admin),
+  deleteAdmin: () => Promise.resolve(),
+  handleSetIsOTPRequired: () => Promise.resolve(),
   isAuthenticated: false,
   isLocked: false,
   isLoading: true,
+  isOTPRequired: false,
+  pendingAdminId: null,
 });
 
-// Interface for auth state
 interface AuthState {
   user: Admin | null;
   isAuthenticated: boolean;
   isLocked: boolean;
 }
 
-// Props for the context provider
 interface AdminAuthContextProviderProps {
   children: ReactNode;
 }
 
-/**
- * Admin Auth Context Provider
- * Provides authentication state and methods to React components
- */
-export const AdminAuthContextProvider: React.FC<AdminAuthContextProviderProps> = ({ children }) => {
-  // Initialize state with default values
+export const AdminAuthContextProvider: React.FC<
+  AdminAuthContextProviderProps
+> = ({ children }) => {
   const [user, setUser] = useState<Admin | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLocked, setIsLocked] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isOTPRequired, setIsOTPRequired] = useState(false);
+  const [pendingAdminId, setPendingAdminId] = useState<string | null>(null);
 
-  // Helper function to update state
   const updateAuthState = (authData: AuthState) => {
-    const { user: userData, isAuthenticated: authStatus, isLocked: lockStatus } = authData;
-
-    setUser(userData);
-    setIsAuthenticated(authStatus);
-    setIsLocked(lockStatus);
+    setUser(authData.user);
+    setIsAuthenticated(authData.isAuthenticated);
+    setIsLocked(authData.isLocked);
   };
 
   /**
-   * Login an admin
-   * @param data - Login credentials
-   * @returns Login response
+   * Login with email/phone.
+   * If 2FA is enabled → set OTP state, don’t authenticate yet.
    */
   const login = async (data: LoginData): Promise<unknown> => {
     try {
-      const { adminEmail, password } = data;
-      const response = await adminAuthService.adminLogin({ adminEmail, password });
+      const response = await adminAuthService.adminLogin(data);
+
+      console.log(response);
+      
+
+      if (response?.twoFARequired) {
+        setIsOTPRequired(true);
+        setPendingAdminId(response.adminId || null);
+        return { otpRequired: true,...response };
+      }
 
       if (response?.authenticated) {
-        // Fetch user profile after successful login
-        try {
-          const userProfile = await adminAuthService.getAdminProfile();
-          if (userProfile?.admin) {
-            updateAuthState({
-              user: userProfile.admin,
-              isAuthenticated: true,
-              isLocked: false,
-            });
-          } else {
-            // Update auth status even if profile is null
-            updateAuthState({
-              user: null,
-              isAuthenticated: true,
-              isLocked: false,
-            });
-          }
-        } catch (profileError) {
-          console.log('Error fetching user profile after login:', profileError);
-          // Still update auth status even if profile fetch fails
+        const userProfile = await adminAuthService.getAdminProfile();
+        if (userProfile?.admin) {
           updateAuthState({
-            user: null,
+            user: userProfile.admin,
             isAuthenticated: true,
             isLocked: false,
           });
         }
+   
       }
 
       return response;
@@ -123,143 +127,135 @@ export const AdminAuthContextProvider: React.FC<AdminAuthContextProviderProps> =
   };
 
   /**
-   * Logout an admin
-   * @returns Logout response
+   * Verify OTP after login
    */
+  const verifyOTP = async (data: OTPVerifyData): Promise<unknown> => {
+    try {
+      const response = await adminAuthService.verifyOTP(data);
+
+      if (response?.authenticated && response.admin) {
+        updateAuthState({
+          user: response.admin,
+          isAuthenticated: true,
+          isLocked: response.admin.isLocked || false,
+        });
+
+        ;
+      }
+
+      return response;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  };
+
   const logout = async (): Promise<unknown> => {
     try {
       const response = await adminAuthService.logout();
-
-      // Clear auth state
-      updateAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLocked: false,
-      });
-
+      updateAuthState({ user: null, isAuthenticated: false, isLocked: false });
       return response;
     } catch (error: any) {
-      // Still clear local state even if logout request fails
-      updateAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLocked: false,
-      });
+      updateAuthState({ user: null, isAuthenticated: false, isLocked: false });
       throw new Error(error.message);
     }
   };
 
-  /**
-   * Lock admin account
-   * @returns Lock response
-   */
   const lockAdmin = async (): Promise<unknown> => {
     try {
       const response = await adminAuthService.lockAdmin();
-
-      updateAuthState({
-        user,
-        isAuthenticated,
-        isLocked: true,
-      });
-
+      updateAuthState({ user, isAuthenticated, isLocked: true });
       return response;
     } catch (error: any) {
       throw new Error(error.message);
     }
   };
 
-  /**
-   * Unlock admin account
-   * @param password - Admin password
-   * @returns Unlock response
-   */
   const unlockAdmin = async (password: string): Promise<unknown> => {
     try {
       const response = await adminAuthService.unlockAdmin({ password });
-
-      updateAuthState({
-        user,
-        isAuthenticated,
-        isLocked: false,
-      });
-
+      updateAuthState({ user, isAuthenticated, isLocked: false });
       return response;
     } catch (error: any) {
       throw new Error(error.message);
     }
   };
 
-  /**
-   * Check authentication status on mount
-   */
+  const updateAdmin = async (updateData: Partial<Admin>): Promise<Admin> => {
+    if (!user?.id) throw new Error('No logged-in admin to update');
+    const updated = await adminAuthService.updateAdmin(user.id, updateData);
+    updateAuthState({
+      user: updated,
+      isAuthenticated: true,
+      isLocked: updated.isLocked || false,
+    });
+    return updated;
+  };
+
+  const deleteAdmin = async (): Promise<unknown> => {
+    if (!user?.id) throw new Error('No logged-in admin to delete');
+    const response = await adminAuthService.deleteAdmin(user.id);
+    updateAuthState({ user: null, isAuthenticated: false, isLocked: false });
+    return response;
+  };
+
   const checkAuthStatus = async () => {
     setIsLoading(true);
-
     try {
-      // Try to fetch profile data to verify authentication
       const response = await adminAuthService.getAdminProfile();
-
       if (response?.authenticated && response.admin) {
-        console.log('Admin profile fetched successfully:', response.admin);
-
         updateAuthState({
           user: response.admin,
           isAuthenticated: true,
           isLocked: response.admin.isLocked || false,
         });
       } else {
-        // Server says we're not authenticated or response is null
-        updateAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLocked: false,
-        });
+        updateAuthState({ user: null, isAuthenticated: false, isLocked: false });
       }
-    } catch (error) {
-      console.log('Error from checkAuthStatus:', error);
-
-      // Clear auth state on any error
-      updateAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLocked: false,
-      });
+    } catch {
+      updateAuthState({ user: null, isAuthenticated: false, isLocked: false });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Run checkAuthStatus on component mount
   useEffect(() => {
     checkAuthStatus();
   }, []);
+  const handleSetIsOTPRequired = async (data: { otpRequired: boolean; adminId?: string }) => {
+  setIsOTPRequired(data.otpRequired);
+  setPendingAdminId(data.adminId || null);
+  return { otpRequired: data.otpRequired, adminId: data.adminId || null };
+};
 
-  // Context values
+
   const values: AdminAuthContextType = {
     login,
+    verifyOTP,
     logout,
     lockAdmin,
     unlockAdmin,
+    updateAdmin,
+    deleteAdmin,
+    handleSetIsOTPRequired,
     user,
     isLoading,
     isAuthenticated,
     isLocked,
+    isOTPRequired,
+    pendingAdminId,
   };
 
-  return <AdminAuthContext.Provider value={values}>{children}</AdminAuthContext.Provider>;
+  return (
+    <AdminAuthContext.Provider value={values}>
+      {children}
+    </AdminAuthContext.Provider>
+  );
 };
 
-/**
- * Hook to access admin auth context
- * @returns Admin auth context values
- */
 export default function useAdminAuth(): AdminAuthContextType {
   const context = useContext(AdminAuthContext);
-
   if (!context) {
     throw new Error('useAdminAuth must be used within AdminAuthContextProvider');
   }
-
   return context;
 }
