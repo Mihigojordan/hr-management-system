@@ -22,54 +22,54 @@ const AdminProfilePage: React.FC = () => {
   }, [activeTab, setSearchParams]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+    <div className=" bg-gray-50 overflow-y-auto h-[90vh]">
+      <div className="flex h-full">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm min-h-screen">
-          <div className="p-6">
-            <nav className="space-y-2">
+        <div className="w-64 bg-white border-r h-full border-gray-200">
+          <div className="p-4 flex-1">
+            <nav className="space-y-1">
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
                   activeTab === 'profile'
-                    ? 'bg-orange-50 text-orange-600 border-r-4 border-orange-500'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <User className="w-5 h-5 mr-3" />
+                <User className="w-4 h-4 mr-2" />
                 Profile Settings
               </button>
               <button
                 onClick={() => setActiveTab('security')}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
                   activeTab === 'security'
-                    ? 'bg-orange-50 text-orange-600 border-r-4 border-orange-500'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Lock className="w-5 h-5 mr-3" />
+                <Lock className="w-4 h-4 mr-2" />
                 Security Settings
               </button>
               <button
                 onClick={() => setActiveTab('notifications')}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
                   activeTab === 'notifications'
-                    ? 'bg-orange-50 text-orange-600 border-r-4 border-orange-500'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Bell className="w-5 h-5 mr-3" />
+                <Bell className="w-4 h-4 mr-2" />
                 Notifications
               </button>
               <button
                 onClick={() => setActiveTab('connected-apps')}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
                   activeTab === 'connected-apps'
-                    ? 'bg-orange-50 text-orange-600 border-r-4 border-orange-500'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Link className="w-5 h-5 mr-3" />
+                <Link className="w-4 h-4 mr-2" />
                 Connected Apps
               </button>
             </nav>
@@ -77,11 +77,11 @@ const AdminProfilePage: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
-          <div className=" mx-auto">
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="px-8 py-6 border-b border-gray-200">
-                <h1 className="text-2xl font-semibold text-gray-900">
+        <div className="h-full overflow-y-auto flex-1 p-4">
+          <div className="mx-auto">
+            <div className="bg-white rounded border border-gray-200">
+              <div className="px-4 py-3 border-b border-gray-200">
+                <h1 className="text-lg font-semibold text-gray-900">
                   {activeTab === 'profile'
                     ? 'Profile Settings'
                     : activeTab === 'security'
@@ -91,7 +91,7 @@ const AdminProfilePage: React.FC = () => {
                     : 'Connected Apps'}
                 </h1>
               </div>
-              <div className="p-8">
+              <div className="p-4">
                 {activeTab === 'profile' && <ProfileSettings />}
                 {activeTab === 'security' && <SecuritySettings />}
                 {activeTab === 'notifications' && <NotificationsSettings />}

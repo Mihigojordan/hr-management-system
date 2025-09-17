@@ -29,13 +29,13 @@ const NotificationsSettings: React.FC = () => {
   const ToggleSwitch: React.FC<{ isOn: boolean; onToggle: () => void }> = ({ isOn, onToggle }) => (
     <button
       onClick={onToggle}
-      className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-        isOn ? 'bg-orange-500' : 'bg-gray-300'
+      className={`relative inline-flex items-center h-5 rounded-full w-9 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+        isOn ? 'bg-primary-500' : 'bg-gray-300'
       }`}
     >
       <span
-        className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200 ${
-          isOn ? 'translate-x-6' : 'translate-x-1'
+        className={`inline-block w-3 h-3 transform bg-white rounded-full transition-transform duration-200 ${
+          isOn ? 'translate-x-5' : 'translate-x-1'
         }`}
       />
     </button>
@@ -75,38 +75,38 @@ const NotificationsSettings: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Header Row */}
-      <div className="bg-gray-100 px-6 py-3 rounded-t-lg">
-        <div className="grid grid-cols-12 gap-4 items-center">
+      <div className="bg-gray-50 px-4 py-2 rounded-t border border-gray-200">
+        <div className="grid grid-cols-12 gap-3 items-center">
           <div className="col-span-6">
-            <h3 className="text-sm font-medium text-gray-700">Modules</h3>
+            <h3 className="text-xs font-medium text-gray-600">Modules</h3>
           </div>
           <div className="col-span-2 text-center">
-            <h3 className="text-sm font-medium text-gray-700">Push</h3>
+            <h3 className="text-xs font-medium text-gray-600">Push</h3>
           </div>
           <div className="col-span-2 text-center">
-            <h3 className="text-sm font-medium text-gray-700">SMS</h3>
+            <h3 className="text-xs font-medium text-gray-600">SMS</h3>
           </div>
           <div className="col-span-2 text-center">
-            <h3 className="text-sm font-medium text-gray-700">Email</h3>
+            <h3 className="text-xs font-medium text-gray-600">Email</h3>
           </div>
         </div>
       </div>
 
       {/* Notification Rows */}
-      <div className="bg-white border border-gray-200 rounded-b-lg">
+      <div className="bg-white border border-gray-200 rounded-b">
         {notificationModules.map((module, index) => (
           <div
             key={module.key}
-            className={`px-6 py-4 ${
+            className={`px-4 py-3 ${
               index !== notificationModules.length - 1 ? 'border-b border-gray-100' : ''
             }`}
           >
-            <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="grid grid-cols-12 gap-3 items-center">
               <div className="col-span-6">
-                <h4 className="text-sm font-medium text-gray-900 mb-1">{module.title}</h4>
-                <p className="text-sm text-gray-500">{module.description}</p>
+                <h4 className="text-xs font-medium text-gray-900 mb-0.5">{module.title}</h4>
+                <p className="text-xs text-gray-500">{module.description}</p>
               </div>
               <div className="col-span-2 flex justify-center">
                 <ToggleSwitch
@@ -132,10 +132,10 @@ const NotificationsSettings: React.FC = () => {
       </div>
 
       {/* Save Button */}
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-end mt-4">
         <button
           onClick={handleSave}
-          className="px-6 py-2 bg-orange-500 text-white font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-4 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           Save Changes
         </button>

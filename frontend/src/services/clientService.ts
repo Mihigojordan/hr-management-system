@@ -136,7 +136,7 @@ class ClientService {
   /**
    * Validate client data before sending to backend
    */
-  validateClientData(clientData: CreateClientInput): ValidationResult {
+  validateClientData(clientData: any): ValidationResult {
     const errors: string[] = [];
 
     if (!clientData.firstname?.trim()) {

@@ -375,7 +375,7 @@ const ApplicantView: React.FC = () => {
         <div className="col-span-3">
           <div className="bg-white rounded-lg shadow-sm border">
             <div className="p-4 border-b">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex flex-col   sm:justify-between space-y-4 sm:space-y-0">
                 <h2 className="text-lg font-semibold text-gray-900">Applicants</h2>
                 <div className="relative flex-1 sm:flex-none">
                   <input
