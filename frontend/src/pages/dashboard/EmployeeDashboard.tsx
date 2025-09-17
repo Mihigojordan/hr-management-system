@@ -306,7 +306,7 @@ const renderTableView = () => (
             >
               <div className="flex items-center space-x-1">
                 <span>Name</span>
-                <ChevronDown className={`w-3 h-3 ${sortBy === "first_name" ? "text-blue-600" : "text-gray-400"}`} />
+                <ChevronDown className={`w-3 h-3 ${sortBy === "first_name" ? "text-primary-600" : "text-gray-400"}`} />
               </div>
             </th>
             <th className="text-left py-2 px-2 text-gray-600 font-medium hidden sm:table-cell">Email</th>
@@ -325,7 +325,7 @@ const renderTableView = () => (
               {/* Name with profile image */}
               <td className="py-2 px-2">
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center overflow-hidden">
                     {employee.profile_image ? (
                       <img 
                         src={getUrlImage(employee.profile_image)} 
@@ -343,7 +343,7 @@ const renderTableView = () => (
                         }}
                       />
                     ) : (
-                      <span className="text-xs font-medium text-blue-700">
+                      <span className="text-xs font-medium text-primary-700">
                         {employee.first_name?.charAt(0)}{employee.last_name?.charAt(0)}
                       </span>
                     )}
@@ -375,14 +375,14 @@ const renderTableView = () => (
                 <div className="flex items-center justify-end space-x-1">
                   <button 
                     onClick={() => handleViewEmployee(employee)} 
-                    className="text-gray-400 hover:text-blue-600 p-1" 
+                    className="text-gray-400 hover:text-primary-600 p-1" 
                     title="View"
                   >
                     <Eye className="w-3 h-3" />
                   </button>
                   <button 
                     onClick={() => handleEditEmployee(employee)} 
-                    className="text-gray-400 hover:text-blue-600 p-1" 
+                    className="text-gray-400 hover:text-primary-600 p-1" 
                     title="Edit"
                   >
                     <Edit className="w-3 h-3" />
@@ -411,7 +411,7 @@ const renderTableView = () => (
       {currentEmployees.map((employee) => (
         <div key={employee.id} className="bg-white rounded border border-gray-200 p-3 hover:shadow-sm transition-shadow">
           <div className="flex items-center space-x-2 mb-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center overflow-hidden">
               {employee.profile_image ? (
                 <img 
                   src={getUrlImage(employee.profile_image)} 
@@ -422,14 +422,14 @@ const renderTableView = () => (
                     target.style.display = 'none';
                     const parent = target.parentElement;
                     if (parent) {
-                      parent.innerHTML = `<span class="text-xs font-medium text-blue-700">
+                      parent.innerHTML = `<span class="text-xs font-medium text-primary-700">
                         ${employee.first_name?.charAt(0) || ''}${employee.last_name?.charAt(0) || ''}
                       </span>`;
                     }
                   }}
                 />
               ) : (
-                <span className="text-xs font-medium text-blue-700">
+                <span className="text-xs font-medium text-primary-700">
                   {employee.first_name?.charAt(0)}{employee.last_name?.charAt(0)}
                 </span>
               )}
@@ -466,16 +466,16 @@ const renderTableView = () => (
 
           <div className="flex items-center justify-between">
             <div className="flex space-x-1">
-              <button onClick={() => handleViewEmployee(employee)} className="text-gray-400 hover:text-blue-600 p-1" title="View">
+              <button onClick={() => handleViewEmployee(employee)} className="text-gray-400 hover:text-primary-600 p-1" title="View">
                 <Eye className="w-3 h-3" />
               </button>
-              <button onClick={() => handleEditEmployee(employee)} className="text-gray-400 hover:text-blue-600 p-1" title="Edit">
+              <button onClick={() => handleEditEmployee(employee)} className="text-gray-400 hover:text-primary-600 p-1" title="Edit">
                 <Edit className="w-3 h-3" />
               </button>
               <button 
                 onClick={() => handleCreateContract(employee)} 
                 disabled={!!(employee.id && employeeContractStatus[employee.id])}
-                className="text-gray-400 hover:text-blue-600 p-1 disabled:opacity-50" 
+                className="text-gray-400 hover:text-primary-600 p-1 disabled:opacity-50" 
                 title="Contract"
               >
                 <FileText className="w-3 h-3" />
@@ -500,7 +500,7 @@ const renderListView = () => (
           {/* Profile + Name */}
           <div className="flex items-center space-x-3 flex-1 min-w-0">
             {/* Profile Image */}
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
               {employee.profile_image ? (
                 <img 
                   src={getUrlImage(employee.profile_image)} 
@@ -511,14 +511,14 @@ const renderListView = () => (
                     target.style.display = 'none';
                     const parent = target.parentElement;
                     if (parent) {
-                      parent.innerHTML = `<span class="text-sm font-medium text-blue-700">
+                      parent.innerHTML = `<span class="text-sm font-medium text-primary-700">
                         ${employee.first_name?.charAt(0) || ''}${employee.last_name?.charAt(0) || ''}
                       </span>`;
                     }
                   }}
                 />
               ) : (
-                <span className="text-sm font-medium text-blue-700">
+                <span className="text-sm font-medium text-primary-700">
                   {employee.first_name?.charAt(0)}{employee.last_name?.charAt(0)}
                 </span>
               )}
@@ -544,14 +544,14 @@ const renderListView = () => (
           <div className="flex items-center space-x-1 flex-shrink-0">
             <button 
               onClick={() => handleViewEmployee(employee)} 
-              className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors" 
+              className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors" 
               title="View Employee"
             >
               <Eye className="w-4 h-4" />
             </button>
             <button 
               onClick={() => handleEditEmployee(employee)} 
-              className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors" 
+              className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors" 
               title="Edit Employee"
             >
               <Edit className="w-4 h-4" />
@@ -603,7 +603,7 @@ const renderListView = () => (
               onClick={() => setCurrentPage(page)}
               className={`px-2 py-1 text-xs rounded ${
                 currentPage === page
-                  ? "bg-blue-500 text-white"
+                  ? "bg-primary-500 text-white"
                   : "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50"
               }`}
             >
@@ -670,8 +670,8 @@ const renderListView = () => (
     {/* Total Employees */}
     <div className="bg-white rounded shadow p-4">
       <div className="flex items-center space-x-3">
-        <div className="p-3 bg-blue-100 rounded-full flex items-center justify-center">
-          <Users className="w-5 h-5 text-blue-600" />
+        <div className="p-3 bg-primary-100 rounded-full flex items-center justify-center">
+          <Users className="w-5 h-5 text-primary-600" />
         </div>
         <div>
           <p className="text-xs text-gray-600">Total Employees</p>
@@ -735,14 +735,14 @@ const renderListView = () => (
                   placeholder="Search employees..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-48 pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                  className="w-48 pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
               
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center space-x-1 px-2 py-1.5 text-xs border rounded transition-colors ${
-                  showFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                  showFilters ? 'bg-primary-50 border-primary-200 text-primary-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <Filter className="w-3 h-3" />
@@ -758,7 +758,7 @@ const renderListView = () => (
                   setSortBy(field);
                   setSortOrder(order);
                 }}
-                className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
                 <option value="first_name-asc">Name (A-Z)</option>
                 <option value="first_name-desc">Name (Z-A)</option>
@@ -771,7 +771,7 @@ const renderListView = () => (
                 <button
                   onClick={() => setViewMode('table')}
                   className={`p-1.5 text-xs transition-colors ${
-                    viewMode === 'table' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                    viewMode === 'table' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
                   }`}
                   title="Table View"
                 >
@@ -780,7 +780,7 @@ const renderListView = () => (
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 text-xs transition-colors ${
-                    viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                    viewMode === 'grid' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
                   }`}
                   title="Grid View"
                 >
@@ -789,7 +789,7 @@ const renderListView = () => (
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-1.5 text-xs transition-colors ${
-                    viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                    viewMode === 'list' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
                   }`}
                   title="List View"
                 >
@@ -806,7 +806,7 @@ const renderListView = () => (
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 >
                   <option value="">All Departments</option>
                   {departments.map((dept) => (
@@ -817,7 +817,7 @@ const renderListView = () => (
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 >
                   <option value="">All Status</option>
                   <option value="active">Active</option>
@@ -850,7 +850,7 @@ const renderListView = () => (
         {loading ? (
           <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
             <div className="inline-flex items-center space-x-2">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
               <span className="text-xs">Loading employees...</span>
             </div>
           </div>
@@ -888,11 +888,11 @@ const renderListView = () => (
           <div className={`flex items-center space-x-2 px-3 py-2 rounded shadow-lg text-xs ${
             operationStatus.type === "success" ? "bg-green-50 border border-green-200 text-green-800" :
             operationStatus.type === "error" ? "bg-red-50 border border-red-200 text-red-800" :
-            "bg-blue-50 border border-blue-200 text-blue-800"
+            "bg-primary-50 border border-primary-200 text-primary-800"
           }`}>
             {operationStatus.type === "success" && <CheckCircle className="w-4 h-4 text-green-600" />}
             {operationStatus.type === "error" && <XCircle className="w-4 h-4 text-red-600" />}
-            {operationStatus.type === "info" && <AlertCircle className="w-4 h-4 text-blue-600" />}
+            {operationStatus.type === "info" && <AlertCircle className="w-4 h-4 text-primary-600" />}
             <span className="font-medium">{operationStatus.message}</span>
             <button onClick={() => setOperationStatus(null)} className="hover:opacity-70">
               <X className="w-3 h-3" />
@@ -905,7 +905,7 @@ const renderListView = () => (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40">
           <div className="bg-white rounded p-4 shadow-xl">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
               <span className="text-gray-700 text-xs font-medium">Processing...</span>
             </div>
           </div>

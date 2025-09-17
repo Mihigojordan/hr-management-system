@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -36,8 +35,8 @@ const JobDetailView: React.FC = () => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  // Current date and time (September 14, 2025, 12:08 AM CAT)
-  const currentDate = new Date('2025-09-14T00:08:00+02:00');
+  // Current date and time (September 17, 2025, 02:00 PM CAT)
+  const currentDate = new Date('2025-09-17T14:00:00+02:00');
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -171,15 +170,15 @@ const JobDetailView: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="w-full xl:w-11/12 mx-auto px-4 py-8">
+        <div className="w-full xl:w-11/12 mx-auto px-4 py-6">
           <div className="animate-pulse">
             {/* Header skeleton */}
-            <div className="bg-white rounded-xl shadow-sm border p-8 mb-8">
-              <div className="flex items-start gap-6">
-                <div className="w-20 h-20 bg-gray-200 rounded-xl"></div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+              <div className="flex items-start gap-4">
+                <div className="w-20 h-20 bg-gray-200 rounded-lg"></div>
                 <div className="flex-1">
-                  <div className="h-8 bg-gray-200 rounded w-2/3 mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                  <div className="h-8 bg-gray-200 rounded w-2/3 mb-3"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
                   <div className="flex gap-4">
                     <div className="h-4 bg-gray-200 rounded w-24"></div>
                     <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -190,10 +189,10 @@ const JobDetailView: React.FC = () => {
             </div>
             
             {/* Content skeleton */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <div className="bg-white rounded-xl shadow-sm border p-8">
-                  <div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div>
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
                   <div className="space-y-3">
                     <div className="h-4 bg-gray-200 rounded w-full"></div>
                     <div className="h-4 bg-gray-200 rounded w-5/6"></div>
@@ -201,7 +200,7 @@ const JobDetailView: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="h-12 bg-gray-200 rounded mb-4"></div>
                 <div className="h-10 bg-gray-200 rounded"></div>
               </div>
@@ -217,11 +216,11 @@ const JobDetailView: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Job Not Found</h2>
-          <p className="text-gray-600 mb-6">{error || 'The job you are looking for does not exist.'}</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">Job Not Found</h2>
+          <p className="text-sm text-gray-600 mb-4">{error || 'The job you are looking for does not exist.'}</p>
           <button
             onClick={() => window.history.back()}
-            className="bg Primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+            className="bg-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors"
           >
             Go Back
           </button>
@@ -234,33 +233,33 @@ const JobDetailView: React.FC = () => {
     return (
       <div className="min-h-[70vh] overflow-y-auto bg-gray-50">
         <div className="border-b border-gray-200">
-          <div className="p-4 sm:p-6">
+          <div className="p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-primary-600 rounded-lg">
-                    <Briefcase className="w-6 h-6 text-white" />
+                  <div className="p-2 bg-primary-500 rounded-lg">
+                    <Briefcase className="w-5 h-5 text-white" />
                   </div>
-                  <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
+                  <h1 className="text-xl font-semibold text-gray-900">{job.title}</h1>
                 </div>
-                <p className="text-gray-600 mt-1">Aby Hr Management</p>
+                <p className="text-sm text-gray-600">Aby Hr Management</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-center min-h-96 p-4">
+        <div className="flex items-center justify-center min-h-96 p-6">
           <div className="text-center max-w-md mx-auto">
             <div className="mb-6">
-              <AlertCircle className="w-16 sm:w-24 h-16 sm:h-24 text-red-300 mx-auto mb-4" />
+              <AlertCircle className="w-16 h-16 text-red-300 mx-auto mb-4" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-4">Job Unavailable</h2>
-            <p className="text-gray-500 mb-6 leading-relaxed text-sm sm:text-base">
+            <h2 className="text-xl font-semibold text-gray-700 mb-3">Job Unavailable</h2>
+            <p className="text-sm text-gray-500 mb-4">
               ⚠️ This job is {job.status === 'CLOSED' ? 'closed' : 'expired'} and is no longer accepting applications. Please explore other opportunities.
             </p>
             <button
               onClick={() => window.history.back()}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base"
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Go Back</span>
@@ -273,35 +272,35 @@ const JobDetailView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full xl:w-11/12 mx-auto px-4 py-8">
+      <div className="w-full xl:w-11/12 mx-auto px-4 py-6">
         {/* Back Button */}
         <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 text-sm transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Jobs
         </button>
 
         {/* Job Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
-          <div className="flex flex-col md:flex-row items-start gap-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+          <div className="flex flex-col md:flex-row items-start gap-4">
             <div className="flex-shrink-0">
               <img
                 src={company_logo}
                 alt="Company Logo"
-                className="w-20 h-20 rounded-xl object-cover shadow-sm border border-gray-100"
+                className="w-20 h-20 rounded-lg object-cover border border-gray-100"
               />
             </div>
             
             <div className="flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-3">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
-                  <p className="text-xl text-gray-700 font-medium">Aby Hr Management</p>
+                  <h1 className="text-xl font-semibold text-gray-900 mb-2">{job.title}</h1>
+                  <p className="text-base font-medium text-gray-700">Aby Hr Management</p>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={handleShare}
                     className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -322,7 +321,7 @@ const JobDetailView: React.FC = () => {
               </div>
 
               {/* Job Meta Information */}
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-6">
+              <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary-500" />
                   <span>{job.location}</span>
@@ -351,13 +350,13 @@ const JobDetailView: React.FC = () => {
 
               {/* Job Tags */}
               <div className="flex flex-wrap gap-3">
-                <span className={`px-4 py-2 rounded-full text-sm font-medium border ${getEmploymentTypeColor(job.employment_type)}`}>
+                <span className={`px-4 py-1.5 rounded-full text-sm font-medium border ${getEmploymentTypeColor(job.employment_type)}`}>
                   {job.employment_type.replace('_', ' ')}
                 </span>
-                <span className={`px-4 py-2 rounded-full text-sm font-medium border ${getExperienceLevelColor(job.experience_level)}`}>
+                <span className={`px-4 py-1.5 rounded-full text-sm font-medium border ${getExperienceLevelColor(job.experience_level)}`}>
                   {job.experience_level.replace('_', ' ')}
                 </span>
-                <span className="px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
+                <span className="px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
                   {job.status}
                 </span>
               </div>
@@ -366,24 +365,24 @@ const JobDetailView: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Job Details */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
             {/* Job Description */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 xl:p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Job Description</h2>
-              <div className="prose max-w-none text-gray-700 leading-relaxed">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Job Description</h2>
+              <div className="text-sm text-gray-700">
                 {job.description ? (
                   <div>
-                    <div className={`${isDescriptionExpanded ? '' : 'max-h-48 overflow-hidden'}`}>
+                    <div className={`${isDescriptionExpanded ? '' : 'max-h-40 overflow-hidden'}`}>
                       {job.description.split('\n').map((paragraph, index) => (
-                        <div key={index} className="bg-white p-4 rounded border text-sm" dangerouslySetInnerHTML={{ __html: paragraph }} />
+                        <div key={index} className="bg-white p-4 rounded-lg border text-sm" dangerouslySetInnerHTML={{ __html: paragraph }} />
                       ))}
                     </div>
                     {job.description.length > 300 && (
                       <button
                         onClick={toggleDescription}
-                        className="mt-4 flex items-center gap-2 text-primary-600 hover:text-primary-700"
+                        className="mt-4 flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm"
                       >
                         {isDescriptionExpanded ? (
                           <>
@@ -407,13 +406,13 @@ const JobDetailView: React.FC = () => {
 
             {/* Required Skills */}
             {job.skills_required && Array.isArray(job.skills_required) && job.skills_required.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Required Skills</h2>
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h2 className="text-base font-semibold text-gray-900 mb-4">Required Skills</h2>
                 <div className="flex flex-wrap gap-3">
                   {job.skills_required.map((skill, index) => (
                     <span
                       key={index}
-                      className="px-4 py-2 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg border border-gray-200"
+                      className="px-4 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg border border-gray-200"
                     >
                       {skill}
                     </span>
@@ -423,8 +422,8 @@ const JobDetailView: React.FC = () => {
             )}
 
             {/* Company Information */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">About the Company</h2>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4">About the Company</h2>
               <div className="flex items-start gap-4 flex-wrap">
                 <img
                   src={company_logo}
@@ -432,8 +431,8 @@ const JobDetailView: React.FC = () => {
                   className="w-16 h-16 rounded-lg object-cover border border-gray-200"
                 />
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Aby Hr Management</h3>
-                  <p className="text-gray-600 mb-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">Aby Hr Management</h3>
+                  <p className="text-sm text-gray-600 mb-3">
                     A leading human resources management company dedicated to connecting talented professionals 
                     with exceptional career opportunities across various industries.
                   </p>
@@ -463,22 +462,22 @@ const JobDetailView: React.FC = () => {
           {/* Application Sidebar */}
           <div className="space-y-6">
             {/* Application Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8">
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Apply?</h3>
-                <p className="text-gray-600 text-sm">
+            <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-6">
+              <div className="text-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-2">Ready to Apply?</h3>
+                <p className="text-sm text-gray-600">
                   Join our team and start your next career journey
                 </p>
               </div>
 
               {hasApplied ? (
                 <div className="text-center">
-                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Application Submitted!</h4>
+                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                  <h4 className="text-base font-semibold text-gray-900 mb-2">Application Submitted!</h4>
                   <p className="text-sm text-gray-600 mb-4">
                     We've received your application and will review it shortly.
                   </p>
-                  <button className="w-full bg-green-100 text-green-800 font-medium py-3 px-4 rounded-xl cursor-default">
+                  <button className="w-full bg-green-100 text-green-800 text-sm font-medium py-2 px-4 rounded-lg cursor-default">
                     Application Sent
                   </button>
                 </div>
@@ -487,7 +486,7 @@ const JobDetailView: React.FC = () => {
                   <button
                     onClick={handleApply}
                     disabled={isApplying || getDaysLeft(job.expiry_date) === 'Expired'}
-                    className="w-full bg-gradient-to-r from-primary-600 to-red-600 text-white font-bold py-4 px-6 rounded-xl hover:from-primary-700 hover:to-red-700 transition-all duration-200 transform hover:scale-[1.02] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                    className="w-full bg-primary-500 text-white text-sm font-medium py-3 px-4 rounded-lg hover:bg-primary-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
                   >
                     {isApplying ? (
                       <div className="flex items-center justify-center gap-2">
@@ -500,7 +499,7 @@ const JobDetailView: React.FC = () => {
                   </button>
                   <button
                     onClick={handleShare}
-                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 text-sm font-medium py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
                   >
                     <Share2 className="w-4 h-4" />
                     Share Job

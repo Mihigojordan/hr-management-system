@@ -1,11 +1,7 @@
-import  { type FC, useState, useEffect } from 'react';
+import { type FC, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Contract,Employee,Department,ContractData } from '../../../types/model';
+import type { Contract, Employee, Department, ContractData } from '../../../types/model';
 
-
-// Interface for Contract (aligned with ContractService)
-
-// Interface for edit contract data (aligned with ContractService's UpdateContractData)
 interface EditContractData {
   id: string;
   employeeId: string;
@@ -18,7 +14,6 @@ interface EditContractData {
   status: string;
 }
 
-// Props for EditContractModal
 interface EditContractModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,10 +24,6 @@ interface EditContractModalProps {
   loading: boolean;
 }
 
-/**
- * EditContractModal component
- * Modal for editing an existing contract with employee and department selection
- */
 const EditContractModal: FC<EditContractModalProps> = ({
   isOpen,
   onClose,
@@ -68,9 +59,6 @@ const EditContractModal: FC<EditContractModalProps> = ({
     });
   }, [contract]);
 
-  /**
-   * Handle form submission
-   */
   const handleSubmit = () => {
     onSubmit(editContract);
   };
@@ -81,13 +69,13 @@ const EditContractModal: FC<EditContractModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Edit Contract</h3>
+          <h3 className="text-base font-semibold text-gray-900">Edit Contract</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
             aria-label="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -98,7 +86,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, employeeId: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Select Employee</option>
               {employees.map((emp) => (
@@ -115,7 +103,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, departmentId: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Select Department</option>
               {departments.map((dept) => (
@@ -132,7 +120,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, contractType: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Select Contract Type</option>
               <option value="PROBATION">Probation</option>
@@ -149,7 +137,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, startDate: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
@@ -162,7 +150,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, endDate: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
@@ -173,7 +161,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, salary: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Enter salary"
             />
           </div>
@@ -185,7 +173,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, currency: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Enter currency (e.g., RWF)"
             />
           </div>
@@ -196,7 +184,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
               onChange={(e) =>
                 setEditContract({ ...editContract, status: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="ACTIVE">Active</option>
               <option value="EXPIRED">Expired</option>
@@ -208,7 +196,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
         <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6">
           <button
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50"
             aria-label="Cancel edit"
           >
             Cancel
@@ -216,7 +204,7 @@ const EditContractModal: FC<EditContractModalProps> = ({
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
             aria-label="Update contract"
           >
             Update Contract

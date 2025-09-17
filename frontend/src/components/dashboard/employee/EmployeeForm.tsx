@@ -1,24 +1,10 @@
-
-import React, { useState, useEffect } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  User, 
-  FileText, 
-  Briefcase, 
-  Upload,
-  X,
-  Eye,
-  Calendar,
-  Plus,
-  Trash2,
-  Save,
-  Check
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight, User, FileText, Briefcase, Upload, X, Eye, Calendar, Plus, Trash2, Save, Check } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import employeeService from '../../../services/employeeService';
 import departmentService from '../../../services/departmentService';
 import { API_URL } from '../../../api/api';
+import Swal from 'sweetalert2';
 
 const MARITAL_STATUS = ['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED'] as const;
 const EMPLOYEE_STATUS = ['ACTIVE', 'TERMINATED', 'RESIGNED', 'PROBATION'] as const;
@@ -67,7 +53,6 @@ interface Employee {
   updated_at?: string;
 }
 
-// Renamed to avoid conflict with browser FormData
 interface EmployeeFormData {
   first_name: string;
   last_name: string;
@@ -412,7 +397,7 @@ const EmployeeForm: React.FC<{
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(2)) return;
+    if (!validateStep(currentStep)) return;
 
     try {
       setIsLoading(true);
@@ -448,7 +433,7 @@ const EmployeeForm: React.FC<{
       </label>
       
       {(!files[fileType] && (!existingFiles[fileType] || removedFiles[fileType])) ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
           <input
             type="file"
             accept={accept}
@@ -459,14 +444,14 @@ const EmployeeForm: React.FC<{
           <label htmlFor={fileType} className="cursor-pointer">
             <Upload className="mx-auto h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-600">Click to upload {label.toLowerCase()}</p>
-            <p className="text-xs text-gray-500">{accept}</p>
+            <p className="text-sm text-gray-500">{accept}</p>
             {existingFiles[fileType] && removedFiles[fileType] && (
-              <p className="text-xs text-red-500 mt-1">Existing file will be removed</p>
+              <p className="text-sm text-red-500 mt-1">Existing file will be removed</p>
             )}
           </label>
         </div>
       ) : (
-        <div className="border border-gray-300 rounded-lg p-4">
+        <div className="border border-gray-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FileText className="h-8 w-8 text-primary-500" />
@@ -474,11 +459,11 @@ const EmployeeForm: React.FC<{
                 <p className="text-sm font-medium text-gray-900">
                   {files[fileType]?.name || existingFiles[fileType]?.split('/').pop() || 'File'}
                   {existingFiles[fileType] && !files[fileType] && (
-                    <span className="ml-2 text-xs text-blue-500">(Existing)</span>
+                    <span className="ml-2 text-sm text-primary-500">(Existing)</span>
                   )}
                 </p>
                 {files[fileType] && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm text-gray-500">
                     {(files[fileType]!.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 )}
@@ -506,7 +491,7 @@ const EmployeeForm: React.FC<{
           {previewFiles[fileType] && (
             <div className="mt-3">
               {fileType === 'profileImg' ? (
-                <img src={previewFiles[fileType]!} alt="Preview" className="h-20 w-20 object-cover rounded" />
+                <img src={previewFiles[fileType]!} alt="Preview" className="h-20 w-20 object-cover rounded-lg" />
               ) : (
                 <p className="text-sm text-gray-500">Preview available in new tab</p>
               )}
@@ -535,7 +520,7 @@ const EmployeeForm: React.FC<{
                   type="text"
                   value={formData.first_name}
                   onChange={(e) => handleInputChange('first_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.first_name && <p className="text-sm text-red-600 mt-1">{errors.first_name}</p>}
               </div>
@@ -548,7 +533,7 @@ const EmployeeForm: React.FC<{
                   type="text"
                   value={formData.last_name}
                   onChange={(e) => handleInputChange('last_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.last_name && <p className="text-sm text-red-600 mt-1">{errors.last_name}</p>}
               </div>
@@ -561,7 +546,7 @@ const EmployeeForm: React.FC<{
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
               </div>
@@ -574,7 +559,7 @@ const EmployeeForm: React.FC<{
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.phone && <p className="text-sm text-red-600 mt-1">{errors.phone}</p>}
               </div>
@@ -586,7 +571,7 @@ const EmployeeForm: React.FC<{
                 <select
                   value={formData.gender}
                   onChange={(e) => handleInputChange('gender', e.target.value as Gender)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Select Gender</option>
                   {GENDERS.map(gender => (
@@ -604,7 +589,7 @@ const EmployeeForm: React.FC<{
                   type="date"
                   value={formData.date_of_birth}
                   onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.date_of_birth && <p className="text-sm text-red-600 mt-1">{errors.date_of_birth}</p>}
               </div>
@@ -617,7 +602,7 @@ const EmployeeForm: React.FC<{
                   type="text"
                   value={formData.national_id}
                   onChange={(e) => handleInputChange('national_id', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.national_id && <p className="text-sm text-red-600 mt-1">{errors.national_id}</p>}
               </div>
@@ -630,7 +615,7 @@ const EmployeeForm: React.FC<{
                   type="text"
                   value={formData.position}
                   onChange={(e) => handleInputChange('position', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.position && <p className="text-sm text-red-600 mt-1">{errors.position}</p>}
               </div>
@@ -642,7 +627,7 @@ const EmployeeForm: React.FC<{
                 <select
                   value={formData.departmentId}
                   onChange={(e) => handleInputChange('departmentId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Select Department</option>
                   {departments.map((dept) => (
@@ -661,7 +646,7 @@ const EmployeeForm: React.FC<{
                 <select
                   value={formData.marital_status}
                   onChange={(e) => handleInputChange('marital_status', e.target.value as MaritalStatus)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   {MARITAL_STATUS.map(status => (
                     <option key={status} value={status}>{status}</option>
@@ -677,7 +662,7 @@ const EmployeeForm: React.FC<{
                   type="date"
                   value={formData.date_hired}
                   onChange={(e) => handleInputChange('date_hired', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.date_hired && <p className="text-sm text-red-600 mt-1">{errors.date_hired}</p>}
               </div>
@@ -689,7 +674,7 @@ const EmployeeForm: React.FC<{
                 <select
                   value={formData.status}
                   onChange={(e) => handleInputChange('status', e.target.value as EmployeeStatus)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   {EMPLOYEE_STATUS.map(status => (
                     <option key={status} value={status}>{status}</option>
@@ -705,7 +690,7 @@ const EmployeeForm: React.FC<{
                   type="text"
                   value={formData.bank_name}
                   onChange={(e) => handleInputChange('bank_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
 
@@ -717,7 +702,7 @@ const EmployeeForm: React.FC<{
                   type="text"
                   value={formData.bank_account_number}
                   onChange={(e) => handleInputChange('bank_account_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.bank_account_number && <p className="text-sm text-red-600 mt-1">{errors.bank_account_number}</p>}
               </div>
@@ -730,7 +715,7 @@ const EmployeeForm: React.FC<{
                   type="text"
                   value={formData.emergency_contact_name}
                   onChange={(e) => handleInputChange('emergency_contact_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
 
@@ -742,7 +727,7 @@ const EmployeeForm: React.FC<{
                   type="tel"
                   value={formData.emergency_contact_phone}
                   onChange={(e) => handleInputChange('emergency_contact_phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.emergency_contact_phone && <p className="text-sm text-red-600 mt-1">{errors.emergency_contact_phone}</p>}
               </div>
@@ -756,7 +741,7 @@ const EmployeeForm: React.FC<{
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               {errors.address && <p className="text-sm text-red-600 mt-1">{errors.address}</p>}
             </div>
@@ -791,21 +776,21 @@ const EmployeeForm: React.FC<{
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Work Experience</h3>
+              <h3 className="text-base font-semibold text-gray-900">Work Experience</h3>
               <button
                 type="button"
                 onClick={addExperience}
-                className="flex items-center space-x-2 px-3 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+                className="flex items-center space-x-2 px-3 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
               >
                 <Plus className="h-4 w-4" />
-                <span>Add Experience</span>
+                <span className="text-sm">Add Experience</span>
               </button>
             </div>
 
             {formData.experience.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <Briefcase className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                <p>No work experience added yet.</p>
+                <p className="text-sm">No work experience added yet.</p>
                 <p className="text-sm">Click "Add Experience" to get started.</p>
               </div>
             ) : (
@@ -813,7 +798,7 @@ const EmployeeForm: React.FC<{
                 {formData.experience.map((exp, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-start justify-between mb-4">
-                      <h4 className="font-medium text-gray-900">Experience {index + 1}</h4>
+                      <h4 className="text-sm font-medium text-gray-900">Experience {index + 1}</h4>
                       <button
                         type="button"
                         onClick={() => removeExperience(index)}
@@ -832,7 +817,7 @@ const EmployeeForm: React.FC<{
                           type="text"
                           value={exp.company_name}
                           onChange={(e) => updateExperience(index, 'company_name', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                         {errors[`experience_${index}_company`] && (
                           <p className="text-sm text-red-600 mt-1">{errors[`experience_${index}_company`]}</p>
@@ -847,7 +832,7 @@ const EmployeeForm: React.FC<{
                           type="date"
                           value={exp.start_date}
                           onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                         {errors[`experience_${index}_start_date`] && (
                           <p className="text-sm text-red-600 mt-1">{errors[`experience_${index}_start_date`]}</p>
@@ -862,7 +847,7 @@ const EmployeeForm: React.FC<{
                           type="date"
                           value={exp.end_date || ''}
                           onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                         {errors[`experience_${index}_date_range`] && (
                           <p className="text-sm text-red-600 mt-1">{errors[`experience_${index}_date_range`]}</p>
@@ -878,7 +863,7 @@ const EmployeeForm: React.FC<{
                         value={exp.description}
                         onChange={(e) => updateExperience(index, 'description', e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         placeholder="Describe your role and responsibilities..."
                       />
                       {errors[`experience_${index}_description`] && (
@@ -895,11 +880,11 @@ const EmployeeForm: React.FC<{
       case 3: // Review
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-medium">Review Information</h3>
+            <h3 className="text-base font-semibold text-gray-900">Review Information</h3>
             
             <div className="bg-gray-50 rounded-lg p-6 space-y-4">
               <div>
-                <h4 className="font-medium mb-2">Personal Information</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-2">Personal Information</h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <p><span className="font-medium">Name:</span> {formData.first_name} {formData.last_name}</p>
                   <p><span className="font-medium">Email:</span> {formData.email}</p>
@@ -920,7 +905,7 @@ const EmployeeForm: React.FC<{
               </div>
 
               <div>
-                <h4 className="font-medium mb-2">Documents</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-2">Documents</h4>
                 <div className="space-y-1 text-sm">
                   <p>Profile Picture: {files.profileImg?.name || (existingFiles.profileImg && !removedFiles.profileImg ? existingFiles.profileImg.split('/').pop() : 'Not uploaded')}</p>
                   <p>Application Letter: {files.applicationLetter?.name || (existingFiles.applicationLetter && !removedFiles.applicationLetter ? existingFiles.applicationLetter.split('/').pop() : 'Not uploaded')}</p>
@@ -929,7 +914,7 @@ const EmployeeForm: React.FC<{
               </div>
 
               <div>
-                <h4 className="font-medium mb-2">Experience ({formData.experience.length} entries)</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-2">Experience ({formData.experience.length} entries)</h4>
                 {formData.experience.length === 0 ? (
                   <p className="text-sm text-gray-500">No experience added</p>
                 ) : (
@@ -946,7 +931,7 @@ const EmployeeForm: React.FC<{
 
             {errors.general && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-600">{errors.general}</p>
+                <p className="text-sm text-red-600">{errors.general}</p>
               </div>
             )}
           </div>
@@ -960,14 +945,14 @@ const EmployeeForm: React.FC<{
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="w-full mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="bg-primary-600 px-6 py-4">
+    <div className="w-full mx-auto bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="bg-primary-500 px-6 py-4">
         <h1 className="text-xl font-semibold text-white">
           {(employeeId || paramsEmployeeId) ? 'Update Employee' : 'Create New Employee'}
         </h1>
@@ -981,7 +966,7 @@ const EmployeeForm: React.FC<{
               <div key={index} className="flex items-center">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                   index === currentStep
-                    ? 'bg-primary-600 border-primary-600 text-white'
+                    ? 'bg-primary-500 border-primary-500 text-white'
                     : index < currentStep
                     ? 'bg-primary-500 border-primary-500 text-white'
                     : 'border-gray-300 text-gray-500'
@@ -1018,7 +1003,7 @@ const EmployeeForm: React.FC<{
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
               >
                 Cancel
               </button>
@@ -1030,7 +1015,7 @@ const EmployeeForm: React.FC<{
               <button
                 type="button"
                 onClick={prevStep}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
                 <span>Previous</span>
@@ -1041,7 +1026,7 @@ const EmployeeForm: React.FC<{
               <button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
               >
                 <span>Next</span>
                 <ChevronRight className="h-4 w-4" />
@@ -1051,7 +1036,7 @@ const EmployeeForm: React.FC<{
                 type="button"
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="flex items-center space-x-2 px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center space-x-2 px-6 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Save className="h-4 w-4" />
                 <span>{isLoading ? 'Saving...' : ((employeeId || paramsEmployeeId) ? 'Update Employee' : 'Create Employee')}</span>
@@ -1068,13 +1053,30 @@ const EmployeeFormExample: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(true);
   const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const handleSuccess = (response: Employee) => {
-    console.log('Employee saved successfully:', response);
-    setShowForm(false);
+    Swal.fire({
+      title: "Success!",
+      text: "Employee has been saved successfully.",
+      icon: "success",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#ff7300"
+    }).then(() => {
+      navigate("/admin/dashboard/employee-management", { replace: true });
+    });
   };
 
   const handleCancel = () => {
-    setShowForm(false);
+    Swal.fire({
+      title: "Cancelling",
+      text: "Are you sure you want to cancel? Unsaved changes will be lost",
+      icon: "info",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#999"
+    }).then(() => {
+      navigate("/admin/dashboard/employee-management", { replace: true });
+    });
   };
 
   const handleEdit = (employeeId: string) => {
@@ -1084,31 +1086,31 @@ const EmployeeFormExample: React.FC = () => {
 
   if (!showForm) {
     return (
-      <div className="min-h-screen bg-gray-100 py-8">
+      <div className="min-h-screen bg-gray-50 py-6">
         <div className="w-full mx-auto px-4">
-          <div className="bg-white rounded-lg shadow p-8 text-center">
+          <div className="bg-white rounded-lg shadow-sm p-6 text-center">
             <div className="mb-4">
-              <Check className="mx-auto h-16 w-16 text-primary-500" />
+              <Check className="mx-auto h-12 w-12 text-primary-500" />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Employee {editingEmployeeId ? 'Updated' : 'Created'} Successfully!
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 mb-4">
               The employee information has been saved to the system.
             </p>
-            <div className="space-x-4">
+            <div className="space-x-3">
               <button
                 onClick={() => {
                   setEditingEmployeeId(null);
                   setShowForm(true);
                 }}
-                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
               >
                 Create Another Employee
               </button>
               <button
                 onClick={() => setShowForm(true)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Go Back to Form
               </button>
@@ -1120,7 +1122,7 @@ const EmployeeFormExample: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-100 py-8">
+    <div className="bg-gray-50 py-6">
       <div className="w-full mx-auto px-4">
         <EmployeeForm
           employeeId={editingEmployeeId!}

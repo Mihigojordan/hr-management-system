@@ -89,7 +89,7 @@ const JobForm: React.FC<{
     experience_level: 'ENTRY',
     industry: 'Technology',
     skills_required: [],
-    status: 'DRAFT',
+    status: 'OPEN',
     posted_at: new Date().toISOString().split('T')[0],
     expiry_date: '',
   });

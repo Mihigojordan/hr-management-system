@@ -309,8 +309,8 @@ const ViewEmployee: React.FC = () => {
     return (
       <div className="min-h-[90vh] bg-gray-50 flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Activity className="w-6 h-6 animate-spin text-blue-600" />
-          <span className="text-gray-600">Loading employee details...</span>
+          <Activity className="w-5 h-5 animate-spin text-blue-600" />
+          <span className="text-xs text-gray-600">Loading employee details...</span>
         </div>
       </div>
     );
@@ -320,9 +320,9 @@ const ViewEmployee: React.FC = () => {
     return (
       <div className="min-h-[90vh] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600">{error}</p>
+          <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Error</h2>
+          <p className="text-xs text-gray-600">{error}</p>
         </div>
       </div>
     );
@@ -332,35 +332,35 @@ const ViewEmployee: React.FC = () => {
     return (
       <div className="min-h-[90vh] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Employee Not Found</h2>
-          <p className="text-gray-600">The requested employee record could not be found.</p>
+          <User className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Employee Not Found</h2>
+          <p className="text-xs text-gray-600">The requested employee record could not be found.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-[90vh] overflow-y-auto bg-gray-50 py-8">
+    <div className="h-[90vh] overflow-y-auto bg-gray-50 py-6">
       {notification && (
         <div
-          className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg ${
+          className={`fixed top-3 right-3 z-50 flex items-center gap-1.5 px-3 py-2 rounded shadow-lg ${
             notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
           } animate-in slide-in-from-top-2 duration-300`}
         >
-          {notification.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
-          {notification.message}
+          {notification.type === 'success' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+          <span className="text-xs">{notification.message}</span>
         </div>
       )}
 
       {previewUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-4 max-w-3xl w-full max-h-[80vh] overflow-auto relative">
+          <div className="bg-white rounded p-3 max-w-3xl w-full max-h-[80vh] overflow-auto relative">
             <button
               onClick={closePreview}
-              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+              className="absolute top-1 right-1 text-gray-600 hover:text-gray-900"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
             {previewType === 'image' ? (
               <img
@@ -381,33 +381,33 @@ const ViewEmployee: React.FC = () => {
 
       {updateModalOpen && selectedContract && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-auto relative">
+          <div className="bg-white rounded p-5 max-w-2xl w-full max-h-[80vh] overflow-auto relative">
             <button
               onClick={handleCloseUpdateModal}
-              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+              className="absolute top-1 right-1 text-gray-600 hover:text-gray-900"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Update Contract</h2>
-            <form onSubmit={handleUpdateContract} className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Update Contract</h2>
+            <form onSubmit={handleUpdateContract} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Contract Type</label>
+                <label className="block text-xs font-medium text-gray-700">Contract Type</label>
                 <input
                   type="text"
                   name="contractType"
                   value={formData.contractType || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-xs font-medium text-gray-700">Status</label>
                 <select
                   name="status"
                   value={formData.status || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                   required
                 >
                   <option value="">Select Status</option>
@@ -419,106 +419,106 @@ const ViewEmployee: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                <label className="block text-xs font-medium text-gray-700">Start Date</label>
                 <input
                   type="date"
                   name="startDate"
                   value={formData.startDate || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">End Date</label>
+                <label className="block text-xs font-medium text-gray-700">End Date</label>
                 <input
                   type="date"
                   name="endDate"
                   value={formData.endDate || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Salary</label>
+                <label className="block text-xs font-medium text-gray-700">Salary</label>
                 <input
                   type="number"
                   name="salary"
                   value={formData.salary || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Currency</label>
+                <label className="block text-xs font-medium text-gray-700">Currency</label>
                 <input
                   type="text"
                   name="currency"
                   value={formData.currency || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Benefits</label>
+                <label className="block text-xs font-medium text-gray-700">Benefits</label>
                 <textarea
                   name="benefits"
                   value={formData.benefits || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Working Hours</label>
+                <label className="block text-xs font-medium text-gray-700">Working Hours</label>
                 <input
                   type="text"
                   name="workingHours"
                   value={formData.workingHours || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Probation Period</label>
+                <label className="block text-xs font-medium text-gray-700">Probation Period</label>
                 <input
                   type="text"
                   name="probationPeriod"
                   value={formData.probationPeriod || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Terms and Conditions</label>
+                <label className="block text-xs font-medium text-gray-700">Terms and Conditions</label>
                 <textarea
                   name="terms"
                   value={formData.terms || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Termination Conditions</label>
+                <label className="block text-xs font-medium text-gray-700">Termination Conditions</label>
                 <textarea
                   name="terminationConditions"
                   value={formData.terminationConditions || ''}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-0.5 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs"
                 />
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={handleCloseUpdateModal}
-                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  className="px-3 py-1.5 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                  className="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs"
                 >
                   Save Changes
                 </button>
@@ -542,223 +542,223 @@ const ViewEmployee: React.FC = () => {
       )}
 
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div className="mb-6">
           <button
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center text-gray-600 hover:text-gray-900 mb-3 text-xs"
             onClick={() => navigate('/admin/dashboard/employee-management')}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-3 h-3 mr-1.5" />
             Back to Employees
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900">
                 {employee.first_name} {employee.last_name}
               </h1>
-              <p className="text-gray-600 mt-1">{employee.gender}</p>
+              <p className="text-xs text-gray-600 mt-0.5">{employee.gender}</p>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">Hire Date</div>
-              <div className="text-lg font-semibold">{formatDate(employee.date_hired)}</div>
+              <div className="text-xs text-gray-500">Hire Date</div>
+              <div className="text-sm font-semibold">{formatDate(employee.date_hired)}</div>
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                <User className="w-5 h-5 mr-2" />
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded shadow">
+            <div className="px-5 py-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center">
+                <User className="w-4 h-4 mr-1.5" />
                 Personal Information
               </h2>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
+            <div className="p-5">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                  <p className="mt-1 text-sm text-gray-900">
+                  <label className="block text-xs font-medium text-gray-700">Full Name</label>
+                  <p className="mt-0.5 text-xs text-gray-900">
                     {employee.first_name} {employee.last_name}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Gender</label>
-                    <p className="mt-1 text-sm text-gray-900">{employee.gender || 'N/A'}</p>
+                    <label className="block text-xs font-medium text-gray-700">Gender</label>
+                    <p className="mt-0.5 text-xs text-gray-900">{employee.gender || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                    <div className="flex items-center mt-1">
-                      <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                      <p className="text-sm text-gray-900">{formatDate(employee.date_of_birth)}</p>
+                    <label className="block text-xs font-medium text-gray-700">Date of Birth</label>
+                    <div className="flex items-center mt-0.5">
+                      <Calendar className="w-3 h-3 text-gray-400 mr-1" />
+                      <p className="text-xs text-gray-900">{formatDate(employee.date_of_birth)}</p>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Marital Status</label>
-                  <div className="flex items-center mt-1">
-                    <Heart className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.marital_status || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Marital Status</label>
+                  <div className="flex items-center mt-0.5">
+                    <Heart className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.marital_status || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">National ID</label>
-                  <div className="flex items-center mt-1">
-                    <CreditCard className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.national_id || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">National ID</label>
+                  <div className="flex items-center mt-0.5">
+                    <CreditCard className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.national_id || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Bank Account Number</label>
-                  <div className="flex items-center mt-1">
-                    <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.bank_account_number || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Bank Account Number</label>
+                  <div className="flex items-center mt-0.5">
+                    <DollarSign className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.bank_account_number || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Bank Name</label>
-                  <div className="flex items-center mt-1">
-                    <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.bank_name || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Bank Name</label>
+                  <div className="flex items-center mt-0.5">
+                    <DollarSign className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.bank_name || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Emergency Contact Name</label>
-                  <div className="flex items-center mt-1">
-                    <UserPlus className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.emergency_contact_name || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Emergency Contact Name</label>
+                  <div className="flex items-center mt-0.5">
+                    <UserPlus className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.emergency_contact_name || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Emergency Contact Phone</label>
-                  <div className="flex items-center mt-1">
-                    <Phone className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.emergency_contact_phone || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Emergency Contact Phone</label>
+                  <div className="flex items-center mt-0.5">
+                    <Phone className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.emergency_contact_phone || 'N/A'}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Mail className="w-5 h-5 mr-2" />
+          <div className="bg-white rounded shadow">
+            <div className="px-5 py-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center">
+                <Mail className="w-4 h-4 mr-1.5" />
                 Contact Information
               </h2>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
+            <div className="p-5">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <div className="flex items-center mt-1">
-                    <Mail className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.email || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Email</label>
+                  <div className="flex items-center mt-0.5">
+                    <Mail className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.email || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
-                  <div className="flex items-center mt-1">
-                    <Phone className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.phone || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Phone</label>
+                  <div className="flex items-center mt-0.5">
+                    <Phone className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.phone || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Address</label>
-                  <p className="mt-1 text-sm text-gray-900">{employee.address || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Address</label>
+                  <p className="mt-0.5 text-xs text-gray-900">{employee.address || 'N/A'}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Briefcase className="w-5 h-5 mr-2" />
+          <div className="bg-white rounded shadow">
+            <div className="px-5 py-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center">
+                <Briefcase className="w-4 h-4 mr-1.5" />
                 Employment Information
               </h2>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
+            <div className="p-5">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Position</label>
-                  <p className="mt-1 text-sm text-gray-900">{employee.position || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Position</label>
+                  <p className="mt-0.5 text-xs text-gray-900">{employee.position || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Department</label>
-                  <div className="flex items-center mt-1">
-                    <Building2 className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{employee.department?.name || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Department</label>
+                  <div className="flex items-center mt-0.5">
+                    <Building2 className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{employee.department?.name || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
-                  <p className="mt-1 text-sm text-gray-900">{employee.status || 'N/A'}</p>
+                  <label className="block text-xs font-medium text-gray-700">Status</label>
+                  <p className="mt-0.5 text-xs text-gray-900">{employee.status || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Hire Date</label>
-                  <div className="flex items-center mt-1">
-                    <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                    <p className="text-sm text-gray-900">{formatDate(employee.date_hired)}</p>
+                  <label className="block text-xs font-medium text-gray-700">Hire Date</label>
+                  <div className="flex items-center mt-0.5">
+                    <Calendar className="w-3 h-3 text-gray-400 mr-1" />
+                    <p className="text-xs text-gray-900">{formatDate(employee.date_hired)}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                <FileText className="w-5 h-5 mr-2" />
+          <div className="bg-white rounded shadow">
+            <div className="px-5 py-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center">
+                <FileText className="w-4 h-4 mr-1.5" />
                 Documents
               </h2>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
+            <div className="p-5">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
-                  <div className="flex items-center mt-1">
+                  <label className="block text-xs font-medium text-gray-700">Profile Picture</label>
+                  <div className="flex items-center mt-0.5">
                     {employee.profile_picture ? (
                       <button
                         onClick={() => handlePreview(employee.profile_picture, 'image')}
-                        className="text-blue-600 hover:underline flex items-center"
+                        className="text-blue-600 hover:underline flex items-center text-xs"
                       >
-                        <File className="w-4 h-4 mr-1" />
+                        <File className="w-3 h-3 mr-1" />
                         Preview Profile Picture
                       </button>
                     ) : (
-                      <p className="text-sm text-gray-900">N/A</p>
+                      <p className="text-xs text-gray-900">N/A</p>
                     )}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">CV</label>
-                  <div className="flex items-center mt-1">
+                  <label className="block text-xs font-medium text-gray-700">CV</label>
+                  <div className="flex items-center mt-0.5">
                     {employee.cv ? (
                       <button
                         onClick={() => handlePreview(employee.cv, 'pdf')}
-                        className="text-blue-600 hover:underline flex items-center"
+                        className="text-blue-600 hover:underline flex items-center text-xs"
                       >
-                        <File className="w-4 h-4 mr-1" />
+                        <File className="w-3 h-3 mr-1" />
                         Preview CV
                       </button>
                     ) : (
-                      <p className="text-sm text-gray-900">N/A</p>
+                      <p className="text-xs text-gray-900">N/A</p>
                     )}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Application Letter</label>
-                  <div className="flex items-center mt-1">
+                  <label className="block text-xs font-medium text-gray-700">Application Letter</label>
+                  <div className="flex items-center mt-0.5">
                     {employee.application_letter ? (
                       <button
                         onClick={() => handlePreview(employee.application_letter, 'pdf')}
-                        className="text-blue-600 hover:underline flex items-center"
+                        className="text-blue-600 hover:underline flex items-center text-xs"
                       >
-                        <File className="w-4 h-4 mr-1" />
+                        <File className="w-3 h-3 mr-1" />
                         Preview Application Letter
                       </button>
                     ) : (
-                      <p className="text-sm text-gray-900">N/A</p>
+                      <p className="text-xs text-gray-900">N/A</p>
                     )}
                   </div>
                 </div>
@@ -768,141 +768,141 @@ const ViewEmployee: React.FC = () => {
 
           <div className="lg:col-span-2 flex flex-col gap-2">
             <div className="grid xl:grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <Briefcase className="w-5 h-5 mr-2" />
+              <div className="bg-white rounded shadow">
+                <div className="px-5 py-3 border-b border-gray-200">
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center">
+                    <Briefcase className="w-4 h-4 mr-1.5" />
                     Contract Information
                   </h2>
                 </div>
-                <div className="p-6">
+                <div className="p-5">
                   {currentContracts.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {currentContracts.map((contract) => (
-                        <div key={contract.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                          <div className="grid grid-cols-1 gap-4">
-                            <div className="grid grid-cols-2 gap-4">
+                        <div key={contract.id} className="border-b border-gray-200 pb-3 last:border-b-0">
+                          <div className="grid grid-cols-1 gap-3">
+                            <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-sm font-medium text-gray-700">Contract Type</label>
-                                <p className="mt-1 text-sm text-gray-900">{contract.contractType || 'N/A'}</p>
+                                <label className="block text-xs font-medium text-gray-700">Contract Type</label>
+                                <p className="mt-0.5 text-xs text-gray-900">{contract.contractType || 'N/A'}</p>
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-gray-700">Status</label>
-                                <p className="mt-1 text-sm text-gray-900">{contract.status || 'N/A'}</p>
+                                <label className="block text-xs font-medium text-gray-700">Status</label>
+                                <p className="mt-0.5 text-xs text-gray-900">{contract.status || 'N/A'}</p>
                               </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                                <div className="flex items-center mt-1">
-                                  <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                                  <p className="text-sm text-gray-900">{formatDate(contract.startDate)}</p>
+                                <label className="block text-xs font-medium text-gray-700">Start Date</label>
+                                <div className="flex items-center mt-0.5">
+                                  <Calendar className="w-3 h-3 text-gray-400 mr-1" />
+                                  <p className="text-xs text-gray-900">{formatDate(contract.startDate)}</p>
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-gray-700">End Date</label>
-                                <div className="flex items-center mt-1">
-                                  <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                                  <p className="text-sm text-gray-900">
+                                <label className="block text-xs font-medium text-gray-700">End Date</label>
+                                <div className="flex items-center mt-0.5">
+                                  <Calendar className="w-3 h-3 text-gray-400 mr-1" />
+                                  <p className="text-xs text-gray-900">
                                     {contract.endDate ? formatDate(contract.endDate) : 'N/A'}
                                   </p>
                                 </div>
                               </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-sm font-medium text-gray-700">Salary</label>
-                                <div className="flex items-center mt-1">
-                                  <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                                  <p className="text-sm text-gray-900">
+                                <label className="block text-xs font-medium text-gray-700">Salary</label>
+                                <div className="flex items-center mt-0.5">
+                                  <DollarSign className="w-3 h-3 text-gray-400 mr-1" />
+                                  <p className="text-xs text-gray-900">
                                     {formatCurrency(contract.salary, contract.currency || 'RWF')}
                                   </p>
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-gray-700">Department</label>
-                                <div className="flex items-center mt-1">
-                                  <Building2 className="w-4 h-4 text-gray-400 mr-1" />
-                                  <p className="text-sm text-gray-900">{contract.department?.name || 'N/A'}</p>
+                                <label className="block text-xs font-medium text-gray-700">Department</label>
+                                <div className="flex items-center mt-0.5">
+                                  <Building2 className="w-3 h-3 text-gray-400 mr-1" />
+                                  <p className="text-xs text-gray-900">{contract.department?.name || 'N/A'}</p>
                                 </div>
                               </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Benefits</label>
-                              <p className="mt-1 text-sm text-gray-900">{contract.benefits || 'N/A'}</p>
+                              <label className="block text-xs font-medium text-gray-700">Benefits</label>
+                              <p className="mt-0.5 text-xs text-gray-900">{contract.benefits || 'N/A'}</p>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Working Hours</label>
-                              <div className="flex items-center mt-1">
-                                <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                                <p className="text-sm text-gray-900">{contract.workingHours || 'N/A'}</p>
+                              <label className="block text-xs font-medium text-gray-700">Working Hours</label>
+                              <div className="flex items-center mt-0.5">
+                                <Clock className="w-3 h-3 text-gray-400 mr-1" />
+                                <p className="text-xs text-gray-900">{contract.workingHours || 'N/A'}</p>
                               </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Probation Period</label>
-                              <p className="mt-1 text-sm text-gray-900">{contract.probationPeriod || 'N/A'}</p>
+                              <label className="block text-xs font-medium text-gray-700">Probation Period</label>
+                              <p className="mt-0.5 text-xs text-gray-900">{contract.probationPeriod || 'N/A'}</p>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Terms and Conditions</label>
-                              <p className="mt-1 text-sm text-gray-900">{contract.terms || 'N/A'}</p>
+                              <label className="block text-xs font-medium text-gray-700">Terms and Conditions</label>
+                              <p className="mt-0.5 text-xs text-gray-900">{contract.terms || 'N/A'}</p>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Termination Conditions</label>
-                              <p className="mt-1 text-sm text-gray-900">{contract.terminationConditions || 'N/A'}</p>
+                              <label className="block text-xs font-medium text-gray-700">Termination Conditions</label>
+                              <p className="mt-0.5 text-xs text-gray-900">{contract.terminationConditions || 'N/A'}</p>
                             </div>
                           </div>
-                          <div className="mt-4 flex gap-2">
+                          <div className="mt-3 flex gap-2">
                             <button
                               onClick={() => handleDownloadContractPDF(contract.id)}
                               disabled={downloadLoading === contract.id}
-                              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
+                              className={`flex items-center px-3 py-1.5 rounded text-xs font-medium ${
                                 downloadLoading === contract.id
                                   ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                   : 'bg-blue-600 text-white hover:bg-blue-700'
                               }`}
                             >
-                              <Download className="w-4 h-4 mr-2" />
+                              <Download className="w-3 h-3 mr-1.5" />
                               {downloadLoading === contract.id ? 'Downloading...' : 'Download Contract PDF'}
                             </button>
                             <button
                               onClick={() => handleOpenUpdateModal(contract)}
-                              className="flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-yellow-500 text-white hover:bg-yellow-600"
+                              className="flex items-center px-3 py-1.5 rounded text-xs font-medium bg-yellow-500 text-white hover:bg-yellow-600"
                             >
-                              <Edit className="w-4 h-4 mr-2" />
+                              <Edit className="w-3 h-3 mr-1.5" />
                               Update
                             </button>
                             <button
                               onClick={() => handleDeleteContract(contract)}
                               disabled={deleteLoading === contract.id}
-                              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
+                              className={`flex items-center px-3 py-1.5 rounded text-xs font-medium ${
                                 deleteLoading === contract.id
                                   ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                   : 'bg-red-600 text-white hover:bg-red-700'
                               }`}
                             >
-                              <Trash2 className="w-4 h-4 mr-2" />
+                              <Trash2 className="w-3 h-3 mr-1.5" />
                               {deleteLoading === contract.id ? 'Deleting...' : 'Delete'}
                             </button>
                           </div>
                         </div>
                       ))}
-                      <div className="flex justify-between items-center mt-4">
+                      <div className="flex justify-between items-center mt-3">
                         <button
                           onClick={() => paginate(currentPage - 1)}
                           disabled={currentPage === 1}
-                          className={`px-4 py-2 rounded-lg ${
+                          className={`px-3 py-1.5 rounded text-xs ${
                             currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'
                           }`}
                         >
                           Previous
                         </button>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-xs text-gray-600">
                           Page {currentPage} of {totalPages}
                         </span>
                         <button
                           onClick={() => paginate(currentPage + 1)}
                           disabled={currentPage === totalPages}
-                          className={`px-4 py-2 rounded-lg ${
+                          className={`px-3 py-1.5 rounded text-xs ${
                             currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'
                           }`}
                         >
@@ -911,46 +911,46 @@ const ViewEmployee: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-600">No contracts found for this employee.</p>
+                    <p className="text-xs text-gray-600">No contracts found for this employee.</p>
                   )}
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <Briefcase className="w-5 h-5 mr-2" />
+              <div className="bg-white rounded shadow">
+                <div className="px-5 py-3 border-b border-gray-200">
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center">
+                    <Briefcase className="w-4 h-4 mr-1.5" />
                     Work Experience
                   </h2>
                 </div>
-                <div className="p-6">
+                <div className="p-5">
                   {employee.experience.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {employee.experience.map((exp, index) => (
-                        <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
-                          <div className="grid grid-cols-2 gap-4">
+                        <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0">
+                          <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Company Name</label>
-                              <p className="mt-1 text-sm text-gray-900">{exp.company_name || 'N/A'}</p>
+                              <label className="block text-xs font-medium text-gray-700">Company Name</label>
+                              <p className="mt-0.5 text-xs text-gray-900">{exp.company_name || 'N/A'}</p>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Description</label>
-                              <p className="mt-1 text-sm text-gray-900">{exp.description || 'N/A'}</p>
+                              <label className="block text-xs font-medium text-gray-700">Description</label>
+                              <p className="mt-0.5 text-xs text-gray-900">{exp.description || 'N/A'}</p>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-4 mt-4">
+                          <div className="grid grid-cols-2 gap-3 mt-3">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                              <div className="flex items-center mt-1">
-                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                                <p className="text-sm text-gray-900">{formatDate(exp.start_date)}</p>
+                              <label className="block text-xs font-medium text-gray-700">Start Date</label>
+                              <div className="flex items-center mt-0.5">
+                                <Calendar className="w-3 h-3 text-gray-400 mr-1" />
+                                <p className="text-xs text-gray-900">{formatDate(exp.start_date)}</p>
                               </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">End Date</label>
-                              <div className="flex items-center mt-1">
-                                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                                <p className="text-sm text-gray-900">
+                              <label className="block text-xs font-medium text-gray-700">End Date</label>
+                              <div className="flex items-center mt-0.5">
+                                <Calendar className="w-3 h-3 text-gray-400 mr-1" />
+                                <p className="text-xs text-gray-900">
                                   {exp.end_date ? formatDate(exp.end_date) : 'Present'}
                                 </p>
                               </div>
@@ -960,33 +960,33 @@ const ViewEmployee: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-600">No work experience found for this employee.</p>
+                    <p className="text-xs text-gray-600">No work experience found for this employee.</p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Activity className="w-5 h-5 mr-2" />
+            <div className="bg-white rounded shadow">
+              <div className="px-5 py-3 border-b border-gray-200">
+                <h2 className="text-sm font-semibold text-gray-900 flex items-center">
+                  <Activity className="w-4 h-4 mr-1.5" />
                   System Information
                 </h2>
               </div>
-              <div className="p-6">
-                <div className="space-y-4">
+              <div className="p-5">
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Created At</label>
-                    <div className="flex items-center mt-1">
-                      <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                      <p className="text-sm text-gray-900">{formatDateTime(employee.createdAt)}</p>
+                    <label className="block text-xs font-medium text-gray-700">Created At</label>
+                    <div className="flex items-center mt-0.5">
+                      <Clock className="w-3 h-3 text-gray-400 mr-1" />
+                      <p className="text-xs text-gray-900">{formatDateTime(employee.createdAt)}</p>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Last Updated</label>
-                    <div className="flex items-center mt-1">
-                      <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                      <p className="text-sm text-gray-900">{formatDateTime(employee.updatedAt)}</p>
+                    <label className="block text-xs font-medium text-gray-700">Last Updated</label>
+                    <div className="flex items-center mt-0.5">
+                      <Clock className="w-3 h-3 text-gray-400 mr-1" />
+                      <p className="text-xs text-gray-900">{formatDateTime(employee.updatedAt)}</p>
                     </div>
                   </div>
                 </div>

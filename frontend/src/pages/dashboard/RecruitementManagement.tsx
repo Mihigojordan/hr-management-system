@@ -6,8 +6,6 @@ import {
   Search,
   Filter,
   ChevronDown,
-  Copy,
-  MoreHorizontal,
   Eye,
   ChevronLeft,
   ChevronRight,
@@ -20,11 +18,18 @@ import {
   Calendar,
   Users,
   Briefcase,
+  Grid3X3,
+  List,
+  Settings,
+  Minimize2,
+  RefreshCw,
 } from "lucide-react";
 import jobService from "../../services/jobService";
 import { useNavigate } from "react-router-dom";
-import { useSocketEvent,useSocket } from "../../context/SocketContext"; // Import useSocketEvent
+import { useSocketEvent, useSocket } from "../../context/SocketContext";
 import type { Job } from "../../types/model";
+
+type ViewMode = 'table' | 'grid' | 'list';
 
 interface OperationStatus {
   type: "success" | "error" | "info";
@@ -41,53 +46,60 @@ const JobDashboard: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [employmentTypeFilter, setEmploymentTypeFilter] = useState<string>("all");
-
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage] = useState<number>(5);
-
+  const [itemsPerPage] = useState<number>(8);
   const [deleteConfirm, setDeleteConfirm] = useState<Job | null>(null);
   const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
   const [operationLoading, setOperationLoading] = useState<boolean>(false);
-  const {socket} =useSocket()
-
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const { socket } = useSocket();
   const navigate = useNavigate();
 
-  // Load initial job data
+  // Calculate summary statistics
+  const totalJobs = allJobs.length;
+  const openJobs = allJobs.filter(job => job.status === "OPEN").length;
+  const closedJobs = allJobs.filter(job => job.status === "CLOSED").length;
+  const newJobs = allJobs.filter(job => {
+    if (!job.posted_at) return false;
+    const postedDate = new Date(job.posted_at);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return postedDate >= thirtyDaysAgo;
+  }).length;
+
   useEffect(() => {
     loadData();
   }, []);
 
-  // Handle WebSocket events for job updates
-  useSocketEvent("jobCreated", (job: Job) => {
-    if(job){
+  useEffect(() => {
+    handleFilterAndSort();
+  }, [searchTerm, sortBy, sortOrder, statusFilter, employmentTypeFilter, allJobs]);
 
+  // WebSocket event handlers
+  useSocketEvent("jobCreated", (job: Job) => {
+    if (job) {
       setAllJobs((prev) => [...prev, job]);
       showOperationStatus("success", `New job "${job.title}" created!`);
     }
   }, [setAllJobs]);
 
   useSocketEvent("jobUpdated", (updatedJob: Job) => {
-    if(updatedJob){
-
+    if (updatedJob) {
       setAllJobs((prev) =>
         prev.map((job) => (job.id === updatedJob.id ? updatedJob : job))
-    );
-    showOperationStatus("success", `Job "${updatedJob.title}" updated!`);
-  }
-  }, [setAllJobs]);
-
-  useSocketEvent("jobDeleted", ({ id }: { id: string }) => {
-    if(id){
-
-      setAllJobs((prev) => prev.filter((job:Job) => job.id !== id));
-      showOperationStatus("success", `Job deleted successfully!`);
+      );
+      showOperationStatus("success", `Job "${updatedJob.title}" updated!`);
     }
   }, [setAllJobs]);
 
-  // Apply filters and sorting whenever dependencies change
-  useEffect(() => {
-    handleFilterAndSort();
-  }, [searchTerm, sortBy, sortOrder, statusFilter, employmentTypeFilter, allJobs]);
+  useSocketEvent("jobDeleted", ({ id }: { id: string }) => {
+    if (id) {
+      setAllJobs((prev) => prev.filter((job: Job) => job.id !== id));
+      showOperationStatus("success", `Job deleted successfully!`);
+    }
+  }, [setAllJobs]);
 
   const loadData = async () => {
     try {
@@ -110,7 +122,6 @@ const JobDashboard: React.FC = () => {
   const handleFilterAndSort = () => {
     let filtered = [...allJobs];
 
-    // Apply search filter
     if (searchTerm.trim()) {
       filtered = filtered.filter(
         (job) =>
@@ -121,22 +132,18 @@ const JobDashboard: React.FC = () => {
       );
     }
 
-    // Apply status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter((job) => job.status === statusFilter);
     }
 
-    // Apply employment type filter
     if (employmentTypeFilter !== "all") {
       filtered = filtered.filter((job) => job.employment_type === employmentTypeFilter);
     }
 
-    // Apply sorting
     filtered.sort((a, b) => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
 
-      // Handle dates
       if (
         sortBy === "posted_at" ||
         sortBy === "expiry_date" ||
@@ -147,17 +154,12 @@ const JobDashboard: React.FC = () => {
           typeof aValue === "string" || aValue instanceof Date ? new Date(aValue) : new Date(0);
         const bDate =
           typeof bValue === "string" || bValue instanceof Date ? new Date(bValue) : new Date(0);
-
-        if (sortOrder === "asc") return aDate.getTime() - bDate.getTime();
-        else return bDate.getTime() - aDate.getTime();
+        return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
       }
 
-      // Handle strings / numbers
       const aStr = aValue ? aValue.toString().toLowerCase() : "";
       const bStr = bValue ? bValue.toString().toLowerCase() : "";
-
-      if (sortOrder === "asc") return aStr > bStr ? 1 : aStr < bStr ? -1 : 0;
-      else return aStr < bStr ? 1 : aStr > bStr ? -1 : 0;
+      return sortOrder === "asc" ? (aStr > bStr ? 1 : aStr < bStr ? -1 : 0) : (aStr < bStr ? 1 : aStr > bStr ? -1 : 0);
     });
 
     setJobs(filtered);
@@ -183,7 +185,6 @@ const JobDashboard: React.FC = () => {
       setOperationLoading(true);
       setDeleteConfirm(null);
       await jobService.deleteJob(job.id);
-      // Note: No need to call loadData() since jobDeleted event will update allJobs
       showOperationStatus("success", `"${job.title}" deleted successfully!`);
     } catch (err: any) {
       showOperationStatus("error", err.message || "Failed to delete job");
@@ -192,48 +193,16 @@ const JobDashboard: React.FC = () => {
     }
   };
 
-  const handleSort = (field: keyof Job) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(field);
-      setSortOrder("asc");
-    }
-  };
-
-  const getSortIcon = (field: keyof Job) => {
-    if (sortBy !== field) {
-      return <ChevronDown className="w-4 h-4 text-gray-400" />;
-    }
-    return (
-      <ChevronDown
-        className={`w-4 h-4 text-primary-600 transition-transform ${
-          sortOrder === "desc" ? "rotate-180" : ""
-        }`}
-      />
-    );
-  };
-
-  const formatDate = (dateString?: string): string => {
-    if (!dateString) return "Not set";
-    return new Date(dateString).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   const getStatusBadge = (status: string) => {
     const statusStyles = {
-      OPEN: "bg-green-100 text-green-800 border-green-200",
-      CLOSED: "bg-red-100 text-red-800 border-red-200",
-      PAUSED: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      DRAFT: "bg-gray-100 text-gray-800 border-gray-200",
+      OPEN: "bg-green-100 text-green-800",
+      CLOSED: "bg-red-100 text-red-800",
+      PAUSED: "bg-orange-100 text-orange-800",
+      DRAFT: "bg-gray-100 text-gray-800",
     };
-
     return (
       <span
-        className={`px-2 py-1 text-xs font-medium rounded-full border ${
+        className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
           statusStyles[status as keyof typeof statusStyles] || statusStyles.DRAFT
         }`}
       >
@@ -250,16 +219,24 @@ const JobDashboard: React.FC = () => {
       FREELANCE: "bg-pink-100 text-pink-800",
       INTERNSHIP: "bg-indigo-100 text-indigo-800",
     };
-
     return (
       <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${
+        className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
           typeStyles[type as keyof typeof typeStyles] || "bg-gray-100 text-gray-800"
         }`}
       >
         {type.replace("_", " ")}
       </span>
     );
+  };
+
+  const formatDate = (dateString?: string): string => {
+    if (!dateString) return new Date().toLocaleDateString("en-GB");
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const truncateText = (text: string, maxLength: number = 100) => {
@@ -272,15 +249,230 @@ const JobDashboard: React.FC = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentJobs = jobs.slice(startIndex, endIndex);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  const renderTableView = () => (
+    <div className="bg-white rounded border border-gray-200">
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="text-left py-2 px-2 text-gray-600 font-medium">#</th>
+              <th
+                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  setSortBy("title");
+                  setSortOrder(sortBy === "title" && sortOrder === "asc" ? "desc" : "asc");
+                }}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Job Title</span>
+                  <ChevronDown
+                    className={`w-3 h-3 ${sortBy === "title" ? "text-primary-600" : "text-gray-400"} ${
+                      sortBy === "title" && sortOrder === "desc" ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </th>
+              <th
+                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100 hidden sm:table-cell"
+                onClick={() => {
+                  setSortBy("location");
+                  setSortOrder(sortBy === "location" && sortOrder === "asc" ? "desc" : "asc");
+                }}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Location</span>
+                  <ChevronDown
+                    className={`w-3 h-3 ${sortBy === "location" ? "text-primary-600" : "text-gray-400"} ${
+                      sortBy === "location" && sortOrder === "desc" ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </th>
+              <th className="text-left py-2 px-2 text-gray-600 font-medium hidden lg:table-cell">Type</th>
+              <th className="text-left py-2 px-2 text-gray-600 font-medium">Status</th>
+              <th
+                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100 hidden sm:table-cell"
+                onClick={() => {
+                  setSortBy("posted_at");
+                  setSortOrder(sortBy === "posted_at" && sortOrder === "asc" ? "desc" : "asc");
+                }}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Posted</span>
+                  <ChevronDown
+                    className={`w-3 h-3 ${sortBy === "posted_at" ? "text-primary-600" : "text-gray-400"} ${
+                      sortBy === "posted_at" && sortOrder === "desc" ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </th>
+              <th className="text-right py-2 px-2 text-gray-600 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {currentJobs.map((job, index) => (
+              <tr key={job.id || index} className="hover:bg-gray-25">
+                <td className="py-2 px-2 text-gray-700">{startIndex + index + 1}</td>
+                <td className="py-2 px-2">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900 text-xs">{job.title}</span>
+                    {job.industry && (
+                      <span className="text-xs text-gray-500 mt-0.5">{job.industry}</span>
+                    )}
+                    <div className="sm:hidden mt-0.5">
+                      <div className="flex items-center text-xs text-gray-600">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {job.location}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-2 px-2 text-gray-700 hidden sm:table-cell">
+                  <div className="flex items-center space-x-1 text-xs">
+                    <MapPin className="w-3 h-3 text-gray-400" />
+                    {job.location}
+                  </div>
+                </td>
+                <td className="py-2 px-2 hidden lg:table-cell">{getEmploymentTypeBadge(job.employment_type)}</td>
+                <td className="py-2 px-2">{getStatusBadge(job.status!)}</td>
+                <td className="py-2 px-2 text-gray-700 hidden sm:table-cell">
+                  <div className="flex items-center space-x-1 text-xs">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    {formatDate(job.posted_at)}
+                  </div>
+                </td>
+                <td className="py-2 px-2">
+                  <div className="flex items-center justify-end space-x-1">
+                    <button
+                      onClick={() => handleViewJob(job)}
+                      className="text-gray-400 hover:text-primary-600 p-1"
+                      title="View"
+                    >
+                      <Eye className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => handleEditJob(job)}
+                      className="text-gray-400 hover:text-primary-600 p-1"
+                      title="Edit"
+                    >
+                      <Edit className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(job)}
+                      className="text-gray-400 hover:text-red-600 p-1"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderGridView = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      {currentJobs.map((job) => (
+        <div key={job.id} className="bg-white rounded border border-gray-200 p-3 hover:shadow-sm transition-shadow">
+          <div className="flex items-center space-x-2 mb-2">
+            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+              <Briefcase className="w-4 h-4 text-primary-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-gray-900 text-xs truncate">{job.title}</div>
+              <div className="text-gray-500 text-xs truncate">{job.industry}</div>
+            </div>
+            {getStatusBadge(job.status!)}
+          </div>
+          <div className="space-y-1 mb-3">
+            <div className="flex items-center space-x-1 text-xs text-gray-600">
+              <MapPin className="w-3 h-3" />
+              <span>{job.location}</span>
+            </div>
+            <div className="flex items-center space-x-1 text-xs text-gray-600">
+              <Calendar className="w-3 h-3" />
+              <span>{formatDate(job.posted_at)}</span>
+            </div>
+            <div className="flex items-center space-x-1 text-xs text-gray-600">
+              <Users className="w-3 h-3" />
+              <span>{job.applicants?.length || 0} Applicants</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex space-x-1">
+              <button onClick={() => handleViewJob(job)} className="text-gray-400 hover:text-primary-600 p-1" title="View">
+                <Eye className="w-3 h-3" />
+              </button>
+              <button onClick={() => handleEditJob(job)} className="text-gray-400 hover:text-primary-600 p-1" title="Edit">
+                <Edit className="w-3 h-3" />
+              </button>
+            </div>
+            <button onClick={() => setDeleteConfirm(job)} className="text-gray-400 hover:text-red-600 p-1" title="Delete">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderListView = () => (
+    <div className="bg-white rounded border border-gray-200 divide-y divide-gray-100">
+      {currentJobs.map((job) => (
+        <div key={job.id} className="px-4 py-3 hover:bg-gray-25">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 flex-1 min-w-0">
+              <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Briefcase className="w-5 h-5 text-primary-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-gray-900 text-sm truncate">{job.title}</div>
+              </div>
+            </div>
+            <div className="hidden md:grid grid-cols-4 gap-4 text-xs text-gray-600 flex-1 max-w-3xl px-4">
+              <span className="truncate">{job.location}</span>
+              <span className="truncate">{getEmploymentTypeBadge(job.employment_type)}</span>
+              <span className="truncate">{getStatusBadge(job.status!)}</span>
+              <span>{formatDate(job.posted_at)}</span>
+            </div>
+            <div className="flex items-center space-x-1 flex-shrink-0">
+              <button
+                onClick={() => handleViewJob(job)}
+                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors"
+                title="View Job"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleEditJob(job)}
+                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors"
+                title="Edit Job"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setDeleteConfirm(job)}
+                className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
+                title="Delete Job"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   const renderPagination = () => {
     const pages: number[] = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -291,43 +483,37 @@ const JobDashboard: React.FC = () => {
     }
 
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between bg-white px-4 py-3 border-t">
-        <div className="flex items-center text-sm text-gray-700 mb-4 sm:mb-0">
-          <span>
-            Showing {startIndex + 1} to {Math.min(endIndex, jobs.length)} of {jobs.length} results
-          </span>
+      <div className="flex items-center justify-between bg-white px-3 py-2 border-t border-gray-200">
+        <div className="text-xs text-gray-600">
+          Showing {startIndex + 1}-{Math.min(endIndex, jobs.length)} of {jobs.length}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
+            onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center px-2 py-1 text-xs text-gray-500 bg-white border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Previous
+            <ChevronLeft className="w-3 h-3" />
           </button>
-          <div className="flex space-x-1">
-            {pages.map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${
-                  currentPage === page
-                    ? "bg-primary-500 text-white"
-                    : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
+          {pages.map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`px-2 py-1 text-xs rounded ${
+                currentPage === page
+                  ? "bg-primary-500 text-white"
+                  : "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
+            onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center px-2 py-1 text-xs text-gray-500 bg-white border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Next
-            <ChevronRight className="w-4 h-4 ml-1" />
+            <ChevronRight className="w-3 h-3" />
           </button>
         </div>
       </div>
@@ -335,277 +521,260 @@ const JobDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
-        <div className="mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center space-x-3 mb-4 sm:mb-0">
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                Job Management
-              </h1>
+    <div className="min-h-screen bg-gray-50 text-xs">
+      {/* Header */}
+      <div className="bg-white shadow-md">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="text-gray-400 hover:text-gray-600 p-1"
+                title="Toggle Sidebar"
+              >
+                <Minimize2 className="w-4 h-4" />
+              </button>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">Job Management</h1>
+                <p className="text-xs text-gray-500 mt-0.5">Manage your organization's job postings</p>
+              </div>
             </div>
-            <button
-              onClick={handleAddJob}
-              disabled={operationLoading}
-              className="flex items-center justify-center space-x-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Job</span>
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={loadData}
+                disabled={loading}
+                className="flex items-center space-x-1 px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50"
+                title="Refresh"
+              >
+                <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+              <button
+                onClick={handleAddJob}
+                disabled={operationLoading}
+                className="flex items-center space-x-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Job</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto px-4 sm:px-6 py-6">
+      <div className="px-4 py-4 space-y-4">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-white rounded shadow p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-primary-100 rounded-full flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Total Jobs</p>
+                <p className="text-lg font-semibold text-gray-900">{totalJobs}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded shadow p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-green-100 rounded-full flex items-center justify-center">
+                <Users className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Open Jobs</p>
+                <p className="text-lg font-semibold text-gray-900">{openJobs}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded shadow p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-red-100 rounded-full flex items-center justify-center">
+                <X className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Closed Jobs</p>
+                <p className="text-lg font-semibold text-gray-900">{closedJobs}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded shadow p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-purple-100 rounded-full flex items-center justify-center">
+                <Plus className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">New Jobs (30d)</p>
+                <p className="text-lg font-semibold text-gray-900">{newJobs}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="bg-white rounded border border-gray-200 p-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 gap-3">
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <Search className="w-3 h-3 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search jobs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-48 pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center space-x-1 px-2 py-1.5 text-xs border rounded transition-colors ${
+                  showFilters ? 'bg-primary-50 border-primary-200 text-primary-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Filter className="w-3 h-3" />
+                <span>Filter</span>
+              </button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <select
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => {
+                  const [field, order] = e.target.value.split("-") as [keyof Job, "asc" | "desc"];
+                  setSortBy(field);
+                  setSortOrder(order);
+                }}
+                className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              >
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+                <option value="location-asc">Location (A-Z)</option>
+                <option value="location-desc">Location (Z-A)</option>
+                <option value="posted_at-desc">Newest Posted</option>
+                <option value="posted_at-asc">Oldest Posted</option>
+                <option value="expiry_date-asc">Expiring Soon</option>
+                <option value="expiry_date-desc">Expiring Later</option>
+              </select>
+              <div className="flex items-center border border-gray-200 rounded">
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`p-1.5 text-xs transition-colors ${
+                    viewMode === 'table' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                  title="Table View"
+                >
+                  <List className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 text-xs transition-colors ${
+                    viewMode === 'grid' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                  title="Grid View"
+                >
+                  <Grid3X3 className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 text-xs transition-colors ${
+                    viewMode === 'list' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                  title="List View"
+                >
+                  <Settings className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+          {showFilters && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="OPEN">Open</option>
+                  <option value="CLOSED">Closed</option>
+                  <option value="PAUSED">Paused</option>
+                  <option value="DRAFT">Draft</option>
+                </select>
+                <select
+                  value={employmentTypeFilter}
+                  onChange={(e) => setEmploymentTypeFilter(e.target.value)}
+                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                >
+                  <option value="all">All Types</option>
+                  <option value="FULL_TIME">Full Time</option>
+                  <option value="PART_TIME">Part Time</option>
+                  <option value="CONTRACT">Contract</option>
+                  <option value="FREELANCE">Freelance</option>
+                  <option value="INTERNSHIP">Internship</option>
+                </select>
+                {(statusFilter !== "all" || employmentTypeFilter !== "all") && (
+                  <button
+                    onClick={() => {
+                      setStatusFilter("all");
+                      setEmploymentTypeFilter("all");
+                    }}
+                    className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <div className="bg-red-50 border border-red-200 rounded p-3 text-red-700 text-xs">
             {error}
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
-          <div className="p-4 sm:p-6 border-b">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <div className="relative flex-1 sm:flex-none">
-                  <input
-                    type="text"
-                    placeholder="Search jobs..."
-                    value={searchTerm}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                    className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                </div>
-
-                <div className="flex space-x-2">
-                  <select
-                    value={statusFilter}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
-                    className="text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="OPEN">Open</option>
-                    <option value="CLOSED">Closed</option>
-                    <option value="PAUSED">Paused</option>
-                    <option value="DRAFT">Draft</option>
-                  </select>
-
-                  <select
-                    value={employmentTypeFilter}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEmploymentTypeFilter(e.target.value)}
-                    className="text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="FULL_TIME">Full Time</option>
-                    <option value="PART_TIME">Part Time</option>
-                    <option value="CONTRACT">Contract</option>
-                    <option value="FREELANCE">Freelance</option>
-                    <option value="INTERNSHIP">Internship</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Sort By:</span>
-                <div className="relative">
-                  <select
-                    value={`${sortBy}-${sortOrder}`}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      const [field, order] = e.target.value.split("-") as [keyof Job, "asc" | "desc"];
-                      setSortBy(field);
-                      setSortOrder(order);
-                    }}
-                    className="text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="title-asc">Title (A-Z)</option>
-                    <option value="title-desc">Title (Z-A)</option>
-                    <option value="location-asc">Location (A-Z)</option>
-                    <option value="location-desc">Location (Z-A)</option>
-                    <option value="posted_at-desc">Newest Posted</option>
-                    <option value="posted_at-asc">Oldest Posted</option>
-                    <option value="expiry_date-asc">Expiring Soon</option>
-                    <option value="expiry_date-desc">Expiring Later</option>
-                  </select>
-                </div>
-              </div>
+        {loading ? (
+          <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
+            <div className="inline-flex items-center space-x-2">
+              <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-xs">Loading jobs...</span>
             </div>
           </div>
-
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="p-8 text-center text-gray-500">
-                <div className="inline-flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Loading jobs...</span>
-                </div>
-              </div>
-            ) : currentJobs.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                {searchTerm || statusFilter !== "all" || employmentTypeFilter !== "all"
-                  ? "No jobs found matching your filters"
-                  : "No jobs found"}
-              </div>
-            ) : (
-              <>
-                <table className="w-full min-w-full">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
-                        #
-                      </th>
-                      <th
-                        className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100"
-                        onClick={() => handleSort("title")}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Job Title</span>
-                          {getSortIcon("title")}
-                        </div>
-                      </th>
-                      <th
-                        className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 hidden md:table-cell"
-                        onClick={() => handleSort("location")}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Location</span>
-                          {getSortIcon("location")}
-                        </div>
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
-                        Type
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden lg:table-cell">
-                        Status
-                      </th>
-                      <th
-                        className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 hidden sm:table-cell"
-                        onClick={() => handleSort("posted_at")}
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Posted</span>
-                          {getSortIcon("posted_at")}
-                        </div>
-                      </th>
-                      <th className="text-left py-3 px-4 sm:px-6 text-sm font-medium text-gray-500 hidden xl:table-cell">
-                        Expires
-                      </th>
-                      <th className="text-right py-3 px-4 sm:px-6 text-sm font-medium text-gray-500">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {currentJobs.map((job, index) => (
-                      <tr key={job.id || index} className="hover:bg-gray-50">
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm">
-                          {startIndex + index + 1}
-                        </td>
-                        <td className="py-4 px-4 sm:px-6">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-gray-900 text-sm sm:text-base">
-                              {job.title}
-                            </span>
-                            {job.industry && (
-                              <span className="text-xs text-gray-500 mt-1">{job.industry}</span>
-                            )}
-                            <div className="md:hidden mt-1">
-                              <div className="flex items-center text-xs text-gray-500">
-                                <MapPin className="w-3 h-3 mr-1" />
-                                {job.location}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden md:table-cell">
-                          <div className="flex items-center">
-                            <MapPin className="w-4 h-4 text-gray-400 mr-1" />
-                            {job.location}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 hidden lg:table-cell">
-                          <div className="flex flex-col space-y-1">
-                            {getEmploymentTypeBadge(job.employment_type)}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 hidden lg:table-cell">
-                          <div className="flex flex-col space-y-1">
-                            {getStatusBadge(job.status!)}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden sm:table-cell">
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                            {formatDate(job.posted_at)}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 text-gray-700 text-sm hidden xl:table-cell">
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                            {formatDate(job.expiry_date)}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 sm:px-6">
-                          <div className="flex items-center justify-end space-x-2">
-                            <button
-                              onClick={() => handleViewJob(job)}
-                              className="text-gray-400 hover:text-primary-600 transition-colors"
-                              title="View Details"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleEditJob(job)}
-                              disabled={operationLoading}
-                              className="text-gray-400 hover:text-primary-600 transition-colors disabled:opacity-50"
-                              title="Edit"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(job)}
-                              disabled={operationLoading}
-                              className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {renderPagination()}
-              </>
-            )}
+        ) : currentJobs.length === 0 ? (
+          <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
+            <div className="text-xs">
+              {searchTerm || statusFilter !== "all" || employmentTypeFilter !== "all"
+                ? "No jobs found matching your criteria"
+                : "No jobs found"}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div>
+            {viewMode === 'table' && renderTableView()}
+            {viewMode === 'grid' && renderGridView()}
+            {viewMode === 'list' && renderListView()}
+            {renderPagination()}
+          </div>
+        )}
       </div>
 
       {operationStatus && (
-        <div className="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-in-out">
+        <div className="fixed top-4 right-4 z-50">
           <div
-            className={`flex items-center space-x-3 px-4 py-3 rounded-lg shadow-lg border ${
+            className={`flex items-center space-x-2 px-3 py-2 rounded shadow-lg text-xs ${
               operationStatus.type === "success"
-                ? "bg-green-50 border-green-200 text-green-800"
+                ? "bg-green-50 border border-green-200 text-green-800"
                 : operationStatus.type === "error"
-                ? "bg-red-50 border-red-200 text-red-800"
-                : "bg-primary-50 border-primary-200 text-primary-800"
+                ? "bg-red-50 border border-red-200 text-red-800"
+                : "bg-primary-50 border border-primary-200 text-primary-800"
             }`}
           >
-            {operationStatus.type === "success" && (
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            )}
-            {operationStatus.type === "error" && (
-              <XCircle className="w-5 h-5 text-red-600" />
-            )}
-            {operationStatus.type === "info" && (
-              <AlertCircle className="w-5 h-5 text-primary-600" />
-            )}
+            {operationStatus.type === "success" && <CheckCircle className="w-4 h-4 text-green-600" />}
+            {operationStatus.type === "error" && <XCircle className="w-4 h-4 text-red-600" />}
+            {operationStatus.type === "info" && <AlertCircle className="w-4 h-4 text-primary-600" />}
             <span className="font-medium">{operationStatus.message}</span>
-            <button onClick={() => setOperationStatus(null)} className="ml-2 hover:opacity-70">
-              <X className="w-4 h-4" />
+            <button onClick={() => setOperationStatus(null)} className="hover:opacity-70">
+              <X className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -613,10 +782,10 @@ const JobDashboard: React.FC = () => {
 
       {operationLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40">
-          <div className="bg-white rounded-lg p-6 shadow-xl">
-            <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-gray-700 font-medium">Processing...</span>
+          <div className="bg-white rounded p-4 shadow-xl">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-gray-700 text-xs font-medium">Processing...</span>
             </div>
           </div>
         </div>
@@ -624,35 +793,34 @@ const JobDashboard: React.FC = () => {
 
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
+          <div className="bg-white rounded p-4 w-full max-w-sm">
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Delete Job</h3>
-                <p className="text-sm text-gray-500">This action cannot be undone</p>
+                <h3 className="text-sm font-semibold text-gray-900">Delete Job</h3>
+                <p className="text-xs text-gray-500">This action cannot be undone</p>
               </div>
             </div>
-            <div className="mb-6">
-              <p className="text-gray-700">
-                Are you sure you want to delete the job{" "}
-                <span className="font-semibold">"{deleteConfirm.title}"</span>? This will permanently
-                remove the job posting and all associated data.
+            <div className="mb-4">
+              <p className="text-xs text-gray-700">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold">{deleteConfirm.title}</span>?
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <div className="flex items-center justify-end space-x-2">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="w-full sm:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-3 py-1.5 text-xs text-gray-700 border border-gray-200 rounded hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteJob(deleteConfirm)}
-                className="w-full sm:w-auto px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700"
               >
-                Delete Job
+                Delete
               </button>
             </div>
           </div>
