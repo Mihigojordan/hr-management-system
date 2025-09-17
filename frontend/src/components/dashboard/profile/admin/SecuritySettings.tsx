@@ -27,7 +27,9 @@ const SecuritySettings: React.FC = () => {
       text: 'A modal to change your password would open here.',
       icon: 'info',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#f97316', // orange-500
+      confirmButtonColor: '#2563eb', // primary-600
+      textColor: '#1f2937', // gray-800
+      titleColor: '#1f2937', // gray-800
     });
   };
 
@@ -43,8 +45,10 @@ const SecuritySettings: React.FC = () => {
         showCancelButton: true,
         confirmButtonText: `Yes, ${action} 2FA`,
         cancelButtonText: 'Cancel',
-        confirmButtonColor: '#f97316', // orange-500
+        confirmButtonColor: '#2563eb', // primary-600
         cancelButtonColor: '#6b7280', // gray-500
+        textColor: '#1f2937', // gray-800
+        titleColor: '#1f2937', // gray-800
       });
 
       if (result.isConfirmed) {
@@ -58,7 +62,9 @@ const SecuritySettings: React.FC = () => {
           text: `Two Factor Authentication has been ${action}d successfully.`,
           icon: 'success',
           confirmButtonText: 'OK',
-          confirmButtonColor: '#f97316',
+          confirmButtonColor: '#2563eb',
+          textColor: '#1f2937',
+          titleColor: '#1f2937',
         });
       }
     } catch (error: any) {
@@ -67,7 +73,9 @@ const SecuritySettings: React.FC = () => {
         text: error.message || `Failed to ${twoFactorEnabled ? 'disable' : 'enable'} 2FA. Please try again.`,
         icon: 'error',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#f97316',
+        confirmButtonColor: '#ef4444', // red-500
+        textColor: '#1f2937',
+        titleColor: '#1f2937',
       });
     }
   };
@@ -83,8 +91,10 @@ const SecuritySettings: React.FC = () => {
       showCancelButton: true,
       confirmButtonText: `Yes, ${action}`,
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#6b7280',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
 
     if (result.isConfirmed) {
@@ -94,7 +104,9 @@ const SecuritySettings: React.FC = () => {
         text: `Google Authentication has been ${action}ed successfully.`,
         icon: 'success',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#f97316',
+        confirmButtonColor: '#2563eb',
+        textColor: '#1f2937',
+        titleColor: '#1f2937',
       });
     }
   };
@@ -107,8 +119,10 @@ const SecuritySettings: React.FC = () => {
       showCancelButton: true,
       confirmButtonText: 'Yes, remove',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#6b7280',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
 
     if (result.isConfirmed) {
@@ -117,7 +131,9 @@ const SecuritySettings: React.FC = () => {
         text: 'Your phone number has been removed successfully.',
         icon: 'success',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#f97316',
+        confirmButtonColor: '#2563eb',
+        textColor: '#1f2937',
+        titleColor: '#1f2937',
       });
     }
   };
@@ -128,7 +144,9 @@ const SecuritySettings: React.FC = () => {
       text: 'A modal to change your phone number would open here.',
       icon: 'info',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
   };
 
@@ -140,8 +158,10 @@ const SecuritySettings: React.FC = () => {
       showCancelButton: true,
       confirmButtonText: 'Yes, remove',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#6b7280',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
 
     if (result.isConfirmed) {
@@ -150,7 +170,9 @@ const SecuritySettings: React.FC = () => {
         text: 'Your email has been removed successfully.',
         icon: 'success',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#f97316',
+        confirmButtonColor: '#2563eb',
+        textColor: '#1f2937',
+        titleColor: '#1f2937',
       });
     }
   };
@@ -161,7 +183,9 @@ const SecuritySettings: React.FC = () => {
       text: 'A modal to change your email would open here.',
       icon: 'info',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
   };
 
@@ -171,7 +195,9 @@ const SecuritySettings: React.FC = () => {
       text: 'A modal to manage your devices would open here.',
       icon: 'info',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
   };
 
@@ -181,7 +207,9 @@ const SecuritySettings: React.FC = () => {
       text: 'A modal to view your account activity would open here.',
       icon: 'info',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
   };
 
@@ -193,8 +221,10 @@ const SecuritySettings: React.FC = () => {
       showCancelButton: true,
       confirmButtonText: 'Yes, deactivate',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#6b7280',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
 
     if (result.isConfirmed) {
@@ -203,7 +233,9 @@ const SecuritySettings: React.FC = () => {
         text: 'Your account has been deactivated successfully.',
         icon: 'success',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#f97316',
+        confirmButtonColor: '#2563eb',
+        textColor: '#1f2937',
+        titleColor: '#1f2937',
       });
     }
   };
@@ -216,8 +248,10 @@ const SecuritySettings: React.FC = () => {
       showCancelButton: true,
       confirmButtonText: 'Yes, delete',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#f97316',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#6b7280',
+      textColor: '#1f2937',
+      titleColor: '#1f2937',
     });
 
     if (result.isConfirmed) {
@@ -226,63 +260,65 @@ const SecuritySettings: React.FC = () => {
         text: 'Your account deletion has been initiated.',
         icon: 'success',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#f97316',
+        confirmButtonColor: '#2563eb',
+        textColor: '#1f2937',
+        titleColor: '#1f2937',
       });
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Password Section */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <h3 className="text-base font-medium text-gray-900 mb-1">Password</h3>
-          <p className="text-sm text-gray-500 mb-1">Set a unique password to protect the account</p>
+          <h3 className="text-sm font-medium text-gray-900 mb-0.5">Password</h3>
+          <p className="text-xs text-gray-500 mb-0.5">Set a unique password to protect the account</p>
           <p className="text-xs text-gray-400">Last Changed 03 Jan 2024, 09:00 AM</p>
         </div>
         <button
           onClick={handleChangePassword}
-          className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           Change Password
         </button>
       </div>
 
       {/* Two Factor Authentication */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <h3 className="text-base font-medium text-gray-900 mb-1">Two Factor Authentication</h3>
-          <p className="text-sm text-gray-500">Receive codes via SMS or email every time you login</p>
+          <h3 className="text-sm font-medium text-gray-900 mb-0.5">Two Factor Authentication</h3>
+          <p className="text-xs text-gray-500">Receive codes via SMS or email every time you login</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           <button
             onClick={handleEnableTwoFactor}
-            className={`px-4 py-2 text-sm font-medium rounded focus:outline-none focus:ring-2 ${
+            className={`px-3 py-1.5 text-xs font-medium rounded focus:outline-none focus:ring-2 ${
               twoFactorEnabled
                 ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
-                : 'bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500'
+                : 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500'
             }`}
           >
             {twoFactorEnabled ? 'Disable' : 'Enable'}
           </button>
-          <button className="p-2 text-orange-500 hover:bg-orange-50 rounded">
+          <button className="p-1.5 text-primary-500 hover:bg-primary-50 rounded">
             <Settings className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Google Authentication */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-1">
-            <h3 className="text-base font-medium text-gray-900">Google Authentication</h3>
+          <div className="flex items-center space-x-1 mb-0.5">
+            <h3 className="text-sm font-medium text-gray-900">Google Authentication</h3>
             {googleConnected && (
-              <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+              <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium text-green-700 bg-green-100 rounded-full">
                 ✓ Connected
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500">Connect to Google</p>
+          <p className="text-xs text-gray-500">Connect to Google</p>
         </div>
         <div className="flex items-center">
           <label className="relative inline-flex items-center cursor-pointer">
@@ -292,31 +328,31 @@ const SecuritySettings: React.FC = () => {
               onChange={handleGoogleToggle}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500"></div>
           </label>
         </div>
       </div>
 
       {/* Phone Number Verification */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-1">
-            <h3 className="text-base font-medium text-gray-900">Phone Number Verification</h3>
-            {phoneVerified && <CheckCircle className="w-4 h-4 text-green-500" />}
+          <div className="flex items-center space-x-1 mb-0.5">
+            <h3 className="text-sm font-medium text-gray-900">Phone Number Verification</h3>
+            {phoneVerified && <CheckCircle className="w-3 h-3 text-green-500" />}
           </div>
-          <p className="text-sm text-gray-500 mb-1">The phone number associated with the account</p>
+          <p className="text-xs text-gray-500 mb-0.5">The phone number associated with the account</p>
           <p className="text-xs text-gray-600">Verified Mobile Number: {user?.phone || '+99264710583'}</p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           <button
             onClick={handleRemovePhone}
-            className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 focus:outline-none"
+            className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-red-600 focus:outline-none"
           >
             Remove
           </button>
           <button
             onClick={handleChangePhone}
-            className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             Change
           </button>
@@ -324,25 +360,25 @@ const SecuritySettings: React.FC = () => {
       </div>
 
       {/* Email Verification */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-1">
-            <h3 className="text-base font-medium text-gray-900">Email Verification</h3>
-            {emailVerified && <CheckCircle className="w-4 h-4 text-green-500" />}
+          <div className="flex items-center space-x-1 mb-0.5">
+            <h3 className="text-sm font-medium text-gray-900">Email Verification</h3>
+            {emailVerified && <CheckCircle className="w-3 h-3 text-green-500" />}
           </div>
-          <p className="text-sm text-gray-500 mb-1">The email address associated with the account</p>
+          <p className="text-xs text-gray-500 mb-0.5">The email address associated with the account</p>
           <p className="text-xs text-gray-600">Verified Email: {user?.adminEmail || 'info@example.com'}</p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           <button
             onClick={handleRemoveEmail}
-            className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 focus:outline-none"
+            className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-red-600 focus:outline-none"
           >
             Remove
           </button>
           <button
             onClick={handleChangeEmail}
-            className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             Change
           </button>
@@ -350,56 +386,56 @@ const SecuritySettings: React.FC = () => {
       </div>
 
       {/* Device Management */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <h3 className="text-base font-medium text-gray-900 mb-1">Device Management</h3>
-          <p className="text-sm text-gray-500">The devices associated with the account</p>
+          <h3 className="text-sm font-medium text-gray-900 mb-0.5">Device Management</h3>
+          <p className="text-xs text-gray-500">The devices associated with the account</p>
         </div>
         <button
           onClick={handleManageDevices}
-          className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           Manage
         </button>
       </div>
 
       {/* Account Activity */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <h3 className="text-base font-medium text-gray-900 mb-1">Account Activity</h3>
-          <p className="text-sm text-gray-500">The activities of the account</p>
+          <h3 className="text-sm font-medium text-gray-900 mb-0.5">Account Activity</h3>
+          <p className="text-xs text-gray-500">The activities of the account</p>
         </div>
         <button
           onClick={handleViewActivity}
-          className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           View
         </button>
       </div>
 
       {/* Deactivate Account */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex-1">
-          <h3 className="text-base font-medium text-gray-900 mb-1">Deactivate Account</h3>
-          <p className="text-sm text-gray-500">This will shutdown your account. Your account will be reactivated when you sign in again</p>
+          <h3 className="text-sm font-medium text-gray-900 mb-0.5">Deactivate Account</h3>
+          <p className="text-xs text-gray-500">This will shutdown your account. Your account will be reactivated when you sign in again</p>
         </div>
         <button
           onClick={handleDeactivateAccount}
-          className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           Deactivate
         </button>
       </div>
 
       {/* Delete Account */}
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between py-3">
         <div className="flex-1">
-          <h3 className="text-base font-medium text-red-600 mb-1">Delete Account</h3>
-          <p className="text-sm text-gray-500">Your account will be permanently deleted</p>
+          <h3 className="text-sm font-medium text-red-600 mb-0.5">Delete Account</h3>
+          <p className="text-xs text-gray-500">Your account will be permanently deleted</p>
         </div>
         <button
           onClick={handleDeleteAccount}
-          className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           Delete
         </button>
