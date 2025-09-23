@@ -15,7 +15,12 @@ export const createUnifiedUploadConfig = (): MulterOptions => ({
       else if(file.fieldname ===  'cv'){
         subFolder = 'cv_files'
       
-      }else if(file.fieldname ===  'applicationLetter'){
+      }
+      else if(file.fieldname ===  'cvFile'){
+        subFolder = 'cv_files'
+      
+      }
+      else if(file.fieldname ===  'applicationLetter'){
         subFolder = 'application_letters'
       }
 
@@ -82,6 +87,18 @@ export const EmployeeFileFields = [
   { name: 'applicationLetter', maxCount:1 },
   { name: 'cv', maxCount:1 },
 ]
+export const ApplicantFileFields = [
+  { name: 'cvFile', maxCount:1 },
+]
+export const ClientFileFields = [
+  { name: 'profileImg', maxCount:1 },
+]
+export const AdminFileFields = [
+  { name: 'profileImg', maxCount:1 },
+]
 
 
 export const EmployeeUploadConfig = createUnifiedUploadConfig()
+export const ApplicantUploadConfig = createUnifiedUploadConfig()
+export const ClientUploadConfig = createUnifiedUploadConfig()
+export const AdminUploadConfig = createUnifiedUploadConfig()

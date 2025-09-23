@@ -1,130 +1,103 @@
-import React from "react";
-import { User, Mail, Calendar, Shield, Lock } from "lucide-react";
-import useAdminAuth from "../../context/AdminAuthContext";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { User, Lock, Bell, Link } from 'lucide-react';
+import ProfileSettings from '../../components/dashboard/profile/admin/ProfileSettings';
+import SecuritySettings from '../../components/dashboard/profile/admin/SecuritySettings';
+import NotificationsSettings from '../../components/dashboard/profile/admin/NotificationsSettings';
+import ConnectedApps from '../../components/dashboard/profile/admin/ConnectedApps';
 
-// --- Type Definitions ---
-interface AdminUser {
-  adminName?: string;
-  adminEmail?: string;
-  isLocked?: boolean;
-  createdAt?: string;
-  profileImg?: string;
-}
+const AdminProfilePage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const validTabs = ['profile', 'security', 'notifications', 'connected-apps'] as const;
+  const initialTab = validTabs.includes(searchParams.get('tab') as any)
+    ? (searchParams.get('tab') as 'profile' | 'security' | 'notifications' | 'connected-apps')
+    : 'profile';
+  const [activeTab, setActiveTab] = useState<
+    'profile' | 'security' | 'notifications' | 'connected-apps'
+  >(initialTab);
 
-interface InfoCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  status?: "red" | "green";
-}
-
-// --- InfoCard Component ---
-const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value, status }) => (
-  <div className="bg-white shadow-md rounded-xl p-5 flex gap-4 items-start">
-    <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
-      {icon}
-    </div>
-    <div className="flex-1">
-      <p className="text-sm font-medium text-primary-600">{label}</p>
-      <div className="flex items-center gap-2">
-        {status && (
-          <span
-            className={`w-3 h-3 rounded-full ${
-              status === "red" ? "bg-red-500" : "bg-green-500"
-            }`}
-          />
-        )}
-        <p className="text-lg font-semibold text-primary-900">{value}</p>
-      </div>
-    </div>
-  </div>
-);
-
-// --- Main Component ---
-const AdminProfile: React.FC = () => {
-  const { user } = useAdminAuth() as { user: AdminUser | null };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Not available";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // Sync activeTab with URL params
+  useEffect(() => {
+    setSearchParams({ tab: activeTab });
+  }, [activeTab, setSearchParams]);
 
   return (
-    <div className="max-h-[90vh] overflow-y-auto p-6 md:p-10">
-      <div className="mx-auto">
-        {/* Profile Header */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          {/* Banner */}
-          <div className="h-32 bg-gradient-to-r from-primary-600 to-primary-700 relative">
-            <div className="absolute inset-0 bg-black/10"></div>
-          </div>
-
-          {/* Avatar + Basic Info */}
-          <div className="relative px-6 pb-8 -mt-16 flex flex-col items-center">
-            <div className="w-28 h-28 bg-primary-600 rounded-full flex items-center justify-center shadow-lg">
-              <User className="w-14 h-14 text-white" />
-            </div>
-            <h2 className="mt-4 text-2xl font-bold text-primary-900">
-              {user?.adminName || "Admin User"}
-            </h2>
-            <p className="text-primary-600">{user?.adminEmail}</p>
-
-            {/* Status */}
-            <div className="mt-4">
-              {user?.isLocked ? (
-                <span className="flex items-center gap-2 bg-red-500/20 px-4 py-1.5 rounded-full text-sm font-medium text-red-700">
-                  <Lock className="w-4 h-4" />
-                  Account Locked
-                </span>
-              ) : (
-                <span className="flex items-center gap-2 bg-green-500/20 px-4 py-1.5 rounded-full text-sm font-medium text-green-700">
-                  <Shield className="w-4 h-4" />
-                  Account Active
-                </span>
-              )}
-            </div>
+    <div className=" bg-gray-50 overflow-y-auto h-[90vh]">
+      <div className="flex h-full">
+        {/* Sidebar */}
+        <div className="w-64 bg-white border-r h-full border-gray-200">
+          <div className="p-4 flex-1">
+            <nav className="space-y-1">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'profile'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile Settings
+              </button>
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'security'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                Security Settings
+              </button>
+              <button
+                onClick={() => setActiveTab('notifications')}
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'notifications'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Bell className="w-4 h-4 mr-2" />
+                Notifications
+              </button>
+              <button
+                onClick={() => setActiveTab('connected-apps')}
+                className={`w-full flex items-center px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'connected-apps'
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-500'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Link className="w-4 h-4 mr-2" />
+                Connected Apps
+              </button>
+            </nav>
           </div>
         </div>
 
-        {/* Info Cards */}
-        <div className="mt-10 grid md:grid-cols-2 gap-6">
-          <InfoCard
-            icon={<User className="w-5 h-5 text-white" />}
-            label="Full Name"
-            value={user?.adminName || "Not provided"}
-          />
-          <InfoCard
-            icon={<Mail className="w-5 h-5 text-white" />}
-            label="Email Address"
-            value={user?.adminEmail || "Not provided"}
-          />
-          <InfoCard
-            icon={<Shield className="w-5 h-5 text-white" />}
-            label="Account Status"
-            value={user?.isLocked ? "Locked" : "Active"}
-            status={user?.isLocked ? "red" : "green"}
-          />
-          <InfoCard
-            icon={<Calendar className="w-5 h-5 text-white" />}
-            label="Account Created"
-            value={formatDate(user?.createdAt)}
-          />
-        </div>
-
-        {/* Footer Note */}
-        <div className="mt-8 bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="flex justify-center items-center text-primary-600">
-            <Shield className="w-5 h-5 mr-2" />
-            <p className="text-sm">
-              This is a read-only view of your administrative account. Contact
-              the system administrator for updates.
-            </p>
+        {/* Main Content */}
+        <div className="h-full overflow-y-auto flex-1 p-4">
+          <div className="mx-auto">
+            <div className="bg-white rounded border border-gray-200">
+              <div className="px-4 py-3 border-b border-gray-200">
+                <h1 className="text-lg font-semibold text-gray-900">
+                  {activeTab === 'profile'
+                    ? 'Profile Settings'
+                    : activeTab === 'security'
+                    ? 'Security Settings'
+                    : activeTab === 'notifications'
+                    ? 'Notifications'
+                    : 'Connected Apps'}
+                </h1>
+              </div>
+              <div className="p-4">
+                {activeTab === 'profile' && <ProfileSettings />}
+                {activeTab === 'security' && <SecuritySettings />}
+                {activeTab === 'notifications' && <NotificationsSettings />}
+                {activeTab === 'connected-apps' && <ConnectedApps />}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -132,4 +105,4 @@ const AdminProfile: React.FC = () => {
   );
 };
 
-export default AdminProfile;
+export default AdminProfilePage;

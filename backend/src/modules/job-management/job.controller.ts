@@ -1,11 +1,15 @@
 // src/job/job.controller.ts
 import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { JobService } from './job.service';
+import { JobGateway } from './job.gateway';
 
 
 @Controller('jobs')
 export class JobController {
-  constructor(private readonly jobService: JobService) {}
+  constructor(
+    private readonly jobService: JobService,
+    private readonly jobGateway: JobGateway,
+  ) { }
 
   @Post()
   async create(
@@ -25,7 +29,9 @@ export class JobController {
     },
   ) {
     try {
-      return await this.jobService.create(body);
+       const createdJob = await this.jobService.create(body);
+      this.jobGateway.emitJobCreated(createdJob);
+      return createdJob;
     } catch (error) {
       throw error;
     }
@@ -43,7 +49,7 @@ export class JobController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      return await this.jobService.findOne(Number(id));
+      return await this.jobService.findOne(id);
     } catch (error) {
       throw error;
     }
@@ -68,7 +74,10 @@ export class JobController {
     },
   ) {
     try {
-      return await this.jobService.update(Number(id), body);
+      const updatedJob = await this.jobService.update(id, body);
+      this.jobGateway.emitJobUpdated(updatedJob);
+      return updatedJob;
+
     } catch (error) {
       throw error;
     }
@@ -77,7 +86,9 @@ export class JobController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      return await this.jobService.remove(Number(id));
+      const deletedJob = await this.jobService.remove(id);
+      this.jobGateway.emitJobUpdated(id);
+      return deletedJob;
     } catch (error) {
       throw error;
     }

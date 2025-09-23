@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+=======
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+>>>>>>> 8d16e1b2a814586b8591ca6560e7dae53496add0
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply font-inter; /* makes Inter the default */
+  text-transform:capitalize;
+}

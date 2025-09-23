@@ -250,14 +250,14 @@ export const useSocketEvent = (
   handler: (...args: any[]) => void, 
   dependencies: React.DependencyList = []
 ): void => {
-  const { on } = useSocket();
+  const { on,socket } = useSocket();
   
   useEffect(() => {
     if (!event || !handler) return;
     
     const cleanup = on(event, handler);
     return cleanup;
-  }, [event, handler, on, ...dependencies]);
+  }, [event,socket, handler, on, ...dependencies]);
 };
 
 // Example usage component

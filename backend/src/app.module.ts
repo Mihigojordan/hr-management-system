@@ -8,9 +8,14 @@ import { ContractModule } from './modules/contract/contract.module';
 import { JobModule } from './modules/job-management/job.module';
 import { ApplicantModule } from './modules/applicants-management/applicant.module';
 import { EmailModule } from './global/email/email.module';
+import { ClientModule } from './modules/client-management/client.module';
+
+import { ActivityModule } from './modules/activity-management/activity.module';
+import { AssetModule } from './modules/assets-management/asset.module';
 
 @Module({
   imports: [
+
     AdminModule,
     PrismaModule,
     DepartmentModule,
@@ -18,7 +23,10 @@ import { EmailModule } from './global/email/email.module';
     ContractModule,
     JobModule,
     ApplicantModule,
-    EmailModule
+    EmailModule,
+    ClientModule,
+    ActivityModule,
+    AssetModule
   ],
   controllers: [AppController],
 })

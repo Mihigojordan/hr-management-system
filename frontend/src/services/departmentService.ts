@@ -4,7 +4,7 @@ import { type AxiosInstance, type AxiosResponse } from 'axios'; // Type-only imp
 // Interface for department data
 interface DepartmentData {
   name: string;
-  description: string;
+  description?: string | null;
 }
 
 // Interface for department (includes additional fields like id and timestamps)

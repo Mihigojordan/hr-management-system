@@ -48,6 +48,7 @@ export interface EmployeeData {
 
 // Interface for employee (includes additional fields like id and timestamps)
 export interface Employee extends EmployeeData {
+    profile_image: string | undefined;
     id: string;
     contract?: Contract; // Assuming one-to-one relationship for simplicity
     created_at?: string; // ISO string
@@ -90,7 +91,7 @@ export interface Contract extends ContractData {
 
 // Interface for Job
 export interface Job {
-  id: number;
+  id: string;
   title: string;
   description: string;
   location: string;
@@ -113,7 +114,9 @@ export type CreateJobInput = Omit<Job, 'id' | 'created_at' | 'updated_at'>;
 // UpdateJobInput: Partial of CreateJobInput (all fields optional)
 export type UpdateJobInput = Partial<CreateJobInput>;
 
+// ========================================================================================================
 
+// 4. ======/=> Applicant <=/========
 
 
 type ApplicationStage =
@@ -125,8 +128,8 @@ type ApplicationStage =
 
 
 export interface Applicant {
-  id: number;
-  jobId: number;
+  id: string;
+  jobId: string;
   name: string;
   email: string;
   phone?: string;
@@ -136,4 +139,20 @@ export interface Applicant {
   stage: ApplicationStage;
   created_at: string; // or Date if you parse it
   updated_at: string; // or Date
+}
+
+// ========================================================================================================
+
+// 5. ======/=> Client <=/========
+export interface Client {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone?: string | null;
+  address?: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
+  profileImage?: string | null;
+  createdAt: string; // ISO date string from backend
+  updatedAt: string; // ISO date string from backend
 }
