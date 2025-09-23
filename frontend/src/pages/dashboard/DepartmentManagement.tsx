@@ -86,7 +86,6 @@ const DepartmentDashboard: React.FC = () => {
 
   const loadDepartments = async () => {
     try {
-      setLoading(true);
       const data = await departmentService.getAllDepartments();
       setAllDepartments(data || []);
       setError(null);
