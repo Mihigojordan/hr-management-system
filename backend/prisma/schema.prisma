@@ -1,0 +1,263 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id         String   @id @unique @default(uuid())
+  adminName  String?
+  adminEmail String?  @unique
+  phone     String?
+  password   String?
+  profileImage  String?
+  status       AdminStatus    @default(ACTIVE)
+  google_id    String?  @unique
+  is2FA   Boolean? @default(false)
+  isLocked   Boolean? @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Activity Activity[]
+}
+
+enum AdminStatus{
+    ACTIVE
+    INACTIVE
+}
+
+model Department {
+  id          String     @id @unique @default(uuid())
+  name        String?
+  description String?    @db.VarChar(1000)
+  employee    Employee[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// Define the enum first
+enum EmployeeStatus {
+  ACTIVE
+  TERMINATED
+  RESIGNED
+  PROBATION
+}
+
+// Enum for marital status
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+model Employee {
+  id                      String         @id @unique @default(uuid())
+  first_name              String
+  last_name               String
+  gender                  String
+  date_of_birth           DateTime
+  phone                   String
+  email                   String         @unique
+  password                String?
+  address                 String
+  national_id             String         @unique
+  profile_picture         String?
+  bank_account_number     String?
+  bank_name               String?
+  cv                      String?
+  application_letter      String?
+  position                String
+  departmentId            String
+  department              Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  marital_status          MaritalStatus? @default(SINGLE)
+  date_hired              DateTime
+  status                  EmployeeStatus @default(ACTIVE)
+  experience              Json?
+  emergency_contact_name  String?
+  emergency_contact_phone String?
+  
+  // security
+  google_id    String?  @unique
+  isLocked   Boolean? @default(false)
+  is2FA   Boolean? @default(false) 
+
+  activity              Activity[]
+  contract              Contract[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Contract {
+  id                     String       @id @default(uuid())
+  employeeId             String?
+  employee               Employee?    @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  contractType           ContractType
+  startDate              DateTime
+  endDate                DateTime?
+  salary                 Float
+  currency               String       @default("RWF")
+  benefits               String?      // e.g., health insurance, PTO
+  workingHours           String?      // e.g., "40 hours/week"
+  probationPeriod        String?      // e.g., "3 months"
+  terminationConditions  String?
+  terms                  String?      // General terms text
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+}
+
+enum ContractType {
+  PERMANENT
+  TEMPORARY
+  INTERNSHIP
+}
+
+
+model Job {
+  id                String       @id @default(uuid())
+  title            String
+  description      String?      @db.Text
+  location         String
+  employment_type  EmploymentType
+  experience_level ExperienceLevel
+  industry         String?
+  
+  skills_required  Json             
+  status           JobStatus         @default(OPEN)
+
+  posted_at        DateTime?         @default(now())
+  expiry_date      DateTime?
+
+  applicants       Applicant[]
+
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum ExperienceLevel {
+  ENTRY
+  MID
+  SENIOR
+  EXECUTIVE
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStage {
+  APPLIED
+  SHORTLISTED
+  INTERVIEWED
+  HIRED
+  REJECTED
+}
+
+model Applicant {
+  id               String       @id @default(uuid())
+  jobId           String               // FK → Job.id
+  job             Job               @relation(fields: [jobId], references: [id],onDelete:Cascade,onUpdate:Cascade)
+
+  name            String
+  email           String
+  phone           String?
+  cvUrl           String?           // link to uploaded CV
+  skills          Json?             // array of candidate’s skills
+  experienceYears Int?              // number of years experience
+  education       Json?             // [{ degree: "BSc CS", school: "XYZ", year: 2023 }]
+  coverLetter     String?      @db.Text
+  start_date      DateTime?
+
+  stage           ApplicationStage  @default(APPLIED)
+
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt 
+}
+
+
+model Client {
+  id           String       @id @default(uuid())
+  firstname    String
+  lastname     String
+  email        String  @unique
+  phone        String?
+  address      String?
+  status       ClientStatus    @default(ACTIVE)
+  profileImage String? // store URL or file path
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+
+enum ClientStatus{
+    ACTIVE
+    INACTIVE
+}
+model Activity {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  adminId     String?   // must match Admin.id type
+  employeeId  String?
+
+  admin       Admin?    @relation(fields: [adminId], references: [id])
+  employee    Employee?    @relation(fields: [employeeId], references: [id])
+}
+
+
+model Asset {
+  id             String       @id @default(uuid())
+  name           String
+  category       AssetCategory             // Machinery, Vehicle, Building, etc.
+  description    String?
+  assetImg       String?
+  location       String?
+  quantity       String
+
+  // Financial
+  purchaseDate   DateTime?
+  purchaseCost   Float?
+
+  // Status & tracking
+  status         AssetStatus @default(ACTIVE)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+enum AssetCategory {
+  MACHINERY
+  VEHICLE
+  BUILDING
+  EQUIPMENT
+  SOFTWARE
+  OTHER
+}
+
+enum AssetStatus {
+  ACTIVE
+  MAINTENANCE
+  RETIRED
+  DISPOSED
+}
