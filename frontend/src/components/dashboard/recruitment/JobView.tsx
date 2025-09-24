@@ -42,7 +42,7 @@ const stripHtml = (html: string): string => {
   return div.textContent || div.innerText || "";
 };
 
-const JobView: React.FC = () => {
+const JobView: React.FC<{role:string}> = ({role})  => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

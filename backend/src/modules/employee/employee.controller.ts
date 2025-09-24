@@ -126,6 +126,7 @@ export class EmployeeController {
     if (updateEmployeeData?.date_hired) {
       updateData.date_hired = new Date(updateEmployeeData?.date_hired);
     }
+    
 
       if (files?.profileImg?.[0]?.filename) {
       updateData.profile_picture = `/uploads/profile_images/${files.profileImg[0].filename}`;

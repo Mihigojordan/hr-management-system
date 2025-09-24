@@ -83,7 +83,7 @@ const stripHtml = (html: string): string => {
   return div.textContent || div.innerText || "";
 };
 
-const ApplicantView: React.FC = () => {
+const ApplicantView: React.FC <{role:string}> = ({role})  => {
   const { jobId, applicantId } = useParams<{ jobId: string; applicantId?: string }>();
   const navigate = useNavigate();
 

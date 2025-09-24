@@ -61,42 +61,42 @@ enum MaritalStatus {
   WIDOWED
 }
 
-model Employee {
-  id                      String         @id @unique @default(uuid())
-  first_name              String
-  last_name               String
-  gender                  String
-  date_of_birth           DateTime
-  phone                   String
-  email                   String         @unique
-  password                String?
-  address                 String
-  national_id             String         @unique
-  profile_picture         String?
-  bank_account_number     String?
-  bank_name               String?
-  cv                      String?
-  application_letter      String?
-  position                String
-  departmentId            String
-  department              Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  marital_status          MaritalStatus? @default(SINGLE)
-  date_hired              DateTime
-  status                  EmployeeStatus @default(ACTIVE)
-  experience              Json?
-  emergency_contact_name  String?
-  emergency_contact_phone String?
-  
-  // security
-  google_id    String?  @unique
-  isLocked   Boolean? @default(false)
-  is2FA   Boolean? @default(false) 
+  model Employee {
+    id                      String         @id @unique @default(uuid())
+    first_name              String
+    last_name               String
+    gender                  String
+    date_of_birth           DateTime
+    phone                   String
+    email                   String         @unique
+    password                String?
+    address                 String
+    national_id             String         @unique
+    profile_picture         String?
+    bank_account_number     String?
+    bank_name               String?
+    cv                      String?
+    application_letter      String?
+    position                String
+    departmentId            String
+    department              Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    marital_status          MaritalStatus? @default(SINGLE)
+    date_hired              DateTime
+    status                  EmployeeStatus @default(ACTIVE)
+    experience              Json?
+    emergency_contact_name  String?
+    emergency_contact_phone String?
+    
+    // security
+    google_id    String?  @unique
+    isLocked   Boolean? @default(false)
+    is2FA   Boolean? @default(false) 
 
-  activity              Activity[]
-  contract              Contract[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
+    activity              Activity[]
+    contract              Contract[]
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+  }
 
 model Contract {
   id                     String       @id @default(uuid())

@@ -56,7 +56,7 @@ interface DepartmentService {
 
 type ViewMode = 'table' | 'grid' | 'list';
 
-const DepartmentDashboard: React.FC = () => {
+const DepartmentDashboard: React.FC<{role:string}> = ({role})  => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [allDepartments, setAllDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

@@ -10,33 +10,45 @@ import {
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAdminAuth from "../../context/AdminAuthContext";
+import useEmployeeAuth from "../../context/EmployeeAuthContext"; // Import employee auth context
 import { API_URL } from "../../api/api";
 
 interface HeaderProps {
   onToggle: () => void;
+  role: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ onToggle }) => {
-  const { user, logout, lockAdmin } = useAdminAuth();
+const Header: React.FC<HeaderProps> = ({ onToggle, role }) => {
+  const navigate = useNavigate();
+  const { user: adminUser, logout: adminLogout, lockAdmin } = useAdminAuth();
+  const { user: employeeUser, logout: employeeLogout, lockEmployee } = useEmployeeAuth();
+
+  // Use the appropriate user and logout function based on role
+  const user = role === "admin" ? adminUser : employeeUser;
+  const logout = role === "admin" ? adminLogout : employeeLogout;
+  const lock = role === "admin" ? lockAdmin : lockEmployee;
 
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [isLocking, setIsLocking] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const navigate = useNavigate();
+
+
 
   const onLogout = async () => {
     try {
       await logout();
+      setIsDropdownOpen(false);
+   
     } catch (error) {
-      console.error(error);
+      console.error("Logout error:", error);
     }
   };
 
   const handleLock = async () => {
     setIsLocking(true);
     try {
-      await lockAdmin();
-      // Context updates isLocked, ProtectedRoute handles redirect
+      await lock();
+      setIsDropdownOpen(false);
     } catch (error) {
       console.error("Lock error:", error);
     } finally {
@@ -44,26 +56,34 @@ const Header: React.FC<HeaderProps> = ({ onToggle }) => {
     }
   };
 
-  // Get display name
+  // Get display name based on role
   const getDisplayName = (): string => {
-    return user?.adminName || "Admin";
+    if (role === "admin") {
+      return adminUser?.adminName || "Admin";
+    }
+    return employeeUser?.first_name
+      ? `${employeeUser.first_name} ${employeeUser.last_name || ""}`.trim()
+      : "Employee";
+  };
+
+  // Get profile image and email based on role
+  const getProfileImage = (): string | undefined => {
+    return role === "admin" ? adminUser?.profileImage : employeeUser?.profile_image ;
+  };
+
+  const getEmail = (): string | undefined => {
+    return role === "admin" ? adminUser?.adminEmail : employeeUser?.email;
   };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Close dropdown when pressing Escape key
@@ -73,11 +93,8 @@ const Header: React.FC<HeaderProps> = ({ onToggle }) => {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener("keydown", handleEscapeKey);
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-    };
+    return () => document.removeEventListener("keydown", handleEscapeKey);
   }, []);
 
   return (
@@ -114,9 +131,9 @@ const Header: React.FC<HeaderProps> = ({ onToggle }) => {
                 disabled={isLocking}
               >
                 <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center overflow-hidden">
-                  {user?.profileImg ? (
+                  {getProfileImage() ? (
                     <img
-                      src={`${API_URL}${user.profileImg}`}
+                      src={`${API_URL}${getProfileImage()}`}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover"
                     />
@@ -125,10 +142,8 @@ const Header: React.FC<HeaderProps> = ({ onToggle }) => {
                   )}
                 </div>
                 <div className="text-left">
-                  <div className="text-sm font-medium text-gray-700">
-                    {getDisplayName()}
-                  </div>
-                  <div className="text-xs text-primary-600">Administrator</div>
+                  <div className="text-sm font-medium text-gray-700">{getDisplayName()}</div>
+                  <div className="text-xs text-primary-600">{role === "admin" ? "Administrator" : "Employee"}</div>
                 </div>
                 <ChevronDown
                   className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
@@ -143,14 +158,10 @@ const Header: React.FC<HeaderProps> = ({ onToggle }) => {
                   <div className="py-1">
                     {/* User Info Header */}
                     <div className="px-4 py-3 border-b border-gray-100 bg-primary-50">
-                      <div className="text-sm font-medium text-gray-900">
-                        {getDisplayName()}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {user?.adminEmail}
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">{getDisplayName()}</div>
+                      <div className="text-xs text-gray-600">{getEmail()}</div>
                       <div className="text-xs font-medium text-primary-600">
-                        Administrator
+                        {role === "admin" ? "Administrator" : "Employee"}
                       </div>
                     </div>
 
@@ -158,7 +169,7 @@ const Header: React.FC<HeaderProps> = ({ onToggle }) => {
                     <div className="py-1">
                       <button
                         onClick={() => {
-                          navigate("/admin/dashboard/profile");
+                          navigate(role === "admin" ? "/admin/dashboard/profile" : "/employee/dashboard/profile");
                           setIsDropdownOpen(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 transition-colors"

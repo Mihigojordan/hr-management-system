@@ -101,7 +101,7 @@ interface Notification {
   type: 'success' | 'error';
 }
 
-const ViewEmployee: React.FC = () => {
+const ViewEmployee: React.FC<{role:string}> = ({role}) => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState<Employee | null>(null);

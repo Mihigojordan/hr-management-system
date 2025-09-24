@@ -36,7 +36,7 @@ interface OperationStatus {
   message: string;
 }
 
-const JobDashboard: React.FC = () => {
+const JobDashboard: React.FC <{role:string}> = ({role}) => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

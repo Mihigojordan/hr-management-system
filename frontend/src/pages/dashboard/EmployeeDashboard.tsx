@@ -43,7 +43,7 @@ interface OperationStatus {
   message: string;
 }
 
-const EmployeeDashboard: React.FC = () => {
+const EmployeeDashboard: React.FC<{role:string}> = ({role})  => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);

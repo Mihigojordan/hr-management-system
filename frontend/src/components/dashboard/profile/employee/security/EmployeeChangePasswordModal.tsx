@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import Swal from 'sweetalert2';
-import adminAuthService, { changePassword } from '../../../../../services/adminAuthService';
+import  useEmployeeAuth  from '../../../../../context/EmployeeAuthContext';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  adminId: string;
+  employeeId: string;
 }
 
 interface FormData {
@@ -21,7 +21,8 @@ interface Errors {
   confirmPassword?: string;
 }
 
-const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, adminId }) => {
+const EmployeeChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, employeeId }) => {
+  const { changePassword } = useEmployeeAuth();
   const [formData, setFormData] = useState<FormData>({
     oldPassword: '',
     newPassword: '',
@@ -69,34 +70,33 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
     return newErrors;
   };
 
- const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value } = e.target;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
 
-  // Compute the new form data
-  const nextFormData = { ...formData, [name]: value };
-  setFormData(nextFormData);
+    // Compute the new form data
+    const nextFormData = { ...formData, [name]: value };
+    setFormData(nextFormData);
 
-  // Validate old and new password
-  const newErrors: Errors = {
-    oldPassword: validateOldPassword(nextFormData.oldPassword),
-    newPassword: validateNewPassword(nextFormData.newPassword),
+    // Validate old and new password
+    const newErrors: Errors = {
+      oldPassword: validateOldPassword(nextFormData.oldPassword),
+      newPassword: validateNewPassword(nextFormData.newPassword),
+    };
+
+    // Custom confirm password validation
+    if (!nextFormData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your new password';
+    } else if (nextFormData.confirmPassword !== nextFormData.newPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    // Remove empty errors
+    Object.keys(newErrors).forEach((key) => {
+      if (!newErrors[key as keyof Errors]) delete newErrors[key as keyof Errors];
+    });
+
+    setErrors(newErrors);
   };
-
-  // Custom confirm password validation
-  if (!nextFormData.confirmPassword) {
-    newErrors.confirmPassword = 'Please confirm your new password';
-  } else if (nextFormData.confirmPassword !== nextFormData.newPassword) {
-    newErrors.confirmPassword = 'Passwords do not match';
-  }
-
-  // Remove empty errors
-  Object.keys(newErrors).forEach((key) => {
-    if (!newErrors[key as keyof Errors]) delete newErrors[key as keyof Errors];
-  });
-
-  setErrors(newErrors);
-};
-
 
   const handleSave = async () => {
     const newErrors = validateForm();
@@ -107,7 +107,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
 
     setIsLoading(true);
     try {
-      await adminAuthService.changePassword({
+      await changePassword({
         currentPassword: formData.oldPassword,
         newPassword: formData.newPassword,
       });
@@ -125,8 +125,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
         onClose();
       });
     } catch (error: any) {
-        console.log(error);
-        
+      console.error(error);
       Swal.fire({
         title: 'Error',
         text: error.message || 'Failed to change password. Please try again.',
@@ -285,4 +284,4 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
   );
 };
 
-export default ChangePasswordModal;
+export default EmployeeChangePasswordModal;

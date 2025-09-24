@@ -37,7 +37,7 @@ interface OperationStatus {
 
 type ViewMode = 'table' | 'grid' | 'list';
 
-const AssetManagement = () => {
+const AssetManagement = ({role}:{role:string}) => {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [allAssets, setAllAssets] = useState<Asset[]>([]);
     const [loading, setLoading] = useState<boolean>(true);

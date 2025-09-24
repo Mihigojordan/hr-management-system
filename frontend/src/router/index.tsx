@@ -12,7 +12,7 @@ import UnlockScreen from '../pages/auth/admin/UnlockScreen';
 import DashboardLayout from '../layout/DashboardLayout';
 import DashboardHome from '../pages/dashboard/DashboardHome';
 import ProtectPrivateAdminRoute from '../components/protectors/ProtectPrivateAdminRoute';
-import AdminProfile from '../pages/dashboard/AdminProfile';
+import AdminProfile from '../pages/dashboard/admin/AdminProfile';
 import EmployeeDashboard from '../pages/dashboard/EmployeeDashboard';
 import EmployeeFormExample from '../components/dashboard/employee/EmployeeForm';
 import ContractDashboard from '../pages/dashboard/ContractManagement';
@@ -29,6 +29,10 @@ import AssetManagement from '../pages/dashboard/AssetManagement';
 import AddAssetPage from '../components/dashboard/asset/AddAssetPage';
 import EditAssetPage from '../components/dashboard/asset/EditAssetPage';
 import AssetViewPage from '../components/dashboard/asset/AssetViewPage';
+import EmployeeLogin from '../pages/auth/employee/EmployeeLogin';
+import EmployeeUnlockScreen from '../pages/auth/employee/EmployeeUnlockScreen';
+import ProtectPrivateEmployeeRoute from '../components/protectors/ProtectPrivateEmployeeRoute';
+import EmployeeProfilePage from '../pages/dashboard/employee/EmployeeProfilePage';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -175,13 +179,13 @@ const routes = createBrowserRouter([
           },
           {
             path: 'dashboard',
-            element: <DashboardLayout />,
+            element: <DashboardLayout role='admin' />,
             children: [
               {
                 path: '',
                 element: (
                   <SuspenseWrapper>
-                    <DashboardHome />
+                    <DashboardHome role='admin'/>
                   </SuspenseWrapper>
                 ),
               },
@@ -189,7 +193,7 @@ const routes = createBrowserRouter([
                 path: 'profile',
                 element: (
                   <SuspenseWrapper>
-                    <AdminProfile />
+                    <AdminProfile  />
                   </SuspenseWrapper>
                 ),
               },
@@ -197,7 +201,7 @@ const routes = createBrowserRouter([
                 path: 'department-management',
                 element: (
                   <SuspenseWrapper>
-                    <DepartmentDashboard />
+                    <DepartmentDashboard role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -205,7 +209,7 @@ const routes = createBrowserRouter([
                 path: 'employee-management',
                 element: (
                   <SuspenseWrapper>
-                    <EmployeeDashboard />
+                    <EmployeeDashboard role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -213,7 +217,7 @@ const routes = createBrowserRouter([
                 path: 'employee-management/:id',
                 element: (
                   <SuspenseWrapper>
-                    <ViewEmployee />
+                    <ViewEmployee role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -221,7 +225,7 @@ const routes = createBrowserRouter([
                 path: 'employee-management/create',
                 element: (
                   <SuspenseWrapper>
-                    <EmployeeFormExample />
+                    <EmployeeFormExample role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -229,7 +233,7 @@ const routes = createBrowserRouter([
                 path: 'employee-management/update/:id',
                 element: (
                   <SuspenseWrapper>
-                    <EmployeeFormExample />
+                    <EmployeeFormExample role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -237,7 +241,7 @@ const routes = createBrowserRouter([
                 path: 'contract-management',
                 element: (
                   <SuspenseWrapper>
-                    <ContractDashboard />
+                    <ContractDashboard role='admin'/>
                   </SuspenseWrapper>
                 ),
               },
@@ -245,7 +249,7 @@ const routes = createBrowserRouter([
                 path: 'recruiting-management',
                 element: (
                   <SuspenseWrapper>
-                    <RecruitementManagement />
+                    <RecruitementManagement role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -253,7 +257,7 @@ const routes = createBrowserRouter([
                 path: 'recruiting-management/create',
                 element: (
                   <SuspenseWrapper>
-                    <UpserJobPost />
+                    <UpserJobPost role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -261,7 +265,7 @@ const routes = createBrowserRouter([
                 path: 'recruiting-management/update/:id',
                 element: (
                   <SuspenseWrapper>
-                    <UpserJobPost />
+                    <UpserJobPost role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -269,7 +273,7 @@ const routes = createBrowserRouter([
                 path: 'recruiting-management/:id',
                 element: (
                   <SuspenseWrapper>
-                    <JobView />
+                    <JobView role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -277,7 +281,7 @@ const routes = createBrowserRouter([
                 path: 'recruiting-management/:jobId/applicants/:applicantId',
                 element: (
                   <SuspenseWrapper>
-                    <ApplicantView />
+                    <ApplicantView role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -285,7 +289,7 @@ const routes = createBrowserRouter([
                 path: 'client-management',
                 element: (
                   <SuspenseWrapper>
-                    <ClientManagement />
+                    <ClientManagement role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -293,7 +297,7 @@ const routes = createBrowserRouter([
                 path: 'asset-management',
                 element: (
                   <SuspenseWrapper>
-                    <AssetManagement />
+                    <AssetManagement role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -325,6 +329,85 @@ const routes = createBrowserRouter([
           },
         ],
       },
+         {
+        path: 'employee',
+        element: (
+          <SuspenseWrapper>
+            <ProtectPrivateEmployeeRoute>
+              <Outlet />
+            </ProtectPrivateEmployeeRoute>
+          </SuspenseWrapper>
+        ),
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/employee/dashboard" replace />,
+          },
+          {
+            path: 'dashboard',
+            element: <DashboardLayout role='employee' />,
+            children: [
+              {
+                path: '',
+                element: (
+                  <SuspenseWrapper>
+                    <DashboardHome role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'profile',
+                element: (
+                  <SuspenseWrapper>
+                    <EmployeeProfilePage  />
+                  </SuspenseWrapper>
+                ),
+              },
+          
+              {
+                path: 'client-management',
+                element: (
+                  <SuspenseWrapper>
+                    <ClientManagement role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'asset-management',
+                element: (
+                  <SuspenseWrapper>
+                    <AssetManagement role='employee'/>
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'asset-management/create',
+                element: (
+                  <SuspenseWrapper>
+                    <AddAssetPage role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'asset-management/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <EditAssetPage role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'asset-management/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <AssetViewPage  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -344,6 +427,22 @@ const routes = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <UnlockScreen />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'employee/login',
+        element: (
+          <SuspenseWrapper>
+            <EmployeeLogin />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'employee/unlock',
+        element: (
+          <SuspenseWrapper>
+            <EmployeeUnlockScreen />
           </SuspenseWrapper>
         ),
       },

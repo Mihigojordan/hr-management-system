@@ -9,6 +9,8 @@ import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { OTPService } from 'src/global/otp/otp.service';
 import { EmailService } from 'src/global/email/email.service';
+import { EmployeeService } from '../employee.service';
+
 
 @Injectable()
 export class EmployeeAuthService {
@@ -17,6 +19,7 @@ export class EmployeeAuthService {
     private jwtService: JwtService,
     private otpService: OTPService,
     private email: EmailService,
+    private employeeService: EmployeeService,
   ) {}
 
   async findEmployeeByEmailOrPhone(identifier: string) {
@@ -112,4 +115,71 @@ export class EmployeeAuthService {
 
     return { message: 'Password updated successfully' };
   }
+
+  // Lock employee account
+async lockEmployee(id: string) {
+  try {
+    const employee = await this.employeeService.findOne(id);
+    if (!employee) {
+      throw new NotFoundException('Employee not found');
+    }
+    const lockedEmployee = await this.prisma.employee.update({
+      where: { id },
+      data: { isLocked: true },
+    });
+    return { message: `Employee ${lockedEmployee.email} has been locked.` };
+  } catch (error) {
+    console.error('Error locking employee', error);
+    throw new Error(error.message);
+  }
+}
+
+// Unlock employee account
+async unlockEmployee(id: string, body: { password: string }) {
+  try {
+    if (!id) {
+      throw new BadRequestException('Employee id is required');
+    }
+    if (!body.password || body.password.length < 6) {
+      throw new BadRequestException(
+        'Password is required and must be at least 6 characters long',
+      );
+    }
+
+    const employee = await this.employeeService.findOne(id);
+    if (!employee) {
+      throw new NotFoundException('Employee not found');
+    }
+    if (!employee.isLocked) {
+      throw new BadRequestException('Employee is not locked');
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      body.password,
+      String(employee.password),
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Invalid password');
+    }
+
+    await this.prisma.employee.update({
+      where: { id },
+      data: { isLocked: false },
+    });
+
+    return { message: 'Employee unlocked successfully' };
+  } catch (error) {
+    console.error('Error unlocking employee:', error);
+    throw new Error(error.message);
+  }
+}
+
+
+ async findOne(employeeId: string) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { id: employeeId },
+    });
+    return employee;
+  }
+
 }

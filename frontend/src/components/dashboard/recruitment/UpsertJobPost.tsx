@@ -76,7 +76,8 @@ const JobForm: React.FC<{
   jobId?: string;
   onSuccess?: (response: Job) => void;
   onCancel?: () => void;
-}> = ({ jobId, onSuccess, onCancel }) => {
+  role:string;
+}> = ({ jobId, onSuccess, onCancel, role }) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Errors>({});
@@ -647,7 +648,7 @@ const JobForm: React.FC<{
   );
 };
 
-const UpserJobPost: React.FC = () => {
+const UpserJobPost: React.FC<{role:string}> = ({role}) => {
   const [showForm, setShowForm] = useState<boolean>(true);
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
   const navigate = useNavigate();

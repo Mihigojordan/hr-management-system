@@ -80,7 +80,7 @@ interface StatCard {
 }
 
 // --- Component ---
-const DashboardHome: React.FC = () => {
+const DashboardHome: React.FC<{role:string}> = ({role}) => {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     employees: [],
     recentHires: [],

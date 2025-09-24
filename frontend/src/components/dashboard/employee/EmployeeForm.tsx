@@ -1049,7 +1049,7 @@ const EmployeeForm: React.FC<{
   );
 };
 
-const EmployeeFormExample: React.FC = () => {
+const EmployeeFormExample: React.FC <{role:string}> = ({role})  => {
   const [showForm, setShowForm] = useState<boolean>(true);
   const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(null);
 

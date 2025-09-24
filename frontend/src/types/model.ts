@@ -50,6 +50,9 @@ export interface EmployeeData {
 export interface Employee extends EmployeeData {
     profile_image: string | undefined;
     id: string;
+    isLocked:boolean;
+    google_id:boolean;
+    is2FA:boolean;
     contract?: Contract; // Assuming one-to-one relationship for simplicity
     created_at?: string; // ISO string
     updated_at?: string; // ISO string

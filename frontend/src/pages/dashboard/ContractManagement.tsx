@@ -32,7 +32,7 @@ interface OperationStatus {
   message: string;
 }
 
-const ContractDashboard: React.FC = () => {
+const ContractDashboard: React.FC<{role:string}> = ({role})  => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [allContracts, setAllContracts] = useState<Contract[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);

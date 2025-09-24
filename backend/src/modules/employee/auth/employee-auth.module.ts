@@ -5,6 +5,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { EmailService } from 'src/global/email/email.service';
 import { OTPService } from 'src/global/otp/otp.service';
+import { GoogleEmployeeStrategy } from './employee-google.strategy';
+import { EmployeeService } from '../employee.service';
 
 @Module({
   imports: [
@@ -14,7 +16,7 @@ import { OTPService } from 'src/global/otp/otp.service';
     }),
   ],
   controllers: [EmployeeAuthController],
-  providers: [EmployeeAuthService, PrismaService, EmailService, OTPService],
+  providers: [EmployeeAuthService, EmployeeService, PrismaService, EmailService, OTPService,GoogleEmployeeStrategy],
   exports: [EmployeeAuthService],
 })
 export class EmployeeAuthModule {}

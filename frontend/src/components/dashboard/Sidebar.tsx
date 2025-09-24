@@ -19,6 +19,7 @@ import useAdminAuth from "../../context/AdminAuthContext";
 interface SidebarProps {
   isOpen?: boolean;
   onToggle: () => void;
+  role:string;
 }
 
 interface NavItem {
@@ -28,7 +29,7 @@ interface NavItem {
   path: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle,role }) => {
   const { user } = useAdminAuth();
   const navigate = useNavigate();
 

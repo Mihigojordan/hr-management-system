@@ -6,7 +6,7 @@ import Sidebar from '../components/dashboard/Sidebar';
 
 import { Outlet } from 'react-router-dom';
 
-const DashboardLayout = () => {
+const DashboardLayout = ({role}:{role:string}) => {
 
     const [isOpen, setIsOpen] = useState(false)
  
@@ -16,9 +16,9 @@ const DashboardLayout = () => {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar onToggle={onToggle} isOpen={isOpen} />
+      <Sidebar onToggle={onToggle} role={role} isOpen={isOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onToggle={onToggle} />
+        <Header onToggle={onToggle} role={role} />
         <main className="flex-1 overflow-y-auto">
          <Outlet />
         </main>

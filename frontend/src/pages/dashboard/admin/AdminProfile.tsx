@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Lock, Bell, Link } from 'lucide-react';
-import ProfileSettings from '../../components/dashboard/profile/admin/ProfileSettings';
-import SecuritySettings from '../../components/dashboard/profile/admin/SecuritySettings';
-import NotificationsSettings from '../../components/dashboard/profile/admin/NotificationsSettings';
-import ConnectedApps from '../../components/dashboard/profile/admin/ConnectedApps';
+import ProfileSettings from '../../../components/dashboard/profile/admin/ProfileSettings';
+import SecuritySettings from '../../../components/dashboard/profile/admin/SecuritySettings';
+import NotificationsSettings from '../../../components/dashboard/profile/admin/NotificationsSettings';
+import ConnectedApps from '../../../components/dashboard/profile/admin/ConnectedApps';
 
 const AdminProfilePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();

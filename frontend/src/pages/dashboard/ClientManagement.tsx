@@ -55,7 +55,7 @@ interface OperationStatus {
 
 type ViewMode = 'table' | 'grid' | 'list';
 
-const ClientManagement = () => {
+const ClientManagement = ({role}:{role:string}) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [allClients, setAllClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
