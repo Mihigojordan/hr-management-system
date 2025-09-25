@@ -261,3 +261,17 @@ enum AssetStatus {
   RETIRED
   DISPOSED
 }
+
+
+model Store {
+  id            String       @id @default(uuid())
+  code          String   @unique
+  name          String
+  location      String
+  description   String?
+  manager_name  String?
+  contact_phone String?
+  contact_email String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}

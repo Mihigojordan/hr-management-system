@@ -110,7 +110,7 @@ export const EmployeeAuthProvider: React.FC<EmployeeAuthProviderProps> = ({ chil
       return response;
     } catch (error: any) {
       console.error('Login error:', error);
-      throw new Error(error.response?.data?.message || 'Failed to login');
+      throw new Error(error?.message || 'Failed to login');
     }
   };
 
@@ -134,7 +134,7 @@ export const EmployeeAuthProvider: React.FC<EmployeeAuthProviderProps> = ({ chil
       return response;
     } catch (error: any) {
       console.error('OTP verification error:', error);
-      throw new Error(error.response?.data?.message || 'Failed to verify OTP');
+      throw new Error(error?.message || 'Failed to verify OTP');
     }
   };
 

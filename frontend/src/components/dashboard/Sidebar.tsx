@@ -11,15 +11,17 @@ import {
   Briefcase,
   User2,
   Cog,
+  Settings,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import useAdminAuth from "../../context/AdminAuthContext";
+import useEmployeeAuth from "../../context/EmployeeAuthContext";
 
 interface SidebarProps {
   isOpen?: boolean;
   onToggle: () => void;
-  role:string;
+  role: string;
 }
 
 interface NavItem {
@@ -27,57 +29,87 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   path: string;
+  allowedRoles?: string[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle,role }) => {
-  const { user } = useAdminAuth();
+const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
+  const adminAuth = useAdminAuth();
+  const employeeAuth = useEmployeeAuth();
+  const auth = role === "admin" ? adminAuth : employeeAuth;
+  const user = auth.user;
   const navigate = useNavigate();
 
-  const navlinks: NavItem[] = [
-    {
-      id: "",
-      label: "Dashboard",
-      icon: TrendingUp,
-      path: "/admin/dashboard",
-    },
-    {
-      id: "departments",
-      label: "Departments Management",
-      icon: Building,
-      path: "/admin/dashboard/department-management",
-    },
-    {
-      id: "recruiting",
-      label: "Recruiting Management",
-      icon: Briefcase,
-      path: "/admin/dashboard/recruiting-management",
-    },
-    {
-      id: "employees",
-      label: "Employees Management",
-      icon: Users,
-      path: "/admin/dashboard/employee-management",
-    },
-    {
-      id: "clients",
-      label: "Clients Management",
-      icon: User2,
-      path: "/admin/dashboard/client-management",
-    },
-    {
-      id: "assets",
-      label: "Asset Management",
-      icon: Cog,
-      path: "/admin/dashboard/asset-management",
-    },
-  ];
+  const getNavlinks = (role: string): NavItem[] => {
+    const basePath = `/${role}/dashboard`;
 
-  const getProfileRoute = () => "/admin/dashboard/profile";
+    return [
+      {
+        id: "",
+        label: "Dashboard",
+        icon: TrendingUp,
+        path: basePath,
+      },
+      {
+        id: "departments",
+        label: "Departments Management",
+        icon: Building,
+        path: `${basePath}/department-management`,
+        allowedRoles: ["admin"],
+      },
+      {
+        id: "recruiting",
+        label: "Recruiting Management",
+        icon: Briefcase,
+        path: `${basePath}/recruiting-management`,
+        allowedRoles: ["admin"],
+      },
+      {
+        id: "employees",
+        label: "Employees Management",
+        icon: Users,
+        path: `${basePath}/employee-management`,
+        allowedRoles: ["admin"],
+      },
+      {
+        id: "clients",
+        label: "Clients Management",
+        icon: User2,
+        path: `${basePath}/client-management`,
+      
+      },
+      {
+        id: "assets",
+        label: "Asset Management",
+        icon: Cog,
+        path: `${basePath}/asset-management`,
+      
+      },
+      
+    ];
+  };
+
+  const navlinks = getNavlinks(role).filter(
+    (item) => !item.allowedRoles || item.allowedRoles.includes(role)
+  );
+
+  const getProfileRoute = () => `/${role}/dashboard/profile`;
 
   const handleNavigateProfile = () => {
     const route = getProfileRoute();
-    if (route) navigate(route, { replace: true });
+    navigate(route, { replace: true });
   };
+
+  const displayName =
+    role === "admin"
+      ? user?.adminName || "Admin User"
+      : `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Employee User";
+
+  const displayEmail =
+    role === "admin"
+      ? user?.adminEmail || "admin@example.com"
+      : user?.email || "employee@example.com";
+
+  const portalTitle = `${role.charAt(0).toUpperCase() + role.slice(1)} Portal`;
 
   const renderMenuItem = (item: NavItem) => {
     const Icon = item.icon;
@@ -133,7 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle,role }) => {
               <h2 className="font-bold text-lg text-primary-800">
                 Aby Hr Management
               </h2>
-              <p className="text-xs text-primary-500">Admin Portal</p>
+              <p className="text-xs text-primary-500">{portalTitle}</p>
             </div>
           </div>
           <button
@@ -168,10 +200,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle,role }) => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-normal text-gray-900 truncate">
-                {user?.adminName || "Admin User"}
+                {displayName}
               </p>
               <p className="text-xs text-gray-500 truncate">
-                {user?.adminEmail || "admin@example.com"}
+                {displayEmail}
               </p>
             </div>
           </div>

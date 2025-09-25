@@ -4,6 +4,7 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Experience } from '../../common/interfaces/employee.interface';
 import { EmployeeStatus, MaritalStatus } from '../../../generated/prisma';
@@ -59,7 +60,9 @@ export class EmployeeService {
     }
 
     const password = generatePassword();
-    data['password'] = password;
+      const hashedPassword = await bcrypt.hash(password, 10);
+    
+    data['password'] = hashedPassword;
     // ✅ Create new employee
     const createdEmployee = await this.prisma.employee.create({
       data: {

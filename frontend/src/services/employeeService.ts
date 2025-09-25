@@ -54,7 +54,7 @@ class EmployeeService {
    */
   async changePassword(employeeId: string, currentPassword: string, newPassword: string): Promise<any> {
     try {
-      const response: AxiosResponse<any> = await this.api.post('/employee/change-password', {
+      const response: AxiosResponse<any> = await this.api.patch('/employee/change-password', {
         employeeId,
         currentPassword,
         newPassword,

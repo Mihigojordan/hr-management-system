@@ -87,7 +87,7 @@ export class EmployeeAuthService {
       role: 'employee',
     });
 
-    return { token, employee, message: 'Login successful' };
+    return { token, employee,authenticated:true, message: 'Login successful' };
   }
 
   async changePassword(
