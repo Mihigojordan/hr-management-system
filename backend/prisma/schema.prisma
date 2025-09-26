@@ -86,7 +86,7 @@ enum MaritalStatus {
     experience              Json?
     emergency_contact_name  String?
     emergency_contact_phone String?
-    
+    store  Store[]
     // security
     google_id    String?  @unique
     isLocked   Boolean? @default(false)
@@ -268,8 +268,9 @@ model Store {
   code          String   @unique
   name          String
   location      String
-  description   String?
-  manager_name  String?
+  description   String?  @db.text
+  managerId    String?
+  manager     Employee?    @relation(fields: [managerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   contact_phone String?
   contact_email String?
   created_at    DateTime @default(now())

@@ -12,6 +12,7 @@ import {
   User2,
   Cog,
   Settings,
+  BoxSelect,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -82,6 +83,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         label: "Asset Management",
         icon: Cog,
         path: `${basePath}/asset-management`,
+      
+      },
+      {
+        id: "store",
+        label: "Store Management",
+        icon:BoxSelect,
+        path: `${basePath}/store-management`,
       
       },
       

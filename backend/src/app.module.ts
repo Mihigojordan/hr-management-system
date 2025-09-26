@@ -12,6 +12,7 @@ import { ClientModule } from './modules/client-management/client.module';
 
 import { ActivityModule } from './modules/activity-management/activity.module';
 import { AssetModule } from './modules/assets-management/asset.module';
+import { StoreModule } from './modules/store-management/store.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { AssetModule } from './modules/assets-management/asset.module';
     EmailModule,
     ClientModule,
     ActivityModule,
-    AssetModule
+    AssetModule,
+    StoreModule,
   ],
   controllers: [AppController],
 })
