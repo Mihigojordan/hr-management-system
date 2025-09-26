@@ -12,6 +12,8 @@ import { ClientModule } from './modules/client-management/client.module';
 
 import { ActivityModule } from './modules/activity-management/activity.module';
 import { AssetModule } from './modules/assets-management/asset.module';
+import { SiteModule } from './modules/site-management/site.module';
+import { CageModule } from './modules/cage-management/cage.module';
 
 @Module({
   imports: [
@@ -26,7 +28,9 @@ import { AssetModule } from './modules/assets-management/asset.module';
     EmailModule,
     ClientModule,
     ActivityModule,
-    AssetModule
+    AssetModule,
+    SiteModule,
+    CageModule
   ],
   controllers: [AppController],
 })

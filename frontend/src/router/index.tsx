@@ -39,6 +39,8 @@ const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
 const ContactPage = lazy(() => import('../pages/landing/ContactUs'));
 const AboutPage = lazy(() => import('../pages/landing/AboutPage'));
 const DepartmentDashboard = lazy(() => import('../pages/dashboard/DepartmentManagement'));
+const SiteManagement = lazy(() => import('../pages/dashboard/SiteManagement')); 
+const SiteAssignmentManagement = lazy(()=> import('../pages/dashboard/SiteAssignmentManagement'));
 
 /**
  * Loading spinner component for Suspense fallback
@@ -325,6 +327,22 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+              {
+                path:'site-management',
+                element:(
+                  <SuspenseWrapper>
+                    <SiteManagement role='admin'/>
+                  </SuspenseWrapper>
+                )
+              },
+              {
+                path:'assign-management',
+                element:(
+                  <SuspenseWrapper>
+                    <SiteAssignmentManagement role='admin'/>
+                  </SuspenseWrapper>
+                )
+              }
             ],
           },
         ],
@@ -451,4 +469,3 @@ const routes = createBrowserRouter([
 ]);
 
 export default routes;
-

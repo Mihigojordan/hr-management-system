@@ -159,3 +159,30 @@ export interface Client {
   createdAt: string; // ISO date string from backend
   updatedAt: string; // ISO date string from backend
 }
+
+
+// site interface
+
+export interface Site {
+  id: string;
+  siteCode: string;
+  name: string;
+  location: string;
+  siteImg?: string;
+  managerId?: string;
+  supervisorId?: string;
+  manager?: Employee;
+  supervisor?: Employee;
+  employees?: Employee[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SiteData {
+  siteCode: string;
+  name: string;
+  location: string;
+  siteImg?: string;
+  managerId?: string;
+  supervisorId?: string;
+}

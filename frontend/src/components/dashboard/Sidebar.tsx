@@ -84,6 +84,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/asset-management`,
       
       },
+      {
+        id: "sites",
+        label: "Site Management",
+        icon: Cog,
+        path: `${basePath}/site-management`,
+      
+      },
+      {
+        id: "site assing",
+        label: "site assign Management",
+        icon: Cog,
+        path: `${basePath}/assign-management`,
+      
+      },
       
     ];
   };
