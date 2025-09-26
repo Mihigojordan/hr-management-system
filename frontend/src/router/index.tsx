@@ -36,6 +36,11 @@ import EmployeeProfilePage from '../pages/dashboard/employee/EmployeeProfilePage
 import StoreManagement from '../pages/dashboard/StoreManagement';
 import StoreFormExample from '../components/dashboard/store/StoreForm';
 import StoreViewPage from '../components/dashboard/store/StoreViewMorePage';
+import CageManagement from '../pages/dashboard/CageManagement';
+import CageForm from '../components/dashboard/cage/CageForm';
+import CageViewPage from '../components/dashboard/cage/CageViewMorePage';
+import MedicationForm from '../components/dashboard/cage/MedicationForm';
+import DailyFeedRecordForm from '../components/dashboard/cage/DailyFeedRecordForm';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -378,6 +383,70 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+               {
+                path: 'cage-management',
+                element: (
+                  <SuspenseWrapper>
+                    <CageManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'cage-management/create',
+                element: (
+                  <SuspenseWrapper>
+                    <CageForm role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <CageForm role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/view/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <CageViewPage  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/m/create/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <MedicationForm  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/m/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <MedicationForm  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/f/create',
+                element: (
+                  <SuspenseWrapper>
+                    <DailyFeedRecordForm  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/f/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <DailyFeedRecordForm  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
             ],
           },
         ],
@@ -454,6 +523,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <AssetViewPage  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management',
+                element: (
+                  <SuspenseWrapper>
+                    <CageManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

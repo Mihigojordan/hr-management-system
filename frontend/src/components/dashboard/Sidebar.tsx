@@ -13,6 +13,8 @@ import {
   Cog,
   Settings,
   BoxSelect,
+  Grid,
+  ShoppingBasket,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -101,9 +103,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
       {
         id: "store",
         label: "Store Management",
-        icon:BoxSelect,
+        icon: ShoppingBasket,
         path: `${basePath}/store-management`,
-      }
+      },
+      {
+        id: "cage",
+        label: "Cage Management",
+        icon: Grid,
+        path: `${basePath}/cage-management`,
+      },
       
     ];
   };

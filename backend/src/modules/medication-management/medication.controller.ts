@@ -8,6 +8,8 @@ export class MedicationController {
   @Post()
   async create(@Body() body: any) {
     try {
+      console.log(body);
+      
       return await this.medicationService.create(body);
     } catch (error) {
       return { status: 'error', message: error.message };
@@ -27,6 +29,14 @@ export class MedicationController {
   async findOne(@Param('id') id: string) {
     try {
       return await this.medicationService.findOne(id);
+    } catch (error) {
+      return { status: 'error', message: error.message };
+    }
+  }
+  @Get('cage/:id')
+  async findAllByCageId(@Param('id') id: string) {
+    try {
+      return await this.medicationService.findAllByCageId(id);
     } catch (error) {
       return { status: 'error', message: error.message };
     }
