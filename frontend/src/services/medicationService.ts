@@ -12,7 +12,8 @@ export interface MedicationData {
   startDate: string; // ISO string
   endDate?: string | null;
   cageId: string;
-  administeredBy: string; // Employee ID
+  administeredByEmployee: any; // Employee ID
+  administeredByAdmin:any; // Admin Id
 }
 
 // Medication entity with ID + timestamps and relations

@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { Check, X, Pill } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import medicationService, { type MedicationData, type Medication } from '../../../services/medicationService';
 import cageService, { type Cage } from '../../../services/cageService';
 import Swal from 'sweetalert2';
+import  useAdminAuth from '../../../context/AdminAuthContext';
+import  useEmployeeAuth  from '../../../context/EmployeeAuthContext';
 
 interface MedicationFormData {
   name: string;
@@ -20,13 +22,6 @@ interface MedicationFormData {
 interface Errors {
   [key: string]: string | null;
 }
-
-// Mock employee data (replace with actual employee service if available)
-const mockEmployees = [
-  { id: 'emp1', name: 'John Doe' },
-  { id: 'emp2', name: 'Jane Smith' },
-  { id: 'emp3', name: 'Alice Johnson' },
-];
 
 // Utility function to format ISO date to datetime-local format (YYYY-MM-DDTHH:mm)
 const formatISOToDateTimeLocal = (isoDate: string): string => {
@@ -47,6 +42,10 @@ const formatDateTimeLocalToISO = (dateTime: string): string => {
 };
 
 const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
+  const { user: adminUser } = useAdminAuth();
+  const { user: employeeUser } = useEmployeeAuth();
+  const user = role === 'admin' ? adminUser : employeeUser;
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Errors>({});
   const [cages, setCages] = useState<Cage[]>([]);
@@ -55,13 +54,14 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
     dosage: '',
     method: '',
     reason: '',
-    startDate: '2025-09-26T21:34', // Default to 09:34 PM CAT, September 26, 2025
+    startDate: '2025-09-27T01:19', // Default to 1:19 AM CAT, September 27, 2025
     endDate: '',
     cageId: '',
-    administeredBy: '',
+    administeredBy: user?.id || '',
   });
   const navigate = useNavigate();
   const { id: medicationId } = useParams<{ id?: string }>();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +70,10 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
         // Fetch cages for dropdown
         const cageData = await cageService.getAllCages();
         setCages(cageData || []);
+
+        // Check for query parameters
+        const queryParams = new URLSearchParams(location.search);
+        const prefilledCageId = queryParams.get('cageId');
 
         if (medicationId) {
           // Fetch existing medication for update mode
@@ -83,11 +87,18 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
               startDate: formatISOToDateTimeLocal(medication.startDate || ''),
               endDate: formatISOToDateTimeLocal(medication.endDate || ''),
               cageId: medication.cageId || '',
-              administeredBy: medication.administeredBy || '',
+              administeredBy: medication.administeredByEmployee || medication.administeredByAdmin || '',
             });
           } else {
             throw new Error('Medication not found');
           }
+        } else {
+          // Pre-fill cageId and administeredBy from query parameters and user
+          setFormData((prev) => ({
+            ...prev,
+            cageId: prefilledCageId || prev.cageId,
+            administeredBy: user?.id || '',
+          }));
         }
       } catch (error: any) {
         console.error('Error fetching data:', error);
@@ -105,8 +116,21 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
       }
     };
 
-    fetchData();
-  }, [medicationId]);
+    if (user?.id) {
+      fetchData();
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Authentication Error',
+        text: 'User not authenticated',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+      });
+      navigate(`/${role}/login`);
+    }
+  }, [medicationId, location.search, user, role, navigate]);
 
   const handleInputChange = (field: keyof MedicationFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -124,7 +148,8 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
       startDate: formatDateTimeLocalToISO(formData.startDate),
       endDate: formData.endDate ? formatDateTimeLocalToISO(formData.endDate) : null,
       cageId: formData.cageId,
-      administeredBy: formData.administeredBy,
+      administeredByEmployee: role === 'employee' ? formData.administeredBy : undefined,
+      administeredByAdmin: role === 'admin' ? formData.administeredBy : undefined,
     };
 
     const validation = medicationService.validateMedicationData(data);
@@ -144,11 +169,29 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
       newErrors.endDate = 'End date cannot be before start date';
     }
 
+    if (!formData.administeredBy) {
+      newErrors.administeredBy = 'Administered by is required';
+    }
+
     setErrors(newErrors);
-    return validation.isValid && !newErrors.endDate;
+    return validation.isValid && !newErrors.endDate && !newErrors.administeredBy;
   };
 
   const handleSubmit = async () => {
+    if (!user?.id) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Authentication Error',
+        text: 'User not authenticated',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+      });
+      navigate(`/${role}/login`);
+      return;
+    }
+
     if (!validateForm()) {
       Swal.fire({
         icon: 'error',
@@ -172,7 +215,8 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
         startDate: formatDateTimeLocalToISO(formData.startDate),
         endDate: formData.endDate ? formatDateTimeLocalToISO(formData.endDate) : null,
         cageId: formData.cageId,
-        administeredBy: formData.administeredBy,
+        administeredByEmployee: role === 'employee' ? user.id : undefined,
+        administeredByAdmin: role === 'admin' ? user.id : undefined,
       };
 
       let response: Medication;
@@ -200,7 +244,7 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
         });
       }
 
- navigate(`/${role}/dashboard/cage-management/view/${medicationId}?tab=medications`);
+      navigate(`/${role}/dashboard/cage-management/view/${formData.cageId}?tab=medications`);
     } catch (error: any) {
       console.error('Error submitting form:', error);
       Swal.fire({
@@ -218,7 +262,7 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
   };
 
   const handleCancel = () => {
-    navigate(`/${role}/dashboard/cage-management/view/${medicationId}?tab=medications`);
+    navigate(`/${role}/dashboard/cage-management/view/${formData.cageId || ''}?tab=medications`);
   };
 
   if (isLoading) {
@@ -347,7 +391,7 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Start Date and Time <span className="text-red-500">*</span>
+                  Start Date and Time (CAT) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="datetime-local"
@@ -366,7 +410,7 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  End Date and Time
+                  End Date and Time (CAT)
                 </label>
                 <input
                   type="datetime-local"
@@ -413,18 +457,13 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Administered By <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={formData.administeredBy}
-                  onChange={(e) => handleInputChange('administeredBy', e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="">Select employee</option>
-                  {mockEmployees.map((employee) => (
-                    <option key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  value={user?.name || formData.administeredBy}
+                  disabled
+                  className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed"
+                  placeholder="Authenticated user"
+                />
                 {errors.administeredBy && (
                   <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
                     <X className="h-3 w-3" />

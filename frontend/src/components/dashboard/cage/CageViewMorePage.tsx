@@ -444,7 +444,7 @@ const CageViewPage: React.FC<{ role: string }> = ({ role }) => {
                 <p className="text-sm text-gray-600">Manage medications for {cage.cageName}</p>
               </div>
               <button
-                onClick={() => navigate(`/${role}/dashboard/cage-management/medication/create/${cageId}`)}
+                onClick={() => navigate(`/${role}/dashboard/cage-management/m/create/${cageId}`)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
               >
                 <Plus className="w-4 h-4" />
