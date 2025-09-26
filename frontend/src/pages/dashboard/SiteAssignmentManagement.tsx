@@ -34,7 +34,7 @@ interface OperationStatus {
   message: string;
 }
 
-const SiteAssignmentDashboard: React.FC = () => {
+const SiteAssignmentDashboard: React.FC<{role:string}> = ({role}) => {
  
   const [assignments, setAssignments] = useState<SiteAssignment[]>([]);
   const [allAssignments, setAllAssignments] = useState<SiteAssignment[]>([]);

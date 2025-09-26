@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Trash2,
   Edit,
+  Calendar,
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import Quill from 'react-quill-new';
@@ -57,9 +58,11 @@ const StoreViewPage: React.FC<{ role: string }> = ({ role }) => {
         setError(null);
 
         const storesData = await storeService.getAllStores();
-        if (storesData && storesData.length > 0) {
+       
+        
+        if (storesData.stores && storesData.stores.length > 0) {
           // Sort by created_at descending (most recent first)
-          const sortedStores = storesData.sort(
+          const sortedStores = storesData.stores.sort(
             (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
           );
           setStores(sortedStores);
@@ -102,34 +105,7 @@ const StoreViewPage: React.FC<{ role: string }> = ({ role }) => {
     setSidebarCurrentPage(1);
   }, [searchTerm]);
 
-  // Select store based on URL parameter
-  useEffect(() => {
-    if (stores.length > 0) {
-      if (storeId) {
-        const foundStore = stores.find((store) => store.id === storeId);
-        if (foundStore) {
-          setSelectedStore(foundStore);
-          setShowFullDescription(false);
-          // Calculate the page for the selected store
-          const indexInFiltered = filteredStores.findIndex((store) => store.id === storeId);
-          if (indexInFiltered !== -1) {
-            const targetPage = Math.floor(indexInFiltered / sidebarItemsPerPage) + 1;
-            setSidebarCurrentPage(targetPage);
-          }
-        } else {
-          setError('Store not found');
-        }
-      } else {
-        // Select the first store if no storeId is provided
-        setSelectedStore(stores[0]);
-        setShowFullDescription(false);
-        navigate(`${url}${stores[0].id}`);
-        setSidebarCurrentPage(1);
-      }
-    } else if (!loading && stores.length === 0) {
-      setError('No stores found');
-    }
-  }, [stores, storeId, navigate, filteredStores, sidebarItemsPerPage, url]);
+
 
   const showOperationStatus = (type: OperationStatus['type'], message: string, duration: number = 3000) => {
     setOperationStatus({ type, message });
@@ -193,6 +169,37 @@ const StoreViewPage: React.FC<{ role: string }> = ({ role }) => {
       ].some((field) => field && field.includes(searchTerm.toLowerCase()))
     );
   }, [stores, searchTerm]);
+
+    // Select store based on URL parameter
+  useEffect(() => {
+    if (stores.length > 0) {
+      if (storeId) {
+        const foundStore = stores.find((store) => store.id === storeId);
+        console.warn(foundStore);
+        
+        if (foundStore) {
+          setSelectedStore(foundStore);
+          setShowFullDescription(false);
+          // Calculate the page for the selected store
+          const indexInFiltered = filteredStores.findIndex((store) => store.id === storeId);
+          if (indexInFiltered !== -1) {
+            const targetPage = Math.floor(indexInFiltered / sidebarItemsPerPage) + 1;
+            setSidebarCurrentPage(targetPage);
+          }
+        } else {
+          setError('Store not found');
+        }
+      } else {
+        // Select the first store if no storeId is provided
+        setSelectedStore(stores[0]);
+        setShowFullDescription(false);
+        navigate(`${url}${stores[0].id}`);
+        setSidebarCurrentPage(1);
+      }
+    } else if (!loading && stores.length === 0) {
+      setError('No stores found');
+    }
+  }, [stores, storeId, navigate, filteredStores, sidebarItemsPerPage, url]);
 
   // Sidebar pagination calculations
   const sidebarTotalPages = Math.ceil(filteredStores.length / sidebarItemsPerPage);

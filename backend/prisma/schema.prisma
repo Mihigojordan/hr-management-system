@@ -273,7 +273,7 @@ model Store {
   code          String   @unique
   name          String
   location      String
-  description   String?  @db.text
+  description   String?   @db.Text
   managerId    String?
   manager     Employee?    @relation(fields: [managerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   contact_phone String?

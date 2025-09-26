@@ -18,7 +18,6 @@ import { StoreModule } from './modules/store-management/store.module';
 
 @Module({
   imports: [
-
     AdminModule,
     PrismaModule,
     DepartmentModule,
@@ -31,7 +30,7 @@ import { StoreModule } from './modules/store-management/store.module';
     ActivityModule,
     AssetModule,
     SiteModule,
-    CageModule
+    CageModule,
     StoreModule,
   ],
   controllers: [AppController],

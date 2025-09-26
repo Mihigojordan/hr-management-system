@@ -40,7 +40,7 @@ interface ValidationResult {
   errors: string[];
 }
 
-const SiteDashboard: React.FC = () => {
+const SiteDashboard: React.FC <{role:string}> = ({role}) => {
   const [sites, setSites] = useState<Site[]>([]);
   const [allSites, setAllSites] = useState<Site[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);

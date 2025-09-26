@@ -331,7 +331,6 @@ const routes = createBrowserRouter([
                 ),
               },
               {
-<<<<<<< HEAD
                 path:'site-management',
                 element:(
                   <SuspenseWrapper>
@@ -346,8 +345,8 @@ const routes = createBrowserRouter([
                     <SiteAssignmentManagement role='admin'/>
                   </SuspenseWrapper>
                 )
-              }
-=======
+              },
+              {
                 path: 'store-management',
                 element: (
                   <SuspenseWrapper>
@@ -379,7 +378,6 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
->>>>>>> efea601cf91a8766742e242d9e629b2da04c50d5
             ],
           },
         ],
