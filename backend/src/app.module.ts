@@ -17,7 +17,7 @@ import { CageModule } from './modules/cage-management/cage.module';
 import { StoreModule } from './modules/store-management/store.module';
 import { MedicationModule } from './modules/medication-management/medication.module';
 
-@Module({
+@Module({ 
   imports: [
     AdminModule,
     PrismaModule,
