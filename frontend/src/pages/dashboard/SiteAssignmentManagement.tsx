@@ -21,7 +21,7 @@ import {
   Settings,
   Minimize2,
 } from "lucide-react";
-import siteAssignmentService, { type} from "../../services/siteService";
+import siteAssignmentService, { type SiteAssignment} from "../../services/siteService";
 import employeeService, { type Employee } from "../../services/employeeService"; // Updated to employeeService and Employee
 import siteService, { type Site } from "../../services/siteService";
 import useAdminAuth from "../../context/AdminAuthContext";
