@@ -38,6 +38,10 @@ export class StoreController {
   async findOne(@Param('id') id: string) {
     return await this.storeService.findOne(id);
   }
+  @Get('manager/:id')
+  async findStoresByManagerId(@Param('id') id: string) {
+    return await this.storeService.findStoresByManagerId(id);
+  }
 
   @Put(':id')
   async update(

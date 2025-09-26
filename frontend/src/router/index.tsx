@@ -33,6 +33,9 @@ import EmployeeLogin from '../pages/auth/employee/EmployeeLogin';
 import EmployeeUnlockScreen from '../pages/auth/employee/EmployeeUnlockScreen';
 import ProtectPrivateEmployeeRoute from '../components/protectors/ProtectPrivateEmployeeRoute';
 import EmployeeProfilePage from '../pages/dashboard/employee/EmployeeProfilePage';
+import StoreManagement from '../pages/dashboard/StoreManagement';
+import StoreFormExample from '../components/dashboard/store/StoreForm';
+import StoreViewPage from '../components/dashboard/store/StoreViewMorePage';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -328,6 +331,7 @@ const routes = createBrowserRouter([
                 ),
               },
               {
+<<<<<<< HEAD
                 path:'site-management',
                 element:(
                   <SuspenseWrapper>
@@ -343,6 +347,39 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 )
               }
+=======
+                path: 'store-management',
+                element: (
+                  <SuspenseWrapper>
+                    <StoreManagement role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'store-management/create',
+                element: (
+                  <SuspenseWrapper>
+                    <StoreFormExample role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'store-management/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StoreFormExample role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'store-management/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StoreViewPage  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+>>>>>>> efea601cf91a8766742e242d9e629b2da04c50d5
             ],
           },
         ],

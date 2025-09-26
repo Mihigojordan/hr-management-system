@@ -14,6 +14,7 @@ import { ActivityModule } from './modules/activity-management/activity.module';
 import { AssetModule } from './modules/assets-management/asset.module';
 import { SiteModule } from './modules/site-management/site.module';
 import { CageModule } from './modules/cage-management/cage.module';
+import { StoreModule } from './modules/store-management/store.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CageModule } from './modules/cage-management/cage.module';
     AssetModule,
     SiteModule,
     CageModule
+    StoreModule,
   ],
   controllers: [AppController],
 })
