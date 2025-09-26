@@ -344,10 +344,10 @@ model Medication {
   endDate        DateTime?
 
   cageId  String
-  cage    Cage   @relation(fields: [cageId], references: [cageCode])
+  cage    Cage   @relation(fields: [cageId], references: [cageCode], onDelete: Cascade, onUpdate: Cascade)
 
   administeredBy String
-  employee       Employee @relation(fields: [administeredBy], references: [id])
+  employee       Employee @relation(fields: [administeredBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
