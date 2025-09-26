@@ -97,12 +97,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         label: "site assign Management",
         icon: Cog,
         path: `${basePath}/assign-management`,
+      },
+      {
         id: "store",
         label: "Store Management",
         icon:BoxSelect,
         path: `${basePath}/store-management`,
-      
-      },
+      }
       
     ];
   };
