@@ -1,62 +1,57 @@
-import api from '../api/api'; // Adjust path
+import api from '../api/api'; // axios instance
 import { type AxiosInstance, type AxiosResponse } from 'axios';
 
-// ---------------- Interfaces ----------------
+// ---------- Interfaces ----------
+
+// DTO for creating/updating feed
 export interface FeedData {
   name: string;
   type: string;
   proteinContent: number;
   quantityAvailable: number;
   feedingRate: number;
+  cageId: string;
+  administeredByEmployee?: string | null;
+  administeredByAdmin?: string | null;
+  date: string; // ISO string
+  quantityGiven: number;
+  notes?: string | null;
 }
 
+// Feed entity with ID and relations
 export interface Feed extends FeedData {
   id: string;
+  cage?: { id: string; cageName: string };
+   employee?: { id: string; first_name: string;last_name:string };
+  admin?: { id: string; adminName: string };
   createdAt?: string;
   updatedAt?: string;
-  dailyFeedRecords?: DailyFeedRecord[];
 }
 
-export interface DailyFeedRecordData {
-  date: string;
-  quantityGiven: number;
-  notes?: string;
-  feedId: string;
-  cageId: string;
-  administeredByEmployee?: string;
-  administeredByAdmin?: string;
-}
-
-export interface DailyFeedRecord extends DailyFeedRecordData {
-  id: string;
-  createdAt?: string;
-  updatedAt?: string;
-  feed?: Feed;
-  cage?: { id: string; cageCode: string; cageName: string };
-  employee?: { id: string; name: string };
-  admin?: { id: string; name: string };
-}
-
+// Validation result
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
 }
 
+// Delete response
 export interface DeleteResponse {
   message: string;
 }
 
-// ---------------- Service Class ----------------
+/**
+ * Feed Service
+ */
 class FeedService {
   private api: AxiosInstance = api;
 
-  // ---------- Feed ----------
-  async createFeed(data: FeedData): Promise<Feed> {
+  async createFeed(feedData: FeedData): Promise<Feed> {
     try {
-      const response: AxiosResponse<Feed> = await this.api.post('/feeds', data);
+      const response: AxiosResponse<Feed> = await this.api.post('/feeds', feedData);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to create feed');
+      console.error('Error creating feed:', error);
+      throw new Error(error.response?.data?.message || 'Failed to create feed');
     }
   }
 
@@ -65,17 +60,19 @@ class FeedService {
       const response: AxiosResponse<Feed[]> = await this.api.get('/feeds');
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch feeds');
+      console.error('Error fetching feeds:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch feeds');
     }
   }
 
   async getFeedById(id: string): Promise<Feed | null> {
     try {
-      const response: AxiosResponse<Feed> = await this.api.get(`/feeds/one/${id}`);
+      const response: AxiosResponse<Feed> = await this.api.get(`/feeds/${id}`);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) return null;
-      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch feed');
+      console.error('Error fetching feed:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch feed');
     }
   }
 
@@ -84,7 +81,8 @@ class FeedService {
       const response: AxiosResponse<Feed> = await this.api.put(`/feeds/${id}`, updateData);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to update feed');
+      console.error('Error updating feed:', error);
+      throw new Error(error.response?.data?.message || 'Failed to update feed');
     }
   }
 
@@ -93,94 +91,35 @@ class FeedService {
       const response: AxiosResponse<DeleteResponse> = await this.api.delete(`/feeds/${id}`);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to delete feed');
+      console.error('Error deleting feed:', error);
+      throw new Error(error.response?.data?.message || 'Failed to delete feed');
     }
   }
 
-  // ---------- DailyFeedRecord ----------
-  async createDailyFeedRecord(data: DailyFeedRecordData): Promise<DailyFeedRecord> {
-    try {
-      const response: AxiosResponse<DailyFeedRecord> = await this.api.post('/feeds/records', data);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to create record');
-    }
-  }
-
-  async getAllDailyFeedRecords(): Promise<DailyFeedRecord[]> {
-    try {
-      const response: AxiosResponse<DailyFeedRecord[]> = await this.api.get('/feeds/records');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch records');
-    }
-  }
-
-  async getDailyFeedRecordById(id: string): Promise<DailyFeedRecord | null> {
-    try {
-      const response: AxiosResponse<DailyFeedRecord> = await this.api.get(`/feeds/records/${id}`);
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 404) return null;
-      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch record');
-    }
-  }
-
-  async updateDailyFeedRecord(id: string, updateData: Partial<DailyFeedRecordData>): Promise<DailyFeedRecord> {
-    try {
-      const response: AxiosResponse<DailyFeedRecord> = await this.api.put(`/feeds/records/${id}`, updateData);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to update record');
-    }
-  }
-
-  async deleteDailyFeedRecord(id: string): Promise<DeleteResponse> {
-    try {
-      const response: AxiosResponse<DeleteResponse> = await this.api.delete(`/feeds/records/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || error.message || 'Failed to delete record');
-    }
-  }
-
-  // ---------- Validation ----------
-  validateFeedData(data: FeedData): ValidationResult {
+  validateFeedData(feedData: FeedData): ValidationResult {
     const errors: string[] = [];
-    if (!data.name?.trim()) errors.push('Feed name is required');
-    if (!data.type?.trim()) errors.push('Feed type is required');
-    if (data.proteinContent <= 0) errors.push('Protein content must be positive');
-    if (data.quantityAvailable < 0) errors.push('Quantity available cannot be negative');
-    if (data.feedingRate <= 0) errors.push('Feeding rate must be positive');
 
-    return { isValid: errors.length === 0, errors };
-  }
+    if (!feedData.name?.trim()) errors.push('Feed name is required');
+    if (!feedData.type?.trim()) errors.push('Feed type is required');
+    if (feedData.proteinContent < 0) errors.push('Protein content must be non-negative');
+    if (feedData.quantityAvailable < 0) errors.push('Quantity available must be non-negative');
+    if (feedData.feedingRate <= 0) errors.push('Feeding rate must be greater than 0');
+    if (!feedData.cageId) errors.push('Cage ID is required');
+    if (!feedData.date) errors.push('Feeding date is required');
+    if (feedData.quantityGiven <= 0) errors.push('Quantity given must be greater than 0');
 
-  validateDailyFeedRecordData(data: DailyFeedRecordData): ValidationResult {
-    const errors: string[] = [];
-    if (!data.date) errors.push('Date is required');
-    if (data.quantityGiven <= 0) errors.push('Quantity given must be positive');
-    if (!data.feedId?.trim()) errors.push('Feed ID is required');
-    if (!data.cageId?.trim()) errors.push('Cage ID is required');
     return { isValid: errors.length === 0, errors };
   }
 }
 
-// ---------- Singleton & exports ----------
+// Singleton export
 const feedService = new FeedService();
 export default feedService;
-
 export const {
   createFeed,
   getAllFeeds,
   getFeedById,
   updateFeed,
   deleteFeed,
-  createDailyFeedRecord,
-  getAllDailyFeedRecords,
-  getDailyFeedRecordById,
-  updateDailyFeedRecord,
-  deleteDailyFeedRecord,
   validateFeedData,
-  validateDailyFeedRecordData,
 } = feedService;

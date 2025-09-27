@@ -7,7 +7,7 @@ export class MedicationService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: any): Promise<Medication> {
-    console.log(data);
+    console.log('nigro :',data);
     try {
       // ensure dates are valid
       if (data.startDate) data.startDate = new Date(data.startDate);
@@ -28,6 +28,7 @@ export class MedicationService {
         include: {
           cage: true,
           employee: true,
+          admin:true,
         },
       });
     } catch (error) {
@@ -42,6 +43,7 @@ export class MedicationService {
         include: {
           cage: true,
           employee: true,
+          admin:true
         },
       });
     } catch (error) {
@@ -56,6 +58,7 @@ export class MedicationService {
         include: {
           cage: true,
           employee: true,
+          admin:true,
         },
       });
       if (!med) throw new NotFoundException('Medication not found');

@@ -29,7 +29,7 @@ model Admin {
   updatedAt  DateTime @updatedAt
 
  medications      Medication[]
-  dailyFeeds  DailyFeedRecord[]
+  feed  Feed[]
   Activity Activity[]
 }
 
@@ -99,7 +99,7 @@ enum MaritalStatus {
     managedSites    Site[] @relation("ManagerRelation")
     supervisedSites Site[] @relation("SupervisorRelation")
     medications      Medication[]
-    dailyFeeds  DailyFeedRecord[]
+    feeds  Feed[]
       // Assigned site (one site only)
     siteId       String?
     site         Site?    @relation("SiteEmployees", fields: [siteId], references: [id] , onDelete: SetNull, onUpdate: Cascade)
@@ -320,7 +320,7 @@ model Cage {
 
   //relations 
   Medication   Medication[]
-  dailyFeeds  DailyFeedRecord[]
+  feeds  Feed[]
 
   createdAt DateTime @default(now())
 }
@@ -371,38 +371,39 @@ enum MedicationMethod {
 
 
 
+
 model Feed {
-  id               String    @id @default(uuid())
-  name             String
-  type             String
-  proteinContent   Float
-  quantityAvailable Float
-  feedingRate      Float
-  dailyFeedRecords DailyFeedRecord[]   // One-to-many relationship
-}
+  id                     String    @id @default(uuid())
+  name                   String
+  type                   FeedType   // enum instead of free text
+  proteinContent         Float
+  date                   DateTime
+  quantityGiven          Float
+  notes                  String?
 
-
-model DailyFeedRecord {
-  id                   String    @id @default(uuid())
-  date                  DateTime
-  quantityGiven         Float
-  notes                 String?
-
-  feedId                String
-  cageId                String
-
-  // Relations
-  feed                  Feed     @relation(fields: [feedId], references: [id],onDelete: Cascade, onUpdate: Cascade)
-  cage                  Cage     @relation(fields: [cageId], references: [id],onDelete: Cascade, onUpdate: Cascade)
+  cageId                 String
+  cage                   Cage       @relation(fields: [cageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   administeredByEmployee String?
-  employee              Employee? @relation(fields: [administeredByEmployee], references: [id],onDelete: Cascade, onUpdate: Cascade)
+  employee               Employee?  @relation(fields: [administeredByEmployee], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   administeredByAdmin    String?
-  admin                 Admin?    @relation(fields: [administeredByAdmin], references: [id],onDelete: Cascade, onUpdate: Cascade)
+  admin                  Admin?     @relation(fields: [administeredByAdmin], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@index([feedId])
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+
   @@index([cageId])
   @@index([administeredByEmployee])
   @@index([administeredByAdmin])
+}
+
+
+enum FeedType {
+  PELLET
+  SEED
+  FRUIT
+  VEGETABLE
+  INSECT
+  OTHER
 }
