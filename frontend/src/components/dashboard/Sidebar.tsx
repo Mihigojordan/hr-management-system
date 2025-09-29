@@ -90,14 +90,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
       {
         id: "sites",
         label: "Site Management",
-        icon: Cog,
+        icon: MapPin,
         path: `${basePath}/site-management`,
       
       },
       {
         id: "site assing",
         label: "site assign Management",
-        icon: Cog,
+        icon: MapPin,
         path: `${basePath}/assign-management`,
       },
       {
