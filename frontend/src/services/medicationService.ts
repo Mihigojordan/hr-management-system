@@ -12,8 +12,9 @@ export interface MedicationData {
   startDate: string; // ISO string
   endDate?: string | null;
   cageId: string;
-  administeredByEmployee: any; // Employee ID
-  administeredByAdmin:any; // Admin Id
+
+  administeredByEmployee?: string | null; // Employee ID (optional)
+  administeredByAdmin?: string | null;    // Admin ID (optional)
 }
 
 // Medication entity with ID + timestamps and relations
@@ -21,8 +22,11 @@ export interface Medication extends MedicationData {
   id: string;
   createdAt?: string; // ISO string
   updatedAt?: string; // ISO string
-  cage?: { cageCode: string; cageName: string }; // Optional relation
-  employee?: { id: string; name: string }; // Optional relation
+
+  // Relations (optional)
+  cage?: { id: string; cageCode: string; cageName: string };
+  employee?: { id: string; first_name: string;last_name:string };
+  admin?: { id: string; adminName: string };
 }
 
 // Validation result
@@ -36,6 +40,7 @@ export interface DeleteResponse {
   message: string;
 }
 
+
 /**
  * Medication Service
  * Handles all medication-related API calls
@@ -46,7 +51,9 @@ class MedicationService {
   /** Create new medication */
   async createMedication(data: MedicationData): Promise<Medication> {
     try {
+      console.log('shit');
       const response: AxiosResponse<Medication> = await this.api.post('/medications', data);
+      
       return response.data;
     } catch (error: any) {
       console.error('Error creating medication:', error);
@@ -131,8 +138,7 @@ class MedicationService {
     if (!['FEED', 'BATH', 'WATER', 'INJECTION'].includes(data.method)) errors.push('Invalid method');
     if (!data.startDate) errors.push('Start date is required');
     if (!data.cageId?.trim()) errors.push('Cage ID is required');
-    if (!data.administeredBy?.trim()) errors.push('AdministeredBy (employee) is required');
-
+   
     return {
       isValid: errors.length === 0,
       errors,

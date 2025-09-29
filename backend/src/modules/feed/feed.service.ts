@@ -5,94 +5,83 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class FeedService {
   constructor(private prisma: PrismaService) {}
 
-  // ----- Feed CRUD -----
-  async createFeed(data: any) {
+  async create(data: any) {
     try {
+      console.log(data);
+      
       return await this.prisma.feed.create({ data });
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  async getAllFeeds() {
+  async findAll() {
     try {
-      return await this.prisma.feed.findMany();
+      return await this.prisma.feed.findMany({
+        include: {
+          cage: true,
+          employee: true,
+          admin: true,
+        },
+        orderBy: { date: 'desc' },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async findAllByCageId(id:string) {
+    try {
+      return await this.prisma.feed.findMany({
+        where:{cageId:id},
+        include: {
+          cage: true,
+          employee: true,
+          admin: true,
+        },
+        orderBy: { date: 'desc' },
+      });
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  async getFeedById(id: string) {
+  async findOne(id: string) {
     try {
-      const feed = await this.prisma.feed.findUnique({ where: { id } });
-      if (!feed) throw new NotFoundException('Feed not found');
+      const feed = await this.prisma.feed.findUnique({
+        where: { id },
+        include: {
+          cage: true,
+          employee: true,
+          admin: true,
+        },
+      });
+      if (!feed) throw new NotFoundException('Feed record not found');
       return feed;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  async updateFeed(id: string, data: any) {
+  async update(id: string, data: any) {
     try {
-      return await this.prisma.feed.update({ where: { id }, data });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
+      const feed = await this.prisma.feed.findUnique({ where: { id } });
+      if (!feed) throw new NotFoundException('Feed record not found');
 
-  async deleteFeed(id: string) {
-    try {
-      return await this.prisma.feed.delete({ where: { id } });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
-
-  // ----- DailyFeedRecord CRUD -----
-  async createDailyFeedRecord(data: any) {
-    try {
-      return await this.prisma.dailyFeedRecord.create({ data });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
-
-  async getAllDailyFeedRecords() {
-    try {
-        console.log('sjsjs');
-        
-      return await this.prisma.dailyFeedRecord.findMany({
-        include: { feed: true, cage: true, employee: true, admin: true },
-      });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
-
-  async getDailyFeedRecordById(id: string) {
-    try {
-      const record = await this.prisma.dailyFeedRecord.findUnique({
+      return await this.prisma.feed.update({
         where: { id },
-        include: { feed: true, cage: true, employee: true, admin: true },
+        data,
       });
-      if (!record) throw new NotFoundException('Daily feed record not found');
-      return record;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  async updateDailyFeedRecord(id: string, data: any) {
+  async remove(id: string) {
     try {
-      return await this.prisma.dailyFeedRecord.update({ where: { id }, data });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
+      const feed = await this.prisma.feed.findUnique({ where: { id } });
+      if (!feed) throw new NotFoundException('Feed record not found');
 
-  async deleteDailyFeedRecord(id: string) {
-    try {
-      return await this.prisma.dailyFeedRecord.delete({ where: { id } });
+      return await this.prisma.feed.delete({ where: { id } });
     } catch (error) {
       throw new BadRequestException(error.message);
     }

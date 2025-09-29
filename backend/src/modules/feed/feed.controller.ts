@@ -5,55 +5,56 @@ import { FeedService } from './feed.service';
 export class FeedController {
   constructor(private readonly feedService: FeedService) {}
 
-  // ----- Feed endpoints -----
   @Post()
-  async createFeed(@Body() body: any) {
-    return await this.feedService.createFeed(body);
+  async create(@Body() data: any) {
+    try {
+      return await this.feedService.create(data);
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
   @Get()
-  async getAllFeeds() {
-    return await this.feedService.getAllFeeds();
+  async findAll() {
+    try {
+      return await this.feedService.findAll();
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
+  @Get('cage/:id')
+  async findAllByCageId(@Param('id') id: string) {
+    try {
+      return await this.feedService.findAllByCageId(id);
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
-  @Get('one/:id')
-  async getFeedById(@Param('id') id: string) {
-    return await this.feedService.getFeedById(id);
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    try {
+      return await this.feedService.findOne(id);
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
   @Put(':id')
-  async updateFeed(@Param('id') id: string, @Body() body: any) {
-    return await this.feedService.updateFeed(id, body);
+  async update(@Param('id') id: string, @Body() data: any) {
+    try {
+      return await this.feedService.update(id, data);
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
   @Delete(':id')
-  async deleteFeed(@Param('id') id: string) {
-    return await this.feedService.deleteFeed(id);
-  }
-
-  // ----- DailyFeedRecord endpoints -----
-  @Post('records')
-  async createDailyFeedRecord(@Body() body: any) {
-    return await this.feedService.createDailyFeedRecord(body);
-  }
-
-  @Get('records')
-  async getAllDailyFeedRecords() {
-    return await this.feedService.getAllDailyFeedRecords();
-  }
-
-  @Get('records/:id')
-  async getDailyFeedRecordById(@Param('id') id: string) {
-    return await this.feedService.getDailyFeedRecordById(id);
-  }
-
-  @Put('records/:id')
-  async updateDailyFeedRecord(@Param('id') id: string, @Body() body: any) {
-    return await this.feedService.updateDailyFeedRecord(id, body);
-  }
-
-  @Delete('records/:id')
-  async deleteDailyFeedRecord(@Param('id') id: string) {
-    return await this.feedService.deleteDailyFeedRecord(id);
+  async remove(@Param('id') id: string) {
+    try {
+      return await this.feedService.remove(id);
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 }

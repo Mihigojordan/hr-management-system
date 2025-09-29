@@ -5,8 +5,8 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import medicationService, { type MedicationData, type Medication } from '../../../services/medicationService';
 import cageService, { type Cage } from '../../../services/cageService';
 import Swal from 'sweetalert2';
-import  useAdminAuth from '../../../context/AdminAuthContext';
-import  useEmployeeAuth  from '../../../context/EmployeeAuthContext';
+import  useAdminAuth  from '../../../context/AdminAuthContext';
+import  useEmployeeAuth from '../../../context/EmployeeAuthContext';
 
 interface MedicationFormData {
   name: string;
@@ -67,7 +67,7 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch cages for dropdown
+        // Fetch cages for validation
         const cageData = await cageService.getAllCages();
         setCages(cageData || []);
 
@@ -92,13 +92,39 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
           } else {
             throw new Error('Medication not found');
           }
+        } else if (prefilledCageId) {
+          // Validate prefilled cageId
+          const isValidCageId = cageData?.some((cage) => cage.id === prefilledCageId);
+          if (isValidCageId) {
+            setFormData((prev) => ({
+              ...prev,
+              cageId: prefilledCageId,
+              administeredBy: user?.id || '',
+            }));
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid Cage ID',
+              text: 'The provided cage ID is invalid',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+            });
+            navigate(`/${role}/dashboard/cage-management`);
+          }
         } else {
-          // Pre-fill cageId and administeredBy from query parameters and user
-          setFormData((prev) => ({
-            ...prev,
-            cageId: prefilledCageId || prev.cageId,
-            administeredBy: user?.id || '',
-          }));
+          // No cageId provided in create mode
+          Swal.fire({
+            icon: 'error',
+            title: 'Missing Cage ID',
+            text: 'A valid cage ID is required to create a medication record',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+          });
+          navigate(`/${role}/dashboard/cage-management`);
         }
       } catch (error: any) {
         console.error('Error fetching data:', error);
@@ -111,6 +137,7 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
           showConfirmButton: false,
           timer: 3000,
         });
+        navigate(`/${role}/dashboard/cage-management`);
       } finally {
         setIsLoading(false);
       }
@@ -160,7 +187,6 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
       if (error.includes('dosage')) newErrors.dosage = error;
       if (error.includes('method')) newErrors.method = error;
       if (error.includes('startDate')) newErrors.startDate = error;
-      if (error.includes('cageId')) newErrors.cageId = error;
       if (error.includes('administeredBy')) newErrors.administeredBy = error;
     });
 
@@ -423,51 +449,6 @@ const MedicationForm: React.FC<{ role: string }> = ({ role }) => {
                   <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
                     <X className="h-3 w-3" />
                     {errors.endDate}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Cage <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={formData.cageId}
-                  onChange={(e) => handleInputChange('cageId', e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="">Select cage</option>
-                  {cages.map((cage) => (
-                    <option key={cage.id} value={cage.id}>
-                      {cage.cageName} ({cage.cageCode})
-                    </option>
-                  ))}
-                </select>
-                {errors.cageId && (
-                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                    <X className="h-3 w-3" />
-                    {errors.cageId}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Administered By <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={user?.name || formData.administeredBy}
-                  disabled
-                  className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed"
-                  placeholder="Authenticated user"
-                />
-                {errors.administeredBy && (
-                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                    <X className="h-3 w-3" />
-                    {errors.administeredBy}
                   </p>
                 )}
               </div>

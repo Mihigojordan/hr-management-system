@@ -416,7 +416,7 @@ const routes = createBrowserRouter([
                 ),
               },
               {
-                path: 'cage-management/m/create/:id',
+                path: 'cage-management/m/create',
                 element: (
                   <SuspenseWrapper>
                     <MedicationForm  role='admin' />
