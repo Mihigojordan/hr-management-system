@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Edit,
@@ -20,12 +20,13 @@ import {
   List,
   Settings,
   Minimize2,
+  ChevronUp,
 } from "lucide-react";
 import siteService from "../../services/siteService";
 import employeeService from "../../services/employeeService";
 import { useNavigate } from "react-router-dom";
 import type { Site, SiteData } from "../../types/model";
-import type { Employee } from "../../types/model"; // Assuming Employee type is defined
+import type { Employee } from "../../types/model";
 import useAdminAuth from "../../context/AdminAuthContext";
 
 type ViewMode = "table" | "grid" | "list";
@@ -40,7 +41,113 @@ interface ValidationResult {
   errors: string[];
 }
 
-const SiteDashboard: React.FC <{role:string}> = ({role}) => {
+interface SearchableSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: Employee[];
+  placeholder?: string;
+  label: string;
+}
+
+const SearchableSelect: React.FC<SearchableSelectProps> = ({
+  value,
+  onChange,
+  options,
+  placeholder = "Search...",
+  label,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredOptions = options.filter((emp) => {
+    const fullName = `${emp.first_name} ${emp.last_name}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase());
+  });
+
+  const selectedEmployee = options.find((emp) => emp.id === value);
+  const displayValue = selectedEmployee
+    ? `${selectedEmployee.first_name} ${selectedEmployee.last_name}`
+    : "None";
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-3 py-2 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 text-left flex items-center justify-between bg-white"
+      >
+        <span className={value ? "text-gray-900" : "text-gray-400"}>{displayValue}</span>
+        {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded shadow-lg max-h-60 overflow-hidden">
+          <div className="p-2 border-b border-gray-100">
+            <div className="relative">
+              <Search className="w-3 h-3 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={placeholder}
+                className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                autoFocus
+              />
+            </div>
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => {
+                onChange("");
+                setIsOpen(false);
+                setSearchTerm("");
+              }}
+              className="w-full px-3 py-2 text-xs text-left hover:bg-gray-50 text-gray-600"
+            >
+              None
+            </button>
+            {filteredOptions.length === 0 ? (
+              <div className="px-3 py-2 text-xs text-gray-500">No employees found</div>
+            ) : (
+              filteredOptions.map((emp) => (
+                <button
+                  key={emp.id}
+                  type="button"
+                  onClick={() => {
+                    onChange(emp.id);
+                    setIsOpen(false);
+                    setSearchTerm("");
+                  }}
+                  className={`w-full px-3 py-2 text-xs text-left hover:bg-gray-50 ${
+                    value === emp.id ? "bg-primary-50 text-primary-700" : "text-gray-900"
+                  }`}
+                >
+                  {emp.first_name} {emp.last_name}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SiteDashboard: React.FC<{ role: string }> = ({ role }) => {
   const [sites, setSites] = useState<Site[]>([]);
   const [allSites, setAllSites] = useState<Site[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -114,7 +221,6 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
       setEmployees(data || []);
     } catch (err: any) {
       console.error("Failed to load employees:", err);
-      // Optional: Set an error message if needed
     }
   };
 
@@ -358,8 +464,8 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="text-left py-2 px-2 text-gray-600 font-medium">#</th>
-              <th 
-                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100" 
+              <th
+                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
                 onClick={() => setSortBy("name")}
               >
                 <div className="flex items-center space-x-1">
@@ -387,23 +493,23 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
                 <td className="py-2 px-2 text-gray-700 hidden sm:table-cell">{formatDate(site.createdAt)}</td>
                 <td className="py-2 px-2">
                   <div className="flex items-center justify-end space-x-1">
-                    <button 
-                      onClick={() => handleViewSite(site)} 
-                      className="text-gray-400 hover:text-primary-600 p-1" 
+                    <button
+                      onClick={() => handleViewSite(site)}
+                      className="text-gray-400 hover:text-primary-600 p-1"
                       title="View"
                     >
                       <Eye className="w-3 h-3" />
                     </button>
-                    <button 
-                      onClick={() => handleEditSite(site)} 
-                      className="text-gray-400 hover:text-primary-600 p-1" 
+                    <button
+                      onClick={() => handleEditSite(site)}
+                      className="text-gray-400 hover:text-primary-600 p-1"
                       title="Edit"
                     >
                       <Edit className="w-3 h-3" />
                     </button>
-                    <button 
-                      onClick={() => setDeleteConfirm(site)} 
-                      className="text-gray-400 hover:text-red-600 p-1" 
+                    <button
+                      onClick={() => setDeleteConfirm(site)}
+                      className="text-gray-400 hover:text-red-600 p-1"
                       title="Delete"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -480,23 +586,23 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
               <span className="truncate">Sup: {getEmployeeName(site.supervisorId)}</span>
             </div>
             <div className="flex items-center space-x-1 flex-shrink-0">
-              <button 
-                onClick={() => handleViewSite(site)} 
-                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors" 
+              <button
+                onClick={() => handleViewSite(site)}
+                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors"
                 title="View Site"
               >
                 <Eye className="w-4 h-4" />
               </button>
-              <button 
-                onClick={() => handleEditSite(site)} 
-                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors" 
+              <button
+                onClick={() => handleEditSite(site)}
+                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors"
                 title="Edit Site"
               >
                 <Edit className="w-4 h-4" />
               </button>
-              <button 
-                onClick={() => setDeleteConfirm(site)} 
-                className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors" 
+              <button
+                onClick={() => setDeleteConfirm(site)}
+                className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
                 title="Delete Site"
               >
                 <Trash2 className="w-4 h-4" />
@@ -823,7 +929,7 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Add New Site</h3>
             {formError && (
               <div className="bg-red-50 border border-red-200 rounded p-2 text-red-700 text-xs mb-4">
@@ -867,38 +973,20 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
                   placeholder="Enter site location"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Manager</label>
-                <select
-                  name="managerId"
-                  value={formData.managerId || ""}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                >
-                  <option value="">None</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Supervisor</label>
-                <select
-                  name="supervisorId"
-                  value={formData.supervisorId || ""}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                >
-                  <option value="">None</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SearchableSelect
+                value={formData.managerId || ""}
+                onChange={(value) => setFormData({ ...formData, managerId: value })}
+                options={employees}
+                placeholder="Search managers..."
+                label="Manager"
+              />
+              <SearchableSelect
+                value={formData.supervisorId || ""}
+                onChange={(value) => setFormData({ ...formData, supervisorId: value })}
+                options={employees}
+                placeholder="Search supervisors..."
+                label="Supervisor"
+              />
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Site Image</label>
                 <input
@@ -942,7 +1030,7 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
 
       {showUpdateModal && selectedSite && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Update Site</h3>
             {formError && (
               <div className="bg-red-50 border border-red-200 rounded p-2 text-red-700 text-xs mb-4">
@@ -986,38 +1074,20 @@ const SiteDashboard: React.FC <{role:string}> = ({role}) => {
                   placeholder="Enter site location"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Manager</label>
-                <select
-                  name="managerId"
-                  value={formData.managerId || ""}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                >
-                  <option value="">None</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Supervisor</label>
-                <select
-                  name="supervisorId"
-                  value={formData.supervisorId || ""}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                >
-                  <option value="">None</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SearchableSelect
+                value={formData.managerId || ""}
+                onChange={(value) => setFormData({ ...formData, managerId: value })}
+                options={employees}
+                placeholder="Search managers..."
+                label="Manager"
+              />
+              <SearchableSelect
+                value={formData.supervisorId || ""}
+                onChange={(value) => setFormData({ ...formData, supervisorId: value })}
+                options={employees}
+                placeholder="Search supervisors..."
+                label="Supervisor"
+              />
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Site Image</label>
                 <input
