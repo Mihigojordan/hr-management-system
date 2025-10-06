@@ -17,6 +17,7 @@ import { CageModule } from './modules/cage-management/cage.module';
 import { StoreModule } from './modules/store-management/store.module';
 import { MedicationModule } from './modules/medication-management/medication.module';
 import { FeedModule } from './modules/feed/feed.module';
+import { AssetRequestModule } from './modules/asset-requisition-managment/request.module';
 
 @Module({ 
   imports: [
@@ -36,6 +37,7 @@ import { FeedModule } from './modules/feed/feed.module';
     StoreModule,
     MedicationModule,
     FeedModule,
+    AssetRequestModule
   ],
   controllers: [AppController],
 })

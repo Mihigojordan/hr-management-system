@@ -15,6 +15,8 @@ import {
   BoxSelect,
   Grid,
   ShoppingBasket,
+  LucideBoxes,
+  Inbox,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -74,6 +76,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         allowedRoles: ["admin"],
       },
       {
+        id: "requestedAssets-management",
+        label: "requested assets Management",
+        icon: Inbox,
+        path: `${basePath}/requestedAssets-management`,
+        allowedRoles: ["admin"],
+      },
+      {
         id: "clients",
         label: "Clients Management",
         icon: User2,
@@ -86,6 +95,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         icon: Cog,
         path: `${basePath}/asset-management`,
       
+      },
+      {
+        id: "assets request",
+        label: "Asset request Management",
+        icon: Inbox,
+        path: `${basePath}/asset-request-management`,
+         allowedRoles: ["employee"],
       },
       {
         id: "sites",
