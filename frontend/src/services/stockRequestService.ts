@@ -86,9 +86,9 @@ class RequestService {
   }
 
   // Get all requests
-  async getAllRequests(): Promise<Request[]> {
+  async getAllRequests(): Promise<{data:{requests:Request[]}}> {
     try {
-      const response: AxiosResponse<Request[]> = await this.api.get(`${this.baseUrl}`);
+      const response: AxiosResponse<{data:{requests:Request[]}}> = await this.api.get(`${this.baseUrl}`);
       return response.data;
     } catch (error: any) {
       console.error('Error fetching requests:', error);
@@ -111,7 +111,7 @@ class RequestService {
   // Approve request
   async approveRequest(id: string, data: ApproveRequestInput): Promise<Request> {
     try {
-      const response: AxiosResponse<Request> = await this.api.put(`${this.baseUrl}/approve/${id}`, data);
+      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/approve/${id}`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error approving request:', error);
@@ -122,7 +122,7 @@ class RequestService {
   // Reject request
   async rejectRequest(id: string, notes?: string): Promise<Request> {
     try {
-      const response: AxiosResponse<Request> = await this.api.put(`${this.baseUrl}/reject/${id}`, { notes });
+      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/reject/${id}`, { notes });
       return response.data;
     } catch (error: any) {
       console.error('Error rejecting request:', error);
@@ -133,7 +133,7 @@ class RequestService {
   // Issue materials
   async issueMaterials(data: IssueMaterialsInput): Promise<any> {
     try {
-      const response: AxiosResponse<any> = await this.api.put(`${this.baseUrl}/issue`, data);
+      const response: AxiosResponse<any> = await this.api.patch(`${this.baseUrl}/issue`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error issuing materials:', error);
@@ -144,7 +144,7 @@ class RequestService {
   // Receive materials
   async receiveMaterials(data: ReceiveMaterialsInput): Promise<any> {
     try {
-      const response: AxiosResponse<any> = await this.api.put(`${this.baseUrl}/receive`, data);
+      const response: AxiosResponse<any> = await this.api.patch(`${this.baseUrl}/receive`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error receiving materials:', error);
@@ -155,7 +155,7 @@ class RequestService {
   // Update request
   async updateRequest(id: string, data: UpdateRequestInput): Promise<Request> {
     try {
-      const response: AxiosResponse<Request> = await this.api.put(`${this.baseUrl}/${id}`, data);
+      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/${id}/modify-approve`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error updating request:', error);

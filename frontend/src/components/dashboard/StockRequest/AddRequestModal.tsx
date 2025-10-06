@@ -43,6 +43,8 @@ const AddRequestModal = ({ isOpen, onClose, onSave }: AddRequestModalProps) => {
     setIsLoadingSites(true);
     try {
       const sites = await siteService.getAllSites();
+      console.warn(sites);
+      
       setSites(sites);
     } catch (error: any) {
       console.error('Error loading sites:', error);
@@ -108,7 +110,7 @@ const AddRequestModal = ({ isOpen, onClose, onSave }: AddRequestModalProps) => {
       } else {
         setFormData((prev) => ({
           ...prev,
-          [name]: name === "siteId" ? parseInt(value, 10) || 0 : value,
+          [name]: name === "siteId" ? value : value,
         }));
       }
 
@@ -239,7 +241,7 @@ const AddRequestModal = ({ isOpen, onClose, onSave }: AddRequestModalProps) => {
               </option>
               {sites.map((site) => (
                 <option key={site.id} value={site.id}>
-                  {site.name} {site.code ? `(${site.code})` : ''}
+                  {site.name}  {site.code ? `(${site.code})` : ''}
                 </option>
               ))}
             </select>

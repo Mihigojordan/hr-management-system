@@ -66,6 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/recruiting-management`,
         allowedRoles: ["admin"],
       },
+      
       {
         id: "employees",
         label: "Employees Management",
@@ -87,6 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/asset-management`,
       
       },
+      // sites
       {
         id: "sites",
         label: "Site Management",
@@ -101,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/assign-management`,
       },
 
-      
+      // stock management
       {
         id: "category",
         label: "Category Management",
@@ -115,11 +117,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/stock-management`,
       },
       {
+        id: "stock-request",
+        label: " Stock Request Management",
+        icon: ShoppingBasket,
+        path: `${basePath}/stock-management`,
+      },
+      
+      {
         id: "store",
         label: "Store Management",
         icon: ShoppingBasket,
         path: `${basePath}/store-management`,
       },
+      // cage
       {
         id: "cage",
         label: "Cage Management",

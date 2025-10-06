@@ -42,18 +42,15 @@ import requestService, {
     type IssueMaterialsInput,
     type ReceiveMaterialsInput
 } from '../../services/stockRequestService';
-import stockService, { type StockIn } from '../../services/stockInService'; // For fetching stock items in forms
+import stockService, { type StockIn } from '../../services/stockInService';
 import AddRequestModal from '../../components/dashboard/StockRequest/AddRequestModal';
-import useAdminAuth from '../../context/AdminAuthContext';
 import EditRequestModal from '../../components/dashboard/StockRequest/EditRequestModal';
-// import EditRequestModal from '../../components/dashboard/StockRequest/EditRequestModal';
 // import DeleteRequestModal from '../../components/dashboard/StockRequest/DeleteRequestModal';
 // import ViewRequestModal from '../../components/dashboard/StockRequest/ViewRequestModal';
 // import ApproveRequestModal from '../../components/dashboard/StockRequest/ApproveRequestModal';
 // import RejectRequestModal from '../../components/dashboard/StockRequest/RejectRequestModal';
 // import IssueMaterialsModal from '../../components/dashboard/StockRequest/IssueMaterialsModal';
 // import ReceiveMaterialsModal from '../../components/dashboard/StockRequest/ReceiveMaterialsModal';
-// import useAuth from '../../context/AuthContext';
 
 interface OperationStatus {
     type: 'success' | 'error' | 'info';
@@ -70,7 +67,7 @@ interface RequestItem {
     qtyIssued?: number;
     qtyRemaining?: number;
     qtyReceived?: number;
-    stockIn?: StockIn; // Include StockIn details
+    stockIn?: StockIn;
 }
 
 interface Request {
@@ -98,16 +95,16 @@ interface ApproveRequestResponse {
     message: string;
 }
 
-const StockRequestManagement = ({role}:{role:string}) => {
+const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
     const [requests, setRequests] = useState<Request[]>([]);
     const [allRequests, setAllRequests] = useState<Request[]>([]);
-    const [stockins, setStockins] = useState<StockIn[]>([]); // For modals
+    const [stockins, setStockins] = useState<StockIn[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [dateFrom, setDateFrom] = useState<string>(''); // New state for start date
-    const [dateTo, setDateTo] = useState<string>(''); // New state for end date
+    const [dateFrom, setDateFrom] = useState<string>('');
+    const [dateTo, setDateTo] = useState<string>('');
     const [sortBy, setSortBy] = useState<keyof Request>('siteId');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [itemsPerPage] = useState(8);
@@ -125,18 +122,13 @@ const StockRequestManagement = ({role}:{role:string}) => {
     const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
     const [operationLoading, setOperationLoading] = useState<boolean>(false);
     const [showFilters, setShowFilters] = useState<boolean>(false);
-    const { user } = useAdminAuth();
-
-    const isSiteEngineer = user?.adminName === 'SITE_ENGINEER';
-    const canModify = ['ADMIN', 'DIOCESAN_SITE_ENGINEER', 'PADIRI'].includes(user?.adminName);
 
     useEffect(() => {
         const fetchRequests = async () => {
-            if (!user) return;
             try {
                 setLoading(true);
                 const response = await requestService.getAllRequests();
-                const requests = Array.isArray(response) ? response : [];
+                const requests = Array.isArray(response.data.requests) ? response.data.requests : [];
                 setAllRequests(requests);
                 setError(null);
             } catch (err: any) {
@@ -148,7 +140,7 @@ const StockRequestManagement = ({role}:{role:string}) => {
             }
         };
         fetchRequests();
-    }, [user]);
+    }, []);
 
     useEffect(() => {
         handleFilterAndSort();
@@ -172,7 +164,6 @@ const StockRequestManagement = ({role}:{role:string}) => {
     const handleFilterAndSort = () => {
         let filtered = [...allRequests];
 
-        // Apply search term filter
         if (searchTerm.trim()) {
             filtered = filtered.filter(
                 (request) =>
@@ -183,12 +174,10 @@ const StockRequestManagement = ({role}:{role:string}) => {
             );
         }
 
-        // Apply status filter
         if (statusFilter !== 'all') {
             filtered = filtered.filter((request) => request.status === statusFilter);
         }
 
-        // Apply date range filter
         if (dateFrom || dateTo) {
             filtered = filtered.filter((request) => {
                 const createdAt = new Date(request.createdAt || 0).getTime();
@@ -198,7 +187,6 @@ const StockRequestManagement = ({role}:{role:string}) => {
             });
         }
 
-        // Apply sorting
         filtered.sort((a, b) => {
             let aValue: any = a[sortBy] ?? '';
             let bValue: any = b[sortBy] ?? '';
@@ -430,13 +418,13 @@ const StockRequestManagement = ({role}:{role:string}) => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'PENDING': return '#F59E0B'; // amber
-            case 'APPROVED': return '#10B981'; // green
-            case 'PARTIALLY_ISSUED': return '#EAB308'; // yellow
-            case 'ISSUED': return '#2563EB'; // blue
-            case 'REJECTED': return '#EF4444'; // red
-            case 'CLOSED': return '#6B7280'; // gray
-            default: return '#6B7280'; // fallback gray
+            case 'PENDING': return '#F59E0B';
+            case 'APPROVED': return '#10B981';
+            case 'PARTIALLY_ISSUED': return '#EAB308';
+            case 'ISSUED': return '#2563EB';
+            case 'REJECTED': return '#EF4444';
+            case 'CLOSED': return '#6B7280';
+            default: return '#6B7280';
         }
     };
 
@@ -452,7 +440,7 @@ const StockRequestManagement = ({role}:{role:string}) => {
         }
     };
 
-    const renderActionButtonBasedOnUser = (user: any, request: any) => {
+    const renderActionButtonBasedOnRole = (role: 'admin' | 'employee', request: Request) => {
         const status = request?.status;
 
         if (['REJECTED', 'CLOSED'].includes(status)) {
@@ -461,7 +449,8 @@ const StockRequestManagement = ({role}:{role:string}) => {
 
         const actionButtons = [];
 
-        if (user?.adminName === 'SITE_ENGINEER' && ['PENDING', 'APPROVED'].includes(status)) {
+        // Both admin and employee can edit PENDING requests
+        if ((role === 'employee' && status === 'PENDING') || (role === 'admin' && status === 'APPROVED')  ) {
             actionButtons.push(
                 <button
                     key="edit"
@@ -475,7 +464,8 @@ const StockRequestManagement = ({role}:{role:string}) => {
             );
         }
 
-        if (user?.adminName === 'SITE_ENGINEER' && ['ISSUED', 'PARTIALLY_ISSUED'].includes(status)) {
+        // Employee can receive materials for ISSUED or PARTIALLY_ISSUED requests
+        if (role === 'employee' && ['ISSUED', 'PARTIALLY_ISSUED'].includes(status)) {
             actionButtons.push(
                 <button
                     key="receive"
@@ -489,54 +479,54 @@ const StockRequestManagement = ({role}:{role:string}) => {
             );
         }
 
-        if (
-            canModify &&
-            (
-                (user?.adminName === 'DIOCESAN_SITE_ENGINEER' && status === 'PENDING') ||
-                (['ADMIN', 'PADIRI'].includes(user?.adminName) && status === 'APPROVED')
-            )
-        ) {
-            actionButtons.push(
-                <button
-                    key="issue"
-                    onClick={() => handleIssueMaterials(request)}
-                    disabled={operationLoading}
-                    className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors disabled:opacity-50"
-                    title="Issue Materials"
-                >
-                    <Truck className="w-4 h-4" />
-                </button>
-            );
-        }
-
-        if (
-            ['PADIRI', 'ADMIN', 'DIOCESAN_SITE_ENGINEER'].includes(user?.adminName) &&
-            ['PENDING', 'APPROVED'].includes(status) &&
-            !(
-                (user?.adminName === 'DIOCESAN_SITE_ENGINEER' && status === 'APPROVED') ||
-                (['ADMIN', 'PADIRI'].includes(user?.adminName) && status === 'ISSUED')
-            )
-        ) {
-            actionButtons.push(
-                <div key="approve-reject" className="flex items-center space-x-1">
+        // Admin can approve/reject PENDING requests and issue materials for APPROVED requests
+        if (role === 'admin') {
+            if (status === 'PENDING') {
+                actionButtons.push(
+                    <div key="approve-reject" className="flex items-center space-x-1">
+                        <button
+                            onClick={() => handleApproveRequest(request)}
+                            disabled={operationLoading}
+                            className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors disabled:opacity-50"
+                            title="Approve Request"
+                        >
+                            <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => handleRejectRequest(request)}
+                            disabled={operationLoading}
+                            className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50"
+                            title="Reject Request"
+                        >
+                            <XCircle className="w-4 h-4" />
+                        </button>
+                    </div>
+                );
+            }
+            if (status === 'APPROVED') {
+                actionButtons.push(
                     <button
-                        onClick={() => handleApproveRequest(request)}
+                        key="issue"
+                        onClick={() => handleIssueMaterials(request)}
                         disabled={operationLoading}
-                        className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors disabled:opacity-50"
-                        title="Approve Request"
+                        className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors disabled:opacity-50"
+                        title="Issue Materials"
                     >
-                        <Check className="w-4 h-4" />
+                        <Truck className="w-4 h-4" />
                     </button>
-                    <button
-                        onClick={() => handleRejectRequest(request)}
-                        disabled={operationLoading}
-                        className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50"
-                        title="Reject Request"
-                    >
-                        <XCircle className="w-4 h-4" />
-                    </button>
-                </div>
-            );
+                );
+            }
+            // actionButtons.push(
+            //     <button
+            //         key="delete"
+            //         onClick={() => handleDeleteRequest(request)}
+            //         disabled={operationLoading}
+            //         className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50"
+            //         title="Delete Request"
+            //     >
+            //         <Trash2 className="w-4 h-4" />
+            //     </button>
+            // );
         }
 
         return actionButtons.length > 0 ? (
@@ -625,7 +615,7 @@ const StockRequestManagement = ({role}:{role:string}) => {
                                         >
                                             <Eye className="w-3 h-3" />
                                         </Link>
-                                        {renderActionButtonBasedOnUser(user, request)}
+                                        {renderActionButtonBasedOnRole(role, request)}
                                     </div>
                                 </td>
                             </tr>
@@ -682,7 +672,7 @@ const StockRequestManagement = ({role}:{role:string}) => {
                         >
                             <Eye className="w-3 h-3" />
                         </button>
-                        {renderActionButtonBasedOnUser(user, request)}
+                        {renderActionButtonBasedOnRole(role, request)}
                     </div>
                 </div>
             ))}
@@ -740,7 +730,7 @@ const StockRequestManagement = ({role}:{role:string}) => {
                             >
                                 <Eye className="w-4 h-4" />
                             </button>
-                            {renderActionButtonBasedOnUser(user, request)}
+                            {renderActionButtonBasedOnRole(role, request)}
                         </div>
                     </div>
                 </div>
@@ -914,7 +904,7 @@ const StockRequestManagement = ({role}:{role:string}) => {
                                 <Download className="w-3 h-3" />
                                 <span>Export</span>
                             </button>
-                            {user?.adminName === 'SITE_ENGINEER' && (
+                            {role === 'employee' && (
                                 <button
                                     onClick={handleAddRequest}
                                     disabled={operationLoading}
@@ -942,7 +932,6 @@ const StockRequestManagement = ({role}:{role:string}) => {
                             </div>
                         </div>
                     </div>
-                    
                     <div className="bg-white rounded shadow p-4">
                         <div className="flex items-center space-x-3">
                             <div className="p-3 bg-orange-100 rounded-full flex items-center justify-center">

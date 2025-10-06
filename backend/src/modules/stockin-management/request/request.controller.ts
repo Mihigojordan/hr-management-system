@@ -83,6 +83,8 @@ export class ModifyAndApproveRequestDto {
     qtyRequested: number;
     qtyApproved?: number;
   }>;
+  userId:string;
+  userRole:string;
   itemsToRemove?: string[];
   modificationReason?: string;
 }
@@ -169,16 +171,17 @@ export class RequestController {
   async modifyAndApprove(
     @Param('id') id: string,
     @Body() data: ModifyAndApproveRequestDto,
-    @Req() req: any, // contains logged-in user info (id & role)
+  
   ) {
-    const userId = req.user.id;
-    const userRole = req.user.role.name;
 
+
+
+    
     // Call the service function
     const updatedRequest: any = await this.requestService.modifyAndApproveRequest(
       id,
-      userId,
-      userRole,
+      data.userId,
+      data.userRole,
       data,
     );
 
