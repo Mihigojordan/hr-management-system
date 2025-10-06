@@ -100,6 +100,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         icon: MapPin,
         path: `${basePath}/assign-management`,
       },
+
+      
+      {
+        id: "category",
+        label: "Category Management",
+        icon: ShoppingBasket,
+        path: `${basePath}/category-management`,
+      },
+      {
+        id: "Stock",
+        label: "Stock Management",
+        icon: ShoppingBasket,
+        path: `${basePath}/stock-management`,
+      },
       {
         id: "store",
         label: "Store Management",

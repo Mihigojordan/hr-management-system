@@ -41,6 +41,11 @@ import CageForm from '../components/dashboard/cage/CageForm';
 import CageViewPage from '../components/dashboard/cage/CageViewMorePage';
 import MedicationForm from '../components/dashboard/cage/MedicationForm';
 import DailyFeedRecordForm from '../components/dashboard/cage/DailyFeedRecordForm';
+import CategoryManagement from '../pages/dashboard/CategoryManagement';
+import StockManagement from '../pages/dashboard/StockManagement';
+import StockInForm from '../components/dashboard/stock/StockFormPage';
+import StockInViewPage from '../components/dashboard/stock/StockInViewPage';
+import StockRequestManagement from '../pages/dashboard/StockRequestManagement';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -444,6 +449,54 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <DailyFeedRecordForm  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'category-management',
+                element: (
+                  <SuspenseWrapper>
+                    <CategoryManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management',
+                element: (
+                  <SuspenseWrapper>
+                    <StockManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management/create',
+                element: (
+                  <SuspenseWrapper>
+                    <StockInForm  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockInForm  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockInViewPage  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-request',
+                element: (
+                  <SuspenseWrapper>
+                    <StockRequestManagement  role='admin' />
                   </SuspenseWrapper>
                 ),
               },

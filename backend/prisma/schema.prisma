@@ -28,9 +28,16 @@ model Admin {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
- medications      Medication[]
-  feed  Feed[]
-  Activity Activity[]
+   medications      Medication[]
+
+  // 🔹 Requests
+   requestedBy    Request[] @relation("RequestedByAdmin")
+  closedBy       Request[] @relation("ClosedByAdmin")
+  issuedBy       Request[] @relation("IssuedByAdmin")
+  // 🔹 StockHistory
+  stockHistoriesCreated StockHistory[] 
+   feed  Feed[]
+   Activity Activity[]
 }
 
 enum AdminStatus{
@@ -94,6 +101,8 @@ enum MaritalStatus {
     isLocked   Boolean? @default(false)
     is2FA   Boolean? @default(false) 
 
+
+
     activity              Activity[]
     contract              Contract[]
     managedSites    Site[] @relation("ManagerRelation")
@@ -103,8 +112,19 @@ enum MaritalStatus {
       // Assigned site (one site only)
     siteId       String?
     site         Site?    @relation("SiteEmployees", fields: [siteId], references: [id] , onDelete: SetNull, onUpdate: Cascade)
+
+     // 🔹 Requests
+  requestedBy    Request[] @relation("RequestedByEmployee")
+  closedBy       Request[] @relation("ClosedByEmployee")
+  issuedBy       Request[] @relation("IssuedByEmployee")
+
+  // 🔹 StockHistory
+  stockHistoriesCreated StockHistory[] 
+  
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
+
+    
   }
 
 model Contract {
@@ -282,6 +302,7 @@ model Store {
   manager     Employee?    @relation(fields: [managerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   contact_phone String?
   contact_email String?
+  stockins    StockIn[]
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 }
@@ -300,6 +321,7 @@ model Site{
   manager      Employee? @relation("ManagerRelation", fields: [managerId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "Site_manager_fkey")
   supervisor   Employee? @relation("SupervisorRelation", fields: [supervisorId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "Site_supervisor_fkey")
   employees    Employee[] @relation("SiteEmployees")
+  request    Request[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -406,4 +428,167 @@ enum FeedType {
   VEGETABLE
   INSECT
   OTHER
+}
+
+
+
+model StockCategory {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relation: one category has many stock items
+  stockins    StockIn[]
+}
+
+model StockIn {
+  id               String         @id @default(uuid())
+  productName      String
+  sku              String?        @unique
+  quantity         Int            @default(0)
+  unit             Unit
+  unitPrice        Decimal        @db.Decimal(10,2)
+  reorderLevel     Int?           @default(1)
+  supplier         String?
+  location         String?
+  description      String?
+
+  // Relation: belongs to a category
+  stockcategoryId  String
+  stockcategory    StockCategory  @relation(fields: [stockcategoryId], references: [id])
+
+  // Relation: belongs to a store
+  storeId          String
+  store            Store          @relation(fields: [storeId], references: [id])
+
+  stockhistory   StockHistory[]
+  requestItems  RequestItem[]
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+enum Unit {
+  PCS        // pieces
+  KG         // kilograms
+  LITERS     // liters
+  METER      // meters
+  BOX        // boxes
+  PACK       // packs
+  OTHER      // fallback
+}
+
+
+model Request {
+  id            String         @id @default(uuid()) // UUID primary key
+  ref_no        String         @unique @db.VarChar(50)
+
+  siteId        String
+  site          Site           @relation(fields: [siteId], references: [id])
+
+  // 🔹 Requested by (can be Admin or Employee)
+  requestedByAdminId   String?
+  requestedByAdmin     Admin?       @relation("RequestedByAdmin", fields: [requestedByAdminId], references: [id])
+  requestedByEmployeeId String?
+  requestedByEmployee   Employee?   @relation("RequestedByEmployee", fields: [requestedByEmployeeId], references: [id])
+
+  status        RequestStatus   @default(PENDING)
+  notes         String?         @db.Text
+
+  // 🔹 Received by (Admin or Employee)
+  receivedAt    DateTime?       
+  // 🔹 Closed by
+  closedAt      DateTime?      
+  closedByAdminId   String?
+  closedByAdmin     Admin?       @relation("ClosedByAdmin", fields: [closedByAdminId], references: [id])
+  closedByEmployeeId String?
+  closedByEmployee   Employee?   @relation("ClosedByEmployee", fields: [closedByEmployeeId], references: [id])
+
+  // 🔹 Issued by
+  issuedAt      DateTime?      
+  issuedByAdminId   String?
+  issuedByAdmin     Admin?       @relation("IssuedByAdmin", fields: [issuedByAdminId], references: [id])
+  issuedByEmployeeId String?
+  issuedByEmployee   Employee?   @relation("IssuedByEmployee", fields: [issuedByEmployeeId], references: [id])
+
+  // 🔹 Relations
+  requestItems  RequestItem[]
+  stockhistory  StockHistory[]
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model RequestItem {
+  id             String      @id @default(uuid())        // UUID primary key
+
+  requestId      String
+  request        Request     @relation(fields: [requestId], references: [id],onDelete: Cascade, onUpdate: Cascade)
+
+  stockInId      String
+  stockIn        StockIn     @relation(fields: [stockInId], references: [id],onDelete: Cascade, onUpdate: Cascade)
+
+  qtyRequested   Decimal     @db.Decimal(12, 3)
+  qtyApproved    Decimal?    @db.Decimal(12, 3)
+  qtyIssued      Decimal     @default(0) @db.Decimal(12, 3)
+  qtyRemaining   Decimal     @default(0) @db.Decimal(12, 3)
+  qtyReceived    Decimal?    @default(0) @db.Decimal(12, 3)
+
+ 
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  PARTIALLY_ISSUED
+  ISSUED
+  REJECTED
+  CLOSED
+}
+
+
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+enum SourceType {
+  GRN
+  ISSUE
+  ADJUSTMENT
+  RECEIPT
+}
+
+model StockHistory {
+  id             String        @id @default(uuid())
+
+  stockInId      String
+  stockIn        StockIn       @relation(fields: [stockInId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  movementType   MovementType
+  sourceType     SourceType
+  sourceId       String?       
+  request         Request?    @relation(fields: [sourceId], references: [id])
+
+  qtyBefore      Decimal       @db.Decimal(12, 3) 
+  qtyChange      Decimal       @db.Decimal(12, 3)
+  qtyAfter       Decimal       @db.Decimal(12, 3)
+
+  unitPrice      Decimal?      @db.Decimal(12, 2) 
+  notes          String?       @db.Text          
+
+ createdByAdminId   String?
+createdByAdmin     Admin?    @relation(fields: [createdByAdminId], references: [id])
+createdByEmployeeId String?
+createdByEmployee   Employee? @relation(fields: [createdByEmployeeId], references: [id])
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
