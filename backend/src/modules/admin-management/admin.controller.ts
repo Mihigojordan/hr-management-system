@@ -47,10 +47,10 @@ export class AdminController {
 
   /**
    * Login endpoint
-   * @body { identifier: string, password: string }
+   * @body { adminEmail: string, password: string }
    */
   @Post('login')
-  async login(@Body() body: { identifier: string; password: string }, @Res() res: Response) {
+  async login(@Body() body: { adminEmail: string; password: string }, @Res() res: Response) {
     try {
       const loginResult = await this.adminServices.adminLogin(body);
 
