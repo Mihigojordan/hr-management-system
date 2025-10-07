@@ -18,6 +18,7 @@ export class AssetRequestGateway {
     console.log(`❌ AssetRequest client disconnected: ${client.id}`);
   }
 
+  // Request-level events
   emitRequestCreated(request: any) {
     this.server.emit('requestCreated', request);
   }
@@ -32,5 +33,16 @@ export class AssetRequestGateway {
 
   emitRequestStatusChanged(requestId: string, status: string) {
     this.server.emit('requestStatusChanged', { id: requestId, status });
+  }
+
+  // Item-level events
+  emitItemUpdated(item: any) {
+    // item should include: id, status, quantityIssued, procurementStatus
+    this.server.emit('requestItemUpdated', item);
+  }
+
+  emitItemProcurementNeeded(item: any) {
+    // Emitted when an item is pending procurement
+    this.server.emit('requestItemProcurementNeeded', item);
   }
 }

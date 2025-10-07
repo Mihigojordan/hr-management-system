@@ -4,7 +4,13 @@ import { type AxiosInstance, type AxiosResponse } from 'axios';
 // ---------- Interfaces ----------
 
 // Request statuses
-export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'ISSUED' | 'CLOSED';
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'ISSUED' | 'PARTIALLY_ISSUED' | 'CLOSED';
+
+// Requested item statuses
+export type RequestedItemStatus = 'PENDING' | 'ISSUED' | 'PARTIALLY_ISSUED' | 'PENDING_PROCUREMENT';
+
+// Procurement statuses
+export type ProcurementStatus = 'NOT_REQUIRED' | 'REQUIRED' | 'ORDERED' | 'COMPLETED';
 
 // Asset Request Item interface
 export interface AssetRequestItemData {
@@ -15,6 +21,9 @@ export interface AssetRequestItemData {
 export interface AssetRequestItem extends AssetRequestItemData {
   id: string;
   requestId: string;
+  quantityIssued?: number;
+  status?: RequestedItemStatus;
+  procurementStatus?: ProcurementStatus;
   createdAt?: string;
   updatedAt?: string;
   asset?: {
@@ -52,6 +61,12 @@ export interface AssetRequest {
 export interface AssetRequestUpdateData {
   description?: string;
   items?: AssetRequestItemData[];
+}
+
+// Issued items for approve and issue
+export interface IssuedItem {
+  itemId: string;
+  issuedQuantity: number;
 }
 
 // Validation result
@@ -152,17 +167,21 @@ class AssetRequestService {
   }
 
   /**
-   * Approve an asset request
+   * Approve and issue an asset request (only PENDING requests)
    */
-  async approveRequest(id: string): Promise<AssetRequest> {
+  async approveAndIssueRequest(
+    id: string,
+    issuedItems: IssuedItem[]
+  ): Promise<AssetRequest> {
     try {
       const response: AxiosResponse<AssetRequest> = await this.api.patch(
-        `/asset-requests/${id}/approve`
+        `/asset-requests/${id}/approve`,
+        { issuedItems }
       );
       return response.data;
     } catch (error: any) {
-      console.error('Error approving asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to approve asset request');
+      console.error('Error approving and issuing asset request:', error);
+      throw new Error(error.response?.data?.message || 'Failed to approve and issue asset request');
     }
   }
 
@@ -178,21 +197,6 @@ class AssetRequestService {
     } catch (error: any) {
       console.error('Error rejecting asset request:', error);
       throw new Error(error.response?.data?.message || 'Failed to reject asset request');
-    }
-  }
-
-  /**
-   * Issue an asset request (only APPROVED requests can be issued)
-   */
-  async issueRequest(id: string): Promise<AssetRequest> {
-    try {
-      const response: AxiosResponse<AssetRequest> = await this.api.patch(
-        `/asset-requests/${id}/issue`
-      );
-      return response.data;
-    } catch (error: any) {
-      console.error('Error issuing asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to issue asset request');
     }
   }
 
@@ -261,17 +265,17 @@ class AssetRequestService {
   }
 
   /**
-   * Check if request can be approved (only PENDING requests)
+   * Check if request can be approved and issued (only PENDING requests)
    */
-  canApproveRequest(request: AssetRequest): boolean {
+  canApproveAndIssueRequest(request: AssetRequest): boolean {
     return request.status === 'PENDING';
   }
 
   /**
-   * Check if request can be issued (only APPROVED requests)
+   * Check if request can be rejected (only PENDING requests)
    */
-  canIssueRequest(request: AssetRequest): boolean {
-    return request.status === 'APPROVED';
+  canRejectRequest(request: AssetRequest): boolean {
+    return request.status === 'PENDING';
   }
 }
 
@@ -286,13 +290,12 @@ export const {
   getRequestById,
   updateRequest,
   deleteRequest,
-  approveRequest,
+  approveAndIssueRequest,
   rejectRequest,
-  issueRequest,
   getRequestsByStatus,
   getRequestsByEmployee,
   validateRequestData,
   canModifyRequest,
-  canApproveRequest,
-  canIssueRequest,
+  canApproveAndIssueRequest,
+  canRejectRequest,
 } = assetRequestService;
