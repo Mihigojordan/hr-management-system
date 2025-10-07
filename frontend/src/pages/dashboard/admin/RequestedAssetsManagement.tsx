@@ -41,7 +41,7 @@ interface AssetRequestItem {
   asset?: {
     id: string;
     name: string;
-    availableQuantity?: number;
+    quantity?: number;  // Updated type to number
     [key: string]: any;
   };
 }
@@ -97,13 +97,13 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
   }, [searchTerm, statusFilter, sortBy, sortOrder, allRequests]);
 
   useSocketEvent('requestCreated', (request: AssetRequest) => {
-    setAllRequests((prev) => [...prev, request]);
+    setAllRequests((prev) => [...prev, processRequest(request)]);
     showOperationStatus('success', `Request ${request.id} created`);
   });
 
   useSocketEvent('requestUpdated', (request: AssetRequest) => {
     setAllRequests((prev) =>
-      prev.map((r) => (r.id === request.id ? request : r))
+      prev.map((r) => (r.id === request.id ? processRequest(request) : r))
     );
     showOperationStatus('success', `Request ${request.id} updated`);
   });
@@ -120,18 +120,28 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
     showOperationStatus('info', `Request ${id} status changed to ${status}`);
   });
 
+  const processRequest = (req: AssetRequest): AssetRequest => ({
+    ...req,
+    employee: {
+      ...req.employee,
+      full_name: req.employee?.full_name || `${req.employee?.first_name || ''} ${req.employee?.last_name || ''}`.trim(),
+    },
+    items: req.items?.map((item) => ({
+      ...item,
+      asset: item.asset
+        ? {
+            ...item.asset,
+            quantity: parseInt(item.asset.quantity ?? "0", 10),
+          }
+        : undefined,
+    })),
+  });
+
   const loadData = async () => {
     try {
       setLoading(true);
       const data = await assetRequestService.getAllRequests();
-      const processedData = data.map((req) => ({
-        ...req,
-        employee: {
-          ...req.employee,
-          full_name: req.employee?.full_name || `${req.employee?.first_name || ''} ${req.employee?.last_name || ''}`.trim(),
-        },
-      }));
-      setAllRequests(processedData);
+      setAllRequests(data.map(processRequest));
       setError(null);
     } catch (err: any) {
       setError(err.message || "Failed to load asset requests");
@@ -184,23 +194,29 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
   };
 
   const handleApproveAndIssue = (request: AssetRequest) => {
-    // Initialize issued items with requested quantities
-    const defaultIssuedItems: IssuedItem[] = (request.items || []).map(item => ({
-      itemId: item.id,
-      issuedQuantity: item.quantity
-    }));
+    const defaultIssuedItems: IssuedItem[] = (request.items || []).map(item => {
+      const available = item.asset?.quantity ?? 0;
+      return {
+        itemId: item.id,
+        issuedQuantity: available > 0 ? Math.min(item.quantity, available) : 0
+      };
+    });
     setIssuedItems(defaultIssuedItems);
     setSelectedRequest(request);
     setShowIssueModal(true);
-    setActionConfirmx(null);
+    setActionConfirm(null);
   };
 
   const hasInvalidQuantities = () => {
     return selectedRequest?.items?.some(item => {
       const issued = issuedItems.find(i => i.itemId === item.id)?.issuedQuantity || 0;
-      const available = item.asset?.quantity || 0;
+      const available = item.asset?.quantity ?? 0;
       return issued > available || issued < 0;
     }) || false;
+  };
+
+  const allItemsOutOfStock = (request: AssetRequest | null) => {
+    return request?.items?.every(item => (item.asset?.quantity ?? 0) === 0) || false;
   };
 
   const confirmApproveAndIssue = async () => {
@@ -214,7 +230,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
         issuedItems
       );
       setAllRequests(prev => prev.map(req => 
-        req.id === updatedRequest.id ? updatedRequest : req
+        req.id === updatedRequest.id ? processRequest(updatedRequest) : req
       ));
       showOperationStatus("success", `Request ${selectedRequest.id} approved and issued successfully!`);
       setSelectedRequest(null);
@@ -232,7 +248,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
       setActionConfirm(null);
       const updatedRequest = await assetRequestService.rejectRequest(request.id);
       setAllRequests(prev => prev.map(req => 
-        req.id === updatedRequest.id ? updatedRequest : req
+        req.id === updatedRequest.id ? processRequest(updatedRequest) : req
       ));
       showOperationStatus("success", `Request ${request.id} rejected!`);
     } catch (err: any) {
@@ -352,7 +368,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                         <button 
                           onClick={() => setActionConfirm({request, action: 'approve'})} 
                           className="text-gray-400 hover:text-green-600 p-1" 
-                          title="Approve & Issue"
+                          title={allItemsOutOfStock(request) ? "Procure Assets" : "Approve & Issue"}
                         >
                           <CheckSquare className="w-3 h-3" />
                         </button>
@@ -400,7 +416,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
             <div className="flex space-x-1">
               {request.status === 'PENDING' && (
                 <>
-                  <button onClick={() => setActionConfirm({request, action: 'approve'})} className="text-gray-400 hover:text-green-600 p-1" title="Approve">
+                  <button onClick={() => setActionConfirm({request, action: 'approve'})} className="text-gray-400 hover:text-green-600 p-1" title={allItemsOutOfStock(request) ? "Procure Assets" : "Approve & Issue"}>
                     <CheckSquare className="w-3 h-3" />
                   </button>
                   <button onClick={() => setActionConfirm({request, action: 'reject'})} className="text-gray-400 hover:text-red-600 p-1" title="Reject">
@@ -438,8 +454,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
             <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
               <button 
                 onClick={() => handleViewRequest(request)} 
-                className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg Pillars of Eternity II: Deadfire
-                hover:bg-blue-50 transition-colors" 
+                className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors" 
                 title="View"
               >
                 <Eye className="w-4 h-4" />
@@ -449,7 +464,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                   <button 
                     onClick={() => setActionConfirm({request, action: 'approve'})} 
                     className="text-gray-400 hover:text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors" 
-                    title="Approve"
+                    title={allItemsOutOfStock(request) ? "Procure Assets" : "Approve & Issue"}
                   >
                     <CheckSquare className="w-4 h-4" />
                   </button>
@@ -734,7 +749,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-gray-900">
-                  {actionConfirm.action === 'approve' && 'Approve & Issue Request'}
+                  {actionConfirm.action === 'approve' && (allItemsOutOfStock(actionConfirm.request) ? 'Procure Assets' : 'Approve & Issue Request')}
                   {actionConfirm.action === 'reject' && 'Reject Request'}
                 </h3>
                 <p className="text-xs text-gray-500">Confirm your action</p>
@@ -742,7 +757,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
             </div>
             <div className="mb-4">
               <p className="text-xs text-gray-700 mb-2">
-                Are you sure you want to {actionConfirm.action} this request?
+                Are you sure you want to {actionConfirm.action === 'approve' ? (allItemsOutOfStock(actionConfirm.request) ? 'procure' : 'approve and issue') : 'reject'} this request?
               </p>
               <div className="bg-gray-50 rounded p-2 space-y-1">
                 <div className="text-xs"><span className="font-medium">Employee:</span> {actionConfirm.request.employee?.full_name}</div>
@@ -765,7 +780,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                   actionConfirm.action === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
                 }`}
               >
-                {actionConfirm.action === 'approve' && 'Approve & Issue'}
+                {actionConfirm.action === 'approve' && (allItemsOutOfStock(actionConfirm.request) ? 'Procure Assets' : 'Approve & Issue')}
                 {actionConfirm.action === 'reject' && 'Reject'}
               </button>
             </div>
@@ -777,7 +792,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Approve & Issue Assets</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{allItemsOutOfStock(selectedRequest) ? 'Procure Assets' : 'Approve & Issue Assets'}</h3>
               <button onClick={() => {
                 setShowIssueModal(false);
                 setSelectedRequest(null);
@@ -807,6 +822,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                     const issuedQty = issuedItem?.issuedQuantity || 0;
                     const availableQty = item.asset?.quantity ?? 0;
                     const isInvalid = issuedQty > availableQty || issuedQty < 0;
+                    const isOutOfStock = availableQty === 0;
                     
                     return (
                       <div key={item.id} className="p-3">
@@ -817,19 +833,35 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                             <div className="text-xs text-gray-600">Available: {availableQty}</div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <label className="text-xs text-gray-600 w-24">Issue Quantity:</label>
-                          <input
-                            type="number"
-                            value={issuedQty}
-                            onChange={(e) => updateIssuedQuantity(item.id, parseInt(e.target.value) || 0)}
-                            className={`flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
-                              isInvalid ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
-                            }`}
-                          />
-                          
-                        </div>
-                        {isInvalid && (
+                        {isOutOfStock ? (
+                          <div className="flex items-center space-x-2">
+                            <label className="text-xs text-gray-600 w-24">Issue Quantity:</label>
+                            <div className="flex-1">
+                              <input
+                                type="number"
+                                value={0}
+                                disabled
+                                className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded bg-gray-100 cursor-not-allowed"
+                              />
+                              <p className="text-xs text-orange-600 mt-1">
+                                Item out of stock - Pending Procurement
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <label className="text-xs text-gray-600 w-24">Issue Quantity:</label>
+                            <input
+                              type="number"
+                              value={issuedQty}
+                              onChange={(e) => updateIssuedQuantity(item.id, parseInt(e.target.value) || 0)}
+                              className={`flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                isInvalid ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
+                              }`}
+                            />
+                          </div>
+                        )}
+                        {isInvalid && !isOutOfStock && (
                           <p className="text-xs text-red-600 mt-1">
                             {issuedQty < 0 ? 'Quantity cannot be negative' : `Quantity exceeds available stock (${availableQty})`}
                           </p>
@@ -842,7 +874,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
 
               <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
                 <p className="text-xs text-yellow-800">
-                  <strong>Note:</strong> You can issue partial quantities. Items with quantities less than requested will be marked for procurement.
+                  <strong>Note:</strong> Items with zero available quantity will be marked for procurement. Other items can be issued partially, and remaining quantities will be marked for procurement.
                 </p>
               </div>
             </div>
@@ -867,7 +899,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                     : 'bg-green-600 hover:bg-green-700'
                 }`}
               >
-                Approve & Issue
+                {allItemsOutOfStock(selectedRequest) ? 'Procure Assets' : 'Approve & Issue'}
               </button>
             </div>
           </div>
@@ -976,7 +1008,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                       }}
                       className="px-4 py-2 text-xs bg-green-600 text-white rounded hover:bg-green-700"
                     >
-                      Approve & Issue
+                      {allItemsOutOfStock(selectedRequest) ? 'Procure Assets' : 'Approve & Issue'}
                     </button>
                     <button
                       onClick={() => {

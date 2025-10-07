@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AssetRequestGateway } from './request.gateway';
+import { RequestStatus } from 'generated/prisma';
 @Injectable()
 export class AssetRequestService {
   constructor(
@@ -143,72 +144,109 @@ export class AssetRequestService {
     }
   }
 
-  // Approve and Issue request
-  async approveAndIssueRequest(
-    requestId: string,
-    issuedItems: { itemId: string; issuedQuantity: number }[],
-  ) {
-    try {
-      const request = await this.prisma.assetRequest.findUnique({
-        where: { id: requestId },
-        include: { items: true },
+ // Approve and Issue request
+async approveAndIssueRequest(
+  requestId: string,
+  issuedItems: { itemId: string; issuedQuantity: number }[],
+) {
+  try {
+    const request = await this.prisma.assetRequest.findUnique({
+      where: { id: requestId },
+      include: { items: true },
+    });
+    if (!request) throw new NotFoundException('Request not found');
+    if (request.status !== 'PENDING')
+      throw new BadRequestException('Request not pending');
+
+    let fullyIssued = true;
+    let allUnavailable = true;
+
+    for (const issued of issuedItems) {
+      const item = request.items.find((i) => i.id === issued.itemId);
+      if (!item) continue;
+
+      const asset = await this.prisma.asset.findUnique({
+        where: { id: item.assetId },
       });
-      if (!request) throw new NotFoundException('Request not found');
-      if (request.status !== 'PENDING')
-        throw new BadRequestException('Request not pending');
+      if (!asset)
+        throw new BadRequestException(`Asset not found: ${item.assetId}`);
 
-      let fullyIssued = true;
+      const currentQty = Number(asset.quantity);
 
-      for (const issued of issuedItems) {
-        const item = request.items.find((i) => i.id === issued.itemId);
-        if (!item) continue;
-
-        const asset = await this.prisma.asset.findUnique({
-          where: { id: item.assetId },
-        });
-        if (!asset)
-          throw new BadRequestException(`Asset not found: ${item.assetId}`);
-
-        const issueQty = Math.min(
-          issued.issuedQuantity,
-          Number(asset.quantity),
-        );
-
-        const itemStatus =
-          issueQty === item.quantity ? 'ISSUED' : 'PARTIALLY_ISSUED';
-        if (issueQty < item.quantity) fullyIssued = false;
-
-        const procurementStatus =
-          issueQty < item.quantity ? 'REQUIRED' : 'NOT_REQUIRED';
+      // 🧠 If asset has zero quantity → mark item for procurement
+      if (currentQty <= 0) {
+        fullyIssued = false;
 
         await this.prisma.assetRequestItem.update({
           where: { id: item.id },
           data: {
-            quantityIssued: issueQty,
-            status: itemStatus,
-            procurementStatus,
+            quantityIssued: 0,
+            status: 'PENDING_PROCUREMENT',
+            procurementStatus: 'REQUIRED',
           },
         });
 
-        await this.prisma.asset.update({
-          where: { id: asset.id },
-          data: { quantity: String(Number(asset.quantity) - issueQty) },
-        });
+        // Emit real-time update for item
+        this.assetGateway.emitRequestStatusChanged(
+          item.id,
+          'PENDING_PROCUREMENT',
+        );
+        continue;
       }
 
-      const finalStatus = fullyIssued ? 'ISSUED' : 'PARTIALLY_ISSUED';
-      const updatedRequest = await this.prisma.assetRequest.update({
-        where: { id: requestId },
-        data: { status: finalStatus },
-        include: { items: true , employee: true },
+      // At least one item had stock
+      allUnavailable = false;
+
+      // Normal issuance logic
+      const issueQty = Math.min(issued.issuedQuantity, currentQty);
+
+      const itemStatus =
+        issueQty === item.quantity ? 'ISSUED' : 'PARTIALLY_ISSUED';
+      if (issueQty < item.quantity) fullyIssued = false;
+
+      const procurementStatus =
+        issueQty < item.quantity ? 'REQUIRED' : 'NOT_REQUIRED';
+
+      await this.prisma.assetRequestItem.update({
+        where: { id: item.id },
+        data: {
+          quantityIssued: issueQty,
+          status: itemStatus,
+          procurementStatus,
+        },
       });
 
-      this.assetGateway.emitRequestStatusChanged(requestId, finalStatus);
-      return updatedRequest;
-    } catch (error) {
-      throw new BadRequestException(error.message);
+      await this.prisma.asset.update({
+        where: { id: asset.id },
+        data: { quantity: String(currentQty - issueQty) },
+      });
     }
+
+    let finalStatus: RequestStatus;
+
+    if (allUnavailable) {
+      // All items out of stock → keep request as pending
+      finalStatus = RequestStatus.PENDING;
+    } else if (fullyIssued) {
+      finalStatus = RequestStatus.ISSUED;
+    } else {
+      finalStatus = RequestStatus.PARTIALLY_ISSUED;
+    }
+
+    const updatedRequest = await this.prisma.assetRequest.update({
+      where: { id: requestId },
+      data: { status: finalStatus },
+      include: { items: true, employee: true },
+    });
+    
+    this.assetGateway.emitRequestStatusChanged(requestId, finalStatus);
+    return updatedRequest;
+  } catch (error) {
+    throw new BadRequestException(error.message);
   }
+}
+
+
 
   // Fetch all items that need procurement
   async getItemsForProcurement() {
