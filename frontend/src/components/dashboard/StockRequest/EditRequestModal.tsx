@@ -3,7 +3,6 @@ import { X, FileText, Package, Plus, Trash2 } from 'lucide-react';
 import requestService, { type UpdateRequestInput, type Request } from '../../../services/stockRequestService';
 import stockService, { type StockIn } from '../../../services/stockInService';
 import siteService, { type Site } from '../../../services/siteService';
-// import siteAssignmentService from '../../../services/siteAssignmentService';
 
 interface EditRequestModalProps {
   isOpen: boolean;
@@ -17,20 +16,16 @@ interface Item {
   stockInId: string;
   qtyRequested: number;
   qtyApproved?: number;
+  isNew?: boolean; // Track new items
+  isRemoved?: boolean; // Track items to be removed
 }
 
 const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, request, onSave }) => {
   const [formData, setFormData] = useState<UpdateRequestInput>({
-    siteId: request?.siteId || '',
-    notes: request?.notes || '',
-    items: Array.isArray(request?.requestItems) && request?.requestItems.length > 0
-      ? request.requestItems.map(item => ({
-          id: item.id,
-          stockInId: item.stockInId,
-          qtyRequested: item.qtyRequested,
-          qtyApproved: item.qtyApproved,
-        }))
-      : [{ stockInId: '', qtyRequested: 0 }],
+    siteId: '',
+    notes: '',
+    items: [{ stockInId: '', qtyRequested: 0 }],
+    modificationReason: '',
   });
   const [sites, setSites] = useState<Site[]>([]);
   const [stockins, setStockins] = useState<StockIn[]>([]);
@@ -51,16 +46,19 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
   useEffect(() => {
     if (request) {
       setFormData({
-        siteId: request.siteId || 0,
+        siteId: request.siteId || '',
         notes: request.notes || '',
         items: Array.isArray(request.requestItems) && request.requestItems.length > 0
           ? request.requestItems.map(item => ({
               id: item.id,
-              stockInId: item.stockInId,
+              stockInId: item.stockInId || '',
               qtyRequested: item.qtyRequested,
               qtyApproved: item.qtyApproved,
+              isNew: false,
+              isRemoved: false,
             }))
-          : [{ stockInId: '', qtyRequested: 0 }],
+          : [{ stockInId: '', qtyRequested: 0, isNew: true }],
+        modificationReason: '',
       });
       setErrors([]);
     }
@@ -70,9 +68,10 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
   useEffect(() => {
     if (!isOpen) {
       setFormData({
-        siteId: 0,
+        siteId: '',
         notes: '',
-        items: [{ stockInId: '', qtyRequested: 0 }],
+        items: [{ stockInId: '', qtyRequested: 0, isNew: true }],
+        modificationReason: '',
       });
       setErrors([]);
     }
@@ -118,7 +117,7 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
         if (field === 'stockInId') {
           const selectedStockInId = value;
           const isDuplicate = formData.items.some(
-            (item, i) => i !== index && item.stockInId === selectedStockInId
+            (item, i) => i !== index && item.stockInId === selectedStockInId && !item.isRemoved
           );
 
           if (isDuplicate) {
@@ -127,7 +126,7 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
               ? `${selectedStockIn.productName}${selectedStockIn.sku ? ` (${selectedStockIn.sku})` : ''}`
               : `Stock Item ID: ${selectedStockInId}`;
             setErrors([`You cannot select the same stock item twice: ${stockInLabel}.`]);
-            return; // Stop updating state
+            return;
           }
         }
 
@@ -142,7 +141,7 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
       } else {
         setFormData((prev) => ({
           ...prev,
-          [name]: name === 'siteId' ? parseInt(value, 10) || 0 : value,
+          [name]: name === 'siteId' ? value : value,
         }));
       }
 
@@ -157,15 +156,22 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
   const addItem = () => {
     setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, { stockInId: '', qtyRequested: 0 }],
+      items: [...prev.items, { stockInId: '', qtyRequested: 0, isNew: true }],
     }));
   };
 
   const removeItem = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index),
-    }));
+    setFormData((prev) => {
+      const newItems = [...prev.items];
+      if (newItems[index].id) {
+        // Mark existing item for removal
+        newItems[index] = { ...newItems[index], isRemoved: true };
+      } else {
+        // Remove new items directly
+        newItems.splice(index, 1);
+      }
+      return { ...prev, items: newItems };
+    });
   };
 
   const validateForm = (): { isValid: boolean; errors: string[] } => {
@@ -179,7 +185,16 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
       validationErrors.push('Notes are required');
     }
 
-    formData.items.forEach((item, index) => {
+    if (!formData.modificationReason || !formData.modificationReason.trim()) {
+      validationErrors.push('Modification reason is required');
+    }
+
+    const activeItems = formData.items.filter(item => !item.isRemoved);
+    if (activeItems.length === 0) {
+      validationErrors.push('At least one stock item is required');
+    }
+
+    activeItems.forEach((item, index) => {
       if (!item.stockInId) {
         validationErrors.push(`Stock item is required for item ${index + 1}`);
       }
@@ -206,15 +221,26 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
     }
 
     try {
+      // Prepare data according to modifyAndApproveRequest structure
       const updateData: UpdateRequestInput = {
-        siteId: formData.siteId,
         notes: formData.notes,
-        items: formData.items.map(item => ({
-          id: item.id ,
-          stockInId: item.stockInId,
-          qtyRequested: item.qtyRequested,
-          qtyApproved: item.qtyApproved,
-        })),
+        modificationReason: formData.modificationReason,
+        itemModifications: formData.items
+          .filter(item => item.id && !item.isNew && !item.isRemoved)
+          .map(item => ({
+            requestItemId: item.id!,
+            stockInId: item.stockInId,
+            qtyRequested: item.qtyRequested,
+          })),
+        itemsToAdd: formData.items
+          .filter(item => item.isNew && !item.isRemoved)
+          .map(item => ({
+            stockInId: item.stockInId,
+            qtyRequested: item.qtyRequested,
+          })),
+        itemsToRemove: formData.items
+          .filter(item => item.isRemoved && item.id)
+          .map(item => item.id!),
       };
 
       await onSave(updateData);
@@ -222,7 +248,8 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
       setFormData({
         siteId: '',
         notes: '',
-        items: [{ stockInId: '', qtyRequested: 0 }],
+        items: [{ stockInId: '', qtyRequested: 0, isNew: true }],
+        modificationReason: '',
       });
       onClose();
     } catch (error: any) {
@@ -265,10 +292,10 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
               name="siteId"
               value={formData.siteId}
               onChange={handleChange}
-              disabled={isLoadingSites}
+              disabled={isLoadingSites || request.status !== 'PENDING'}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value={0}>
+              <option value="">
                 {isLoadingSites ? 'Loading sites...' : 'Select a site'}
               </option>
               {sites.map((site) => (
@@ -294,6 +321,21 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
             />
           </div>
 
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 text-sm font-medium text-gray-700">
+              <FileText className="w-4 h-4 text-gray-400" />
+              <span>Modification Reason <span className="text-red-500">*</span></span>
+            </label>
+            <textarea
+              name="modificationReason"
+              value={formData.modificationReason}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+              placeholder="Enter reason for modification"
+              rows={2}
+            />
+          </div>
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="flex items-center space-x-2 text-sm font-medium text-gray-700">
@@ -303,61 +345,65 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
               <button
                 type="button"
                 onClick={addItem}
-                className="px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors flex items-center space-x-2"
+                disabled={request.status !== 'PENDING'}
+                className="px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Item</span>
               </button>
             </div>
 
-            {formData.items.map((item, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Stock Item</label>
-                  <select
-                    name={`items.stockInId`}
-                    value={item.stockInId}
-                    onChange={(e) => handleChange(e, index)}
-                    disabled={isLoadingStockIns}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  >
-                    <option value="">
-                      {isLoadingStockIns ? 'Loading stock items...' : 'Select a stock item'}
-                    </option>
-                    {stockins.map((stockIn) => (
-                      <option key={stockIn.id} value={stockIn.id}>
-                        {stockIn.productName} {stockIn.sku ? `(${stockIn.sku})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Quantity</label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="number"
-                      name={`items.qtyRequested`}
-                      value={item.qtyRequested}
+            {formData.items
+              .map((item, index) => ({ item, index }))
+              .filter(({ item }) => !item.isRemoved)
+              .map(({ item, index }) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Stock Item</label>
+                    <select
+                      name={`items.stockInId`}
+                      value={item.stockInId}
                       onChange={(e) => handleChange(e, index)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                      placeholder="Enter quantity"
-                      min="0"
-                      step="0.01"
-                    />
-                    {formData.items.length > 1 && (
+                      disabled={isLoadingStockIns || request.status !== 'PENDING'}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {isLoadingStockIns ? 'Loading stock items...' : 'Select a stock item'}
+                      </option>
+                      {stockins.map((stockIn) => (
+                        <option key={stockIn.id} value={stockIn.id}>
+                          {stockIn.productName} {stockIn.sku ? `(${stockIn.sku})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Quantity</label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        name={`items.qtyRequested`}
+                        value={item.qtyRequested}
+                        onChange={(e) => handleChange(e, index)}
+                        disabled={request.status !== 'PENDING'}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        placeholder="Enter quantity"
+                        min="0"
+                        step="0.01"
+                      />
                       <button
                         type="button"
                         onClick={() => removeItem(index)}
-                        className="p-2 text-red-600 hover:text-red-700"
+                        disabled={formData.items.filter(i => !i.isRemoved).length <= 1 || request.status !== 'PENDING'}
+                        className="p-2 text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Remove item"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
 
           {errors.length > 0 && (
@@ -385,7 +431,7 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ isOpen, onClose, re
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || isLoadingSites || isLoadingStockIns}
+              disabled={isSubmitting || isLoadingSites || isLoadingStockIns || request.status !== 'PENDING'}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {isSubmitting ? (
