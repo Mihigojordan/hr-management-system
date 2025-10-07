@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapPin,
   Plane,
@@ -7,16 +7,24 @@ import {
   User,
   X,
   Building,
-  FileBadge,
   Briefcase,
   User2,
   Cog,
   Settings,
-  BoxSelect,
   Grid,
   ShoppingBasket,
+  PackageSearch,
+  History,
+  Store,
+  ClipboardList,
+  FolderTree,
+  UserPlus,
+  ChevronDown,
+  ChevronRight,
+  Layers,
+  MapPinned,
 } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 import useAdminAuth from "../../context/AdminAuthContext";
 import useEmployeeAuth from "../../context/EmployeeAuthContext";
@@ -35,90 +43,182 @@ interface NavItem {
   allowedRoles?: string[];
 }
 
+interface DropdownGroup {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  items: NavItem[];
+}
+
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const location = useLocation();
   const adminAuth = useAdminAuth();
   const employeeAuth = useEmployeeAuth();
   const auth = role === "admin" ? adminAuth : employeeAuth;
   const user = auth.user;
   const navigate = useNavigate();
 
-  const getNavlinks = (role: string): NavItem[] => {
+  const toggleDropdown = (id: string) => {
+    setOpenDropdown((prev) => (prev === id ? null : id));
+  };
+
+  const getNavlinks = (role: string): (NavItem | DropdownGroup)[] => {
     const basePath = `/${role}/dashboard`;
 
     return [
       {
-        id: "",
+        id: "dashboard",
         label: "Dashboard",
         icon: TrendingUp,
         path: basePath,
       },
       {
-        id: "departments",
-        label: "Departments Management",
-        icon: Building,
-        path: `${basePath}/department-management`,
-        allowedRoles: ["admin"],
-      },
-      {
-        id: "recruiting",
-        label: "Recruiting Management",
-        icon: Briefcase,
-        path: `${basePath}/recruiting-management`,
-        allowedRoles: ["admin"],
-      },
-      {
-        id: "employees",
-        label: "Employees Management",
-        icon: Users,
-        path: `${basePath}/employee-management`,
-        allowedRoles: ["admin"],
+        id: "hr-management",
+        label: "HR Management",
+        icon: UserPlus,
+        items: [
+          {
+            id: "departments",
+            label: "Departments",
+            icon: Building,
+            path: `${basePath}/department-management`,
+            allowedRoles: ["admin"],
+          },
+          {
+            id: "recruiting",
+            label: "Recruiting",
+            icon: Briefcase,
+            path: `${basePath}/recruiting-management`,
+            allowedRoles: ["admin"],
+          },
+          {
+            id: "employees",
+            label: "Employees",
+            icon: Users,
+            path: `${basePath}/employee-management`,
+            allowedRoles: ["admin"],
+          },
+        ],
       },
       {
         id: "clients",
         label: "Clients Management",
         icon: User2,
         path: `${basePath}/client-management`,
-      
+        
       },
       {
         id: "assets",
         label: "Asset Management",
         icon: Cog,
         path: `${basePath}/asset-management`,
-      
       },
       {
-        id: "sites",
+        id: "site-management",
         label: "Site Management",
-        icon: MapPin,
-        path: `${basePath}/site-management`,
-      
+        icon: MapPinned,
+        items: [
+          {
+            id: "sites",
+            label: "Sites",
+            icon: MapPin,
+            path: `${basePath}/site-management`,
+             allowedRoles: ["admin"],
+          },
+          {
+            id: "site-assign",
+            label: "Site Assignment",
+            icon: Layers,
+            path: `${basePath}/assign-management`,
+             allowedRoles: ["admin"],
+          },
+        ],
       },
       {
-        id: "site assing",
-        label: "site assign Management",
-        icon: MapPin,
-        path: `${basePath}/assign-management`,
-      },
-      {
-        id: "store",
-        label: "Store Management",
-        icon: ShoppingBasket,
-        path: `${basePath}/store-management`,
+        id: "inventory-management",
+        label: "Inventory Management",
+        icon: PackageSearch,
+        items: [
+          {
+            id: "category",
+            label: "Categories",
+            icon: FolderTree,
+            path: `${basePath}/category-management`,
+             allowedRoles: ["admin"],
+          },
+          {
+            id: "stock",
+            label: "Stock",
+            icon: ShoppingBasket,
+            path: `${basePath}/stock-management`,
+             allowedRoles: ["admin"],
+          },
+          {
+            id: "stock-request",
+            label: "Stock Requests",
+            icon: ClipboardList,
+            path: `${basePath}/stock-request`,
+          },
+          {
+            id: "stock-history",
+            label: "Stock History",
+            icon: History,
+            path: `${basePath}/stock-history`,
+             allowedRoles: ["admin"],
+          },
+          {
+            id: "store",
+            label: "Stores",
+            icon: Store,
+            path: `${basePath}/store-management`,
+             allowedRoles: ["admin"],
+          },
+        ],
       },
       {
         id: "cage",
         label: "Cage Management",
         icon: Grid,
         path: `${basePath}/cage-management`,
+         allowedRoles: ["admin"],
       },
-      
     ];
   };
 
-  const navlinks = getNavlinks(role).filter(
-    (item) => !item.allowedRoles || item.allowedRoles.includes(role)
-  );
+  const filterNavItems = (items: (NavItem | DropdownGroup)[]): (NavItem | DropdownGroup)[] => {
+    return items
+      .map((item) => {
+        if ("items" in item) {
+          const filteredItems = item.items.filter(
+            (subItem) => !subItem.allowedRoles || subItem.allowedRoles.includes(role)
+          );
+          if (filteredItems.length === 0) return null;
+          return { ...item, items: filteredItems };
+        }
+        if (!item.allowedRoles || item.allowedRoles.includes(role)) {
+          return item;
+        }
+        return null;
+      })
+      .filter((item): item is NavItem | DropdownGroup => item !== null);
+  };
+
+  const navlinks = filterNavItems(getNavlinks(role));
+
+  // Auto-open dropdown if current path matches any item inside it
+  useEffect(() => {
+    const currentPath = location.pathname;
+    for (const item of navlinks) {
+      if ("items" in item) {
+        const hasActiveChild = item.items.some((subItem) => currentPath === subItem.path);
+        if (hasActiveChild) {
+          setOpenDropdown(item.id);
+          break;
+        }
+      }
+    }
+  }, [location.pathname]);
 
   const getProfileRoute = () => `/${role}/dashboard/profile`;
 
@@ -139,6 +239,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
 
   const portalTitle = `${role.charAt(0).toUpperCase() + role.slice(1)} Portal`;
 
+  const isDropdownActive = (dropdown: DropdownGroup) => {
+    const currentPath = location.pathname;
+    return dropdown.items.some((item) => currentPath === item.path);
+  };
+
   const renderMenuItem = (item: NavItem) => {
     const Icon = item.icon;
 
@@ -148,19 +253,94 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         to={item.path}
         end
         className={({ isActive }) =>
-          `w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 group ${
+          `w-full flex items-center space-x-2 px-2 py-2 rounded-lg transition-all duration-200 group border-l-4 ${
             isActive
-              ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white"
-              : "text-black hover:bg-primary-50"
+              ? "bg-primary-500/10 text-primary-700 border-primary-500"
+              : "text-gray-700 hover:bg-gray-50 border-transparent"
           }`
         }
         onClick={() => {
           if (window.innerWidth < 1024) onToggle();
         }}
       >
-        <Icon className="w-4 h-4" />
-        <span className="text-xs font-medium">{item.label}</span>
+        {({ isActive }) => (
+          <>
+            <div className={`p-1 rounded-md ${isActive ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-600"}`}>
+              <Icon className="w-4 h-4" />
+            </div>
+            <span className="text-sm font-medium">{item.label}</span>
+          </>
+        )}
       </NavLink>
+    );
+  };
+
+  const renderDropdown = (dropdown: DropdownGroup) => {
+    const Icon = dropdown.icon;
+    const isOpen = openDropdown === dropdown.id;
+    const hasActiveChild = isDropdownActive(dropdown);
+
+    return (
+      <div key={dropdown.id} className="w-full">
+        <button
+          onClick={() => toggleDropdown(dropdown.id)}
+          className={`w-full flex items-center justify-between px-2 py-2 rounded-lg transition-all duration-200 ${
+            hasActiveChild
+              ? "bg-primary-500/10 text-primary-700 border-l-4 border-primary-500"
+              : "text-gray-700 hover:bg-gray-50 border-l-4 border-transparent"
+          }`}
+        >
+          <div className="flex items-center space-x-2">
+            <div className={`p-1 rounded-md ${hasActiveChild ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-600"}`}>
+              <Icon className="w-4 h-4" />
+            </div>
+            <span className="text-sm font-medium">{dropdown.label}</span>
+          </div>
+          <ChevronDown
+            className={`w-4 h-4 transition-transform duration-300 ${
+              isOpen ? "rotate-180" : "rotate-0"
+            } ${hasActiveChild ? "text-primary-600" : "text-gray-400"}`}
+          />
+        </button>
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="ml-4 space-y-0.5 border-l-2 border-primary-100 pl-3 py-0.5">
+            {dropdown.items.map((item) => {
+              const SubIcon = item.icon;
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  end
+                  className={({ isActive }) =>
+                    `w-full flex items-center space-x-2 px-2 py-1.5 rounded-md transition-all duration-200 group relative ${
+                      isActive
+                        ? "bg-primary-500 text-white shadow-sm"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`
+                  }
+                  onClick={() => {
+                    if (window.innerWidth < 1024) onToggle();
+                  }}
+                >
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-r-full -ml-3"></div>
+                      )}
+                      <SubIcon className="w-4 h-4" />
+                      <span className="text-sm">{item.label}</span>
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -178,19 +358,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
       <div
         className={`fixed left-0 top-0 min-h-screen bg-white flex flex-col border-r border-primary-200 shadow-lg transform transition-transform duration-300 z-50 lg:relative lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } w-80`}
+        } w-64`}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-4 border-b border-primary-200">
+        <div className="flex items-center justify-between p-3 border-b border-primary-200">
           <div className="flex items-center space-x-2">
-            <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg">
+            <div className="flex items-center justify-center w-7 h-7 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg">
               <div className="flex items-center space-x-0.5">
                 <MapPin className="w-3 h-3 text-white" />
                 <Plane className="w-2 h-2 text-white" />
               </div>
             </div>
             <div>
-              <h2 className="font-bold text-lg text-primary-800">
+              <h2 className="font-bold text-base text-primary-800">
                 Aby Hr Management
               </h2>
               <p className="text-xs text-primary-500">{portalTitle}</p>
@@ -198,19 +378,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
           </div>
           <button
             onClick={onToggle}
-            className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="lg:hidden p-1 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
 
         {/* Navigation Menu */}
-        <div className="flex-1 overflow-y-auto p-3">
-          <nav className="space-y-1">
+        <div className="flex-1 overflow-y-auto p-2">
+          <nav className="space-y-0.5">
             {navlinks.length > 0 ? (
-              navlinks.map(renderMenuItem)
+              navlinks.map((item) => {
+                if ("items" in item) {
+                  return renderDropdown(item);
+                }
+                return renderMenuItem(item);
+              })
             ) : (
-              <div className="text-center py-6">
+              <div className="text-center py-4">
                 <p className="text-gray-500 text-xs">No menu items available</p>
               </div>
             )}
@@ -219,11 +404,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
 
         {/* Sidebar Footer */}
         <div
-          className="p-3 border-t border-primary-200 cursor-pointer"
+          className="p-2 border-t border-primary-200 cursor-pointer"
           onClick={handleNavigateProfile}
         >
-          <div className="flex items-center space-x-2 p-2 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">
-            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+          <div className="flex items-center space-x-2 p-1.5 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">
+            <div className="w-7 h-7 bg-primary-100 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-primary-600" />
             </div>
             <div className="flex-1 min-w-0">
