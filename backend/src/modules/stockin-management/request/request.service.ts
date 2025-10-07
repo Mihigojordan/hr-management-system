@@ -8,7 +8,60 @@ import { Decimal } from '@prisma/client/runtime/library';
 export class RequestService {
   constructor(private prisma: PrismaService) {}
 
-  async createRequest(data: {
+
+  
+  async rejectRequest(
+    requestId: string,
+    data: {
+      rejectedByAdminId?: string;
+      rejectedByEmployeeId?: string;
+      notes?: string;
+    },
+  ) {
+    const request = await this.prisma.request.findUnique({
+      where: { id: requestId },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Request not found');
+    }
+    console.log(data);
+    
+
+    const updatedRequest = await this.prisma.request.update({
+      where: { id: requestId },
+      data: {
+        status: RequestStatus.REJECTED,
+        notes: data.notes || request.notes,
+      },
+       include: {
+        site: true,
+        requestedByAdmin: true,
+        requestedByEmployee: true,
+        issuedByAdmin: true,
+        issuedByEmployee: true,
+        closedByAdmin: true,
+        closedByEmployee: true,
+        rejectedByAdmin:true,
+        rejectedByEmployee:true,
+        stockhistory:true,
+        requestItems: {
+          include: {
+            stockIn: {
+              include: {
+                stockcategory: true,
+                store: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return updatedRequest;
+  }
+
+   async createRequest(data: {
     siteId: string;
     requestedByAdminId?: string;
     requestedByEmployeeId?: string;
@@ -43,7 +96,10 @@ export class RequestService {
           create: data.items.map(item => ({
             stockInId: item.stockInId,
             qtyRequested: new Decimal(item.qtyRequested),
+            // Use qtyRequested as the source of truth for remaining
             qtyRemaining: new Decimal(item.qtyRequested),
+            qtyIssued: new Decimal(0),
+            qtyReceived: new Decimal(0),
           })),
         },
       },
@@ -51,6 +107,13 @@ export class RequestService {
         site: true,
         requestedByAdmin: true,
         requestedByEmployee: true,
+        issuedByAdmin: true,
+        issuedByEmployee: true,
+        closedByAdmin: true,
+        closedByEmployee: true,
+        rejectedByAdmin:true,
+        rejectedByEmployee:true,
+        stockhistory:true,
         requestItems: {
           include: {
             stockIn: {
@@ -65,142 +128,6 @@ export class RequestService {
     });
 
     return request;
-  }
-
-async approveRequest(
-    requestId: string,
-    data: {
-      approvedByAdminId?: string;
-      approvedByEmployeeId?: string;
-      itemModifications?: Array<{
-        requestItemId: string;
-        qtyRequested?: number;
-        qtyApproved?: number;
-        stockInId?: string;
-      }>;
-      itemsToAdd?: Array<{
-        stockInId: string;
-        qtyRequested: number;
-        qtyApproved?: number;
-      }>;
-      itemsToRemove?: string[]; // array of requestItem IDs
-      comment?: string;
-    },
-  ) {
-    const request = await this.prisma.request.findUnique({
-      where: { id: requestId },
-      include: { requestItems: true },
-    });
-
-    if (!request) {
-      throw new NotFoundException('Request not found');
-    }
-
-    if (request.status !== RequestStatus.PENDING) {
-      throw new BadRequestException('Only pending requests can be approved');
-    }
-
-    // Start a transaction
-    return this.prisma.$transaction(async (tx) => {
-      // 1️⃣ Remove items
-      if (data.itemsToRemove && data.itemsToRemove.length > 0) {
-        await tx.requestItem.deleteMany({
-          where: { id: { in: data.itemsToRemove } },
-        });
-      }
-
-      // 2️⃣ Add new items
-      if (data.itemsToAdd && data.itemsToAdd.length > 0) {
-        for (const item of data.itemsToAdd) {
-          await tx.requestItem.create({
-            data: {
-              requestId,
-              stockInId: item.stockInId,
-              qtyRequested: new Decimal(item.qtyRequested),
-              qtyApproved: item.qtyApproved
-                ? new Decimal(item.qtyApproved)
-                : new Decimal(item.qtyRequested),
-              qtyRemaining: item.qtyApproved
-                ? new Decimal(item.qtyApproved)
-                : new Decimal(item.qtyRequested),
-            },
-          });
-        }
-      }
-
-      // 3️⃣ Modify existing items
-      if (data.itemModifications && data.itemModifications.length > 0) {
-        for (const mod of data.itemModifications) {
-          const updateData: any = {};
-          if (mod.qtyRequested !== undefined) updateData.qtyRequested = new Decimal(mod.qtyRequested);
-          if (mod.qtyApproved !== undefined) {
-            updateData.qtyApproved = new Decimal(mod.qtyApproved);
-            updateData.qtyRemaining = new Decimal(mod.qtyApproved);
-          }
-          if (mod.stockInId !== undefined) updateData.stockInId = mod.stockInId;
-
-          if (Object.keys(updateData).length > 0) {
-            await tx.requestItem.update({
-              where: { id: mod.requestItemId },
-              data: updateData,
-            });
-          }
-        }
-      }
-
-      // 4️⃣ Update request approval info
-      const updatedRequest = await tx.request.update({
-        where: { id: requestId },
-        data: {
-          status: RequestStatus.APPROVED,
-        //   approvedByAdminId: data.approvedByAdminId,
-        //   approvedByEmployeeId: data.approvedByEmployeeId,
-        },
-        include: {
-          requestItems: true,
-        },
-      });
-
-      return updatedRequest;
-    });
-  }
-
-  
-  async rejectRequest(
-    requestId: string,
-    data: {
-      rejectedByAdminId?: string;
-      rejectedByEmployeeId?: string;
-      notes?: string;
-    },
-  ) {
-    const request = await this.prisma.request.findUnique({
-      where: { id: requestId },
-    });
-
-    if (!request) {
-      throw new NotFoundException('Request not found');
-    }
-
-    const updatedRequest = await this.prisma.request.update({
-      where: { id: requestId },
-      data: {
-        status: RequestStatus.REJECTED,
-        notes: data.notes || request.notes,
-      },
-      include: {
-        site: true,
-        requestedByAdmin: true,
-        requestedByEmployee: true,
-        requestItems: {
-          include: {
-            stockIn: true,
-          },
-        },
-      },
-    });
-
-    return updatedRequest;
   }
 
   async issueMaterials(data: {
@@ -222,14 +149,14 @@ async approveRequest(
       throw new NotFoundException('Request not found');
     }
 
-    const requestStatus:any = request.status
+    const requestStatus: any = request.status;
 
-    if (![RequestStatus.APPROVED, RequestStatus.PARTIALLY_ISSUED].includes(requestStatus)) {
+    if (![RequestStatus.APPROVED, RequestStatus.PENDING, RequestStatus.RECEIVED].includes(requestStatus)) {
       throw new BadRequestException('Request must be approved before issuing materials');
     }
 
-    const issuedItems:any = [];
-    const stockHistoryRecords:any = [];
+    const issuedItems: any = [];
+    const stockHistoryRecords: any = [];
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of data.items) {
@@ -243,14 +170,14 @@ async approveRequest(
         }
 
         const qtyToIssue = new Decimal(item.qtyIssued);
-        const currentQtyIssued = requestItem.qtyIssued;
+        const currentQtyIssued = requestItem.qtyIssued || new Decimal(0);
         const newQtyIssued = currentQtyIssued.add(qtyToIssue);
 
-        // Validate quantity
-        const qtyApproved = requestItem.qtyApproved || requestItem.qtyRequested;
-        if (newQtyIssued.gt(qtyApproved)) {
+        // Validate quantity - compare to qtyRequested (no qtyApproved)
+        const qtyRequested = requestItem.qtyRequested;
+        if (newQtyIssued.gt(qtyRequested)) {
           throw new BadRequestException(
-            `Cannot issue more than approved for ${requestItem.stockIn.productName}`,
+            `Cannot issue more than requested for ${requestItem.stockIn.productName}`,
           );
         }
 
@@ -260,9 +187,8 @@ async approveRequest(
         });
 
         if (!stockIn) {
-      throw new NotFoundException('StockIn not found');
-    }
-
+          throw new NotFoundException('StockIn not found');
+        }
 
         if (stockIn.quantity < item.qtyIssued) {
           throw new BadRequestException(
@@ -284,7 +210,6 @@ async approveRequest(
           data: {
             qtyIssued: newQtyIssued,
             qtyRemaining: newQtyRemaining.lte(0) ? new Decimal(0) : newQtyRemaining,
-            
           },
         });
 
@@ -301,7 +226,7 @@ async approveRequest(
             unitPrice: stockIn.unitPrice,
             notes: item.notes || `Issued for request ${request.ref_no}`,
             createdByAdminId: data.issuedByAdminId,
-            createdByEmployeeId: data.issuedByEmployeeId,
+
           },
         });
 
@@ -314,18 +239,18 @@ async approveRequest(
         stockHistoryRecords.push(stockHistory);
       }
 
-      // Check if all items are fully issued
+      // Check if all items are fully issued: compare to qtyRequested (no qtyApproved)
       const updatedRequestItems = await tx.requestItem.findMany({
         where: { requestId: data.requestId },
       });
 
       const allItemsIssued = updatedRequestItems.every(item =>
-        item.qtyIssued.gte(item.qtyApproved || item.qtyRequested),
+        item.qtyIssued.gte(item.qtyRequested),
       );
 
       const someItemsIssued = updatedRequestItems.some(item => item.qtyIssued.gt(0));
 
-      let newStatus:any = RequestStatus.APPROVED;
+      let newStatus: any = RequestStatus.APPROVED;
       if (allItemsIssued) {
         newStatus = RequestStatus.ISSUED;
       } else if (someItemsIssued) {
@@ -344,8 +269,35 @@ async approveRequest(
       });
     });
 
+    const updateRequest = await this.prisma.request.findUnique({
+      where: { id: data.requestId },
+    include: {
+        site: true,
+        requestedByAdmin: true,
+        requestedByEmployee: true,
+        issuedByAdmin: true,
+        issuedByEmployee: true,
+        closedByAdmin: true,
+        closedByEmployee: true,
+        rejectedByAdmin:true,
+        rejectedByEmployee:true,
+        stockhistory:true,
+        requestItems: {
+          include: {
+            stockIn: {
+              include: {
+                stockcategory: true,
+                store: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
     return {
       requestId: data.requestId,
+      request:updateRequest,
       issuedItems,
       stockHistoryRecords,
     };
@@ -368,12 +320,14 @@ async approveRequest(
     if (!request) {
       throw new NotFoundException('Request not found');
     }
+    console.log(request.status);
+    
 
     if (![RequestStatus.ISSUED, RequestStatus.PARTIALLY_ISSUED].includes(request.status as any)) {
       throw new BadRequestException('Request must be issued before receiving materials');
     }
 
-    const receivedItems:any = [];
+    const receivedItems: any = [];
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of data.items) {
@@ -390,7 +344,7 @@ async approveRequest(
         const currentQtyReceived = requestItem.qtyReceived || new Decimal(0);
         const newQtyReceived = currentQtyReceived.add(qtyToReceive);
 
-        // Validate quantity
+        // Validate quantity: cannot receive more than issued
         if (newQtyReceived.gt(requestItem.qtyIssued)) {
           throw new BadRequestException(
             `Cannot receive more than issued for ${requestItem.stockIn.productName}`,
@@ -417,7 +371,6 @@ async approveRequest(
             qtyAfter: newQtyReceived,
             unitPrice: requestItem.stockIn.unitPrice,
             notes: `Received for request ${request.ref_no}`,
-            createdByAdminId: data.receivedByAdminId,
             createdByEmployeeId: data.receivedByEmployeeId,
           },
         });
@@ -434,25 +387,66 @@ async approveRequest(
         where: { requestId: data.requestId },
       });
 
-      const allItemsReceived = updatedRequestItems.every(item =>
-        (item.qtyReceived || new Decimal(0)).gte(item.qtyIssued),
-      );
+    const allItemsFullyIssuedAndReceived = (() => {
+  for (const item of updatedRequestItems) {
+    const requested = new Decimal(item.qtyRequested || 0);
+    const issued = new Decimal(item.qtyIssued || 0);
+    const received = new Decimal(item.qtyReceived || 0);
+
+    // Item must be fully issued
+    if (issued.lt(requested)) return false;
+
+    // If it was issued, it must be fully received
+    if (issued.gt(0) && received.lt(issued)) return false;
+  }
+
+  // All items passed the checks
+  return true;
+})();
+
 
       // Update request status
       await tx.request.update({
-        where: { id: data.requestId },
-        data: {
-          receivedAt: new Date(),
-          status: allItemsReceived ? RequestStatus.CLOSED : request.status,
-          closedAt: allItemsReceived ? new Date() : null,
-          closedByAdminId: allItemsReceived ? data.receivedByAdminId : null,
-          closedByEmployeeId: allItemsReceived ? data.receivedByEmployeeId : null,
+  where: { id: data.requestId },
+  data: {
+    receivedAt: new Date(),
+    status: allItemsFullyIssuedAndReceived ? RequestStatus.CLOSED : RequestStatus.RECEIVED,
+    closedAt: allItemsFullyIssuedAndReceived ? new Date() : null,
+    closedByAdminId: allItemsFullyIssuedAndReceived ? data.receivedByAdminId : null,
+    closedByEmployeeId: allItemsFullyIssuedAndReceived ? data.receivedByEmployeeId : null,
+  },
+});
+});
+
+const updateRequest = await this.prisma.request.findUnique({
+      where: { id: data.requestId },
+     include: {
+        site: true,
+        requestedByAdmin: true,
+        requestedByEmployee: true,
+        issuedByAdmin: true,
+        issuedByEmployee: true,
+        closedByAdmin: true,
+        closedByEmployee: true,
+        rejectedByAdmin:true,
+        rejectedByEmployee:true,
+        stockhistory:true,
+        requestItems: {
+          include: {
+            stockIn: {
+              include: {
+                stockcategory: true,
+                store: true,
+              },
+            },
+          },
         },
-      });
+      },
     });
 
     return {
       requestId: data.requestId,
+      request:updateRequest,
       receivedItems,
     };
   }
@@ -462,20 +456,16 @@ async approveRequest(
    */
   async modifyAndApproveRequest(
     requestId: string,
-    userId: string,
-    userRole: string,
     data: {
       notes?: string;
       itemModifications?: Array<{
         requestItemId: string;
         qtyRequested?: number;
-        qtyApproved?: number;
         stockInId?: string;
       }>;
       itemsToAdd?: Array<{
         stockInId: string;
         qtyRequested: number;
-        qtyApproved?: number;
       }>;
       itemsToRemove?: string[];
       modificationReason?: string;
@@ -489,9 +479,10 @@ async approveRequest(
 
     if (!request) throw new NotFoundException('Request not found');
 
-    // 2️⃣ Permission check
-    const canModify = this.checkModificationPermissions(request.status, userRole);
-    if (!canModify.allowed) throw new ForbiddenException(canModify.reason);
+    // ensure request is in a correct state for modification (original code had a confusing message)
+    if (![RequestStatus.PENDING].includes(request.status as any)) {
+      throw new BadRequestException('Only pending requests can be modified/approved');
+    }
 
     // 3️⃣ Transaction for atomic modifications
     return this.prisma.$transaction(async (tx) => {
@@ -507,10 +498,10 @@ async approveRequest(
       if (data.itemModifications?.length) {
         for (const mod of data.itemModifications) {
           const updateData: any = {};
-          if (mod.qtyRequested !== undefined) updateData.qtyRequested = new Decimal(mod.qtyRequested);
-          if (mod.qtyApproved !== undefined) {
-            updateData.qtyApproved = new Decimal(mod.qtyApproved);
-            updateData.qtyRemaining = new Decimal(mod.qtyApproved);
+          if (mod.qtyRequested !== undefined) {
+            updateData.qtyRequested = new Decimal(mod.qtyRequested);
+            // reset remaining to match new requested amount
+            updateData.qtyRemaining = new Decimal(mod.qtyRequested);
           }
           if (mod.stockInId !== undefined) updateData.stockInId = mod.stockInId;
 
@@ -531,8 +522,8 @@ async approveRequest(
               requestId,
               stockInId: item.stockInId,
               qtyRequested: new Decimal(item.qtyRequested),
-              qtyApproved: item.qtyApproved ? new Decimal(item.qtyApproved) : new Decimal(item.qtyRequested),
-              qtyRemaining: item.qtyApproved ? new Decimal(item.qtyApproved) : new Decimal(item.qtyRequested),
+              // qtyRemaining equals qtyRequested
+              qtyRemaining: new Decimal(item.qtyRequested),
               qtyIssued: new Decimal(0),
               qtyReceived: new Decimal(0),
             },
@@ -550,59 +541,35 @@ async approveRequest(
         });
       }
 
-      // 3e. Determine new request status based on role
-      let newStatus = request.status;
-      let approvalLevel = 'DSE';
-
-      if (userRole === 'ADMIN' || userRole === 'PADIRI') {
-        if ([RequestStatus.APPROVED, RequestStatus.PARTIALLY_ISSUED].includes(request.status as any)) {
-          newStatus = RequestStatus.APPROVED; // reset for review
-        }
-        approvalLevel = userRole;
-      } else if (userRole === 'DIOCESAN_SITE_ENGINEER') {
-        newStatus = RequestStatus.PENDING; // mark as pending review
-        approvalLevel = 'DSE';
-      }
-
-      // 3f. Update request status and approver info
-      await tx.request.update({
-        where: { id: requestId },
-        data: {
-          status: newStatus,
-        //   approvedByAdminId: userRole === 'ADMIN' ? userId : undefined,
-        //   approvedByEmployeeId: userRole !== 'ADMIN' ? userId : undefined,
-        },
-      });
-
-    
-
       // 4️⃣ Return updated request with all items
       return tx.request.findUnique({
         where: { id: requestId },
-        include: {
-          requestItems: true,
-          requestedByAdmin: true,
-          requestedByEmployee: true,
+       include: {
+        site: true,
+        requestedByAdmin: true,
+        requestedByEmployee: true,
+        issuedByAdmin: true,
+        issuedByEmployee: true,
+        closedByAdmin: true,
+        closedByEmployee: true,
+        rejectedByAdmin:true,
+        rejectedByEmployee:true,
+        stockhistory:true,
+        requestItems: {
+          include: {
+            stockIn: {
+              include: {
+                stockcategory: true,
+                store: true,
+              },
+            },
+          },
         },
+      },
       });
     });
   }
 
-  /**
-   * Permission checker (adjust as needed)
-   */
-  private checkModificationPermissions(status: RequestStatus, role: string) {
-    const allowedRoles = ['ADMIN', 'PADIRI', 'DIOCESAN_SITE_ENGINEER'];
-    if (!allowedRoles.includes(role)) {
-      return { allowed: false, reason: 'Role cannot modify this request' };
-    }
-
-    if ([RequestStatus.CLOSED, RequestStatus.REJECTED].includes(status as any)) {
-      return { allowed: false, reason: 'Cannot modify a closed or rejected request' };
-    }
-
-    return { allowed: true };
-  }
 
   async findAll(params: {
     page?: number;
@@ -627,6 +594,7 @@ async approveRequest(
           site: true,
           requestedByAdmin: true,
           requestedByEmployee: true,
+
           requestItems: {
             include: {
               stockIn: {
@@ -654,66 +622,6 @@ async approveRequest(
     };
   }
 
-  async getIssuableRequests(query: {
-    page?: number;
-    limit?: number;
-    siteId?: string;
-  }) {
-    const page = query.page ? Number(query.page) : 1;
-    const limit = query.limit ? Number(query.limit) : 10;
-    const offset = (page - 1) * limit;
-
-    // Build filters
-    const where: Prisma.RequestWhereInput = {
-      status: { in: [RequestStatus.APPROVED, RequestStatus.PARTIALLY_ISSUED] },
-    };
-
-    if (query.siteId) {
-      where.siteId = query.siteId;
-    }
-
-    // Count total items for pagination
-    const totalItems = await this.prisma.request.count({ where });
-
-    // Fetch paginated requests
-    const requests = await this.prisma.request.findMany({
-      where,
-      include: {
-        requestItems: {
-          where: {
-            OR: [
-              { qtyRemaining: { gt: new Decimal(0) } },
-              { qtyIssued: { equals: new Decimal(0) } },
-            ],
-          },
-          include: {
-            stockIn: {
-              include: {
-                stockcategory: true,
-                store: true,
-              },
-            },
-          },
-        },
-        requestedByAdmin: true,
-        requestedByEmployee: true,
-        site: true,
-      },
-      skip: offset,
-      take: limit,
-      orderBy: { createdAt: 'asc' },
-    });
-
-    return {
-      requests,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalItems / limit),
-        totalItems,
-        itemsPerPage: limit,
-      },
-    };
-  }
 
   async findOne(id: string) {
     const request = await this.prisma.request.findUnique({
@@ -726,6 +634,9 @@ async approveRequest(
         issuedByEmployee: true,
         closedByAdmin: true,
         closedByEmployee: true,
+        rejectedByAdmin:true,
+        rejectedByEmployee:true,
+        stockhistory:true,
         requestItems: {
           include: {
             stockIn: {
@@ -745,6 +656,90 @@ async approveRequest(
 
     return request;
   }
+
+  // Service method
+async addAttachment(
+  requestId: string,
+  data: {
+  fileName: string;
+  fileUrl: string;
+  role: string;
+  userId: string;
+  uploadedAt: string;
+  description?: string;
+}) {
+  const request = await this.prisma.request.findUnique({ where: { id: requestId } });
+  if (!request) throw new NotFoundException('Request not found');
+
+let attachments: Array<any> = [];
+
+if (Array.isArray(request.attachments as any)) {
+  try {
+    attachments = JSON.parse(request.attachments as string);
+  } catch (err) {
+    console.error('Failed to parse attachments JSON:', err);
+    attachments = [];
+  }
+} 
+// attachments is now always an array, either parsed from JSON or empty
+
+  attachments.push({
+    fileName: data.fileName,
+    fileUrl: data.fileUrl,
+    uploadedBy: data.role,
+    uploadedById: data.userId,
+    uploadedAt: new Date(),
+    description: data.description || '',
+  });
+
+  await this.prisma.request.update({
+    where: { id: requestId },
+    data: { attachments },
+  });
+
+  return { success: true, attachments };
+}
+
+
+// Service method
+async addComment(
+  requestId: string,
+  data: {
+  userId: string;
+  role: string;
+  description: string;
+  uploadedAt: string;
+}) {
+  const request = await this.prisma.request.findUnique({ where: { id: requestId } });
+  if (!request) throw new NotFoundException('Request not found');
+
+  let comments: Array<any> = [];
+
+if (Array.isArray(request.comments as any)) {
+  try {
+    comments = JSON.parse(request.comments as string);
+  } catch (err) {
+    console.error('Failed to parse comments JSON:', err);
+    comments = [];
+  }
+} 
+// attachments is now always an array, either parsed from JSON or empty
+
+  comments.push({
+    userId: data.userId,
+    role: data.role,
+    description: data.description,
+    uploadedAt: data.uploadedAt,
+  });
+
+  await this.prisma.request.update({
+    where: { id: requestId },
+    data: { comments },
+  });
+
+  return { success: true, comments };
+}
+
 
   private async generateRefNo(): Promise<string> {
     const date = new Date();

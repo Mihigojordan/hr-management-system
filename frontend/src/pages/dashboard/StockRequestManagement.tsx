@@ -32,7 +32,7 @@ import {
     Archive,
     Calendar
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import html2pdf from 'html2pdf.js';
 import requestService, {
     type Request,
@@ -45,12 +45,10 @@ import requestService, {
 import stockService, { type StockIn } from '../../services/stockInService';
 import AddRequestModal from '../../components/dashboard/StockRequest/AddRequestModal';
 import EditRequestModal from '../../components/dashboard/StockRequest/EditRequestModal';
-// import DeleteRequestModal from '../../components/dashboard/StockRequest/DeleteRequestModal';
-// import ViewRequestModal from '../../components/dashboard/StockRequest/ViewRequestModal';
-// import ApproveRequestModal from '../../components/dashboard/StockRequest/ApproveRequestModal';
-// import RejectRequestModal from '../../components/dashboard/StockRequest/RejectRequestModal';
-// import IssueMaterialsModal from '../../components/dashboard/StockRequest/IssueMaterialsModal';
-// import ReceiveMaterialsModal from '../../components/dashboard/StockRequest/ReceiveMaterialsModal';
+import IssueMaterialsModal from '../../components/dashboard/StockRequest/IssueMaterialsModal';
+import ReceiveMaterialsModal from '../../components/dashboard/StockRequest/ReceiveMaterialsModal';
+import RejectRequestModal from '../../components/dashboard/StockRequest/RejectRequestModal';
+import { useSocketEvent } from '../../context/SocketContext';
 
 interface OperationStatus {
     type: 'success' | 'error' | 'info';
@@ -61,7 +59,7 @@ type ViewMode = 'table' | 'grid' | 'list';
 
 interface RequestItem {
     id: string;
-    stockInId: string;
+    stock_in_id?: string;
     qtyRequested: number;
     qtyApproved?: number;
     qtyIssued?: number;
@@ -76,9 +74,9 @@ interface Request {
     siteId: string;
     site?: { name: string };
     requestedByAdminId?: string;
-    requestedByAdmin?: { full_name: string };
+    requestedByAdmin?: { adminName: string; adminEmail: string; phone: string; status: string };
     requestedByEmployeeId?: string;
-    requestedByEmployee?: { full_name: string };
+    requestedByEmployee?: { first_name: string; last_name: string; email: string; phone: string; position: string; status: string };
     status: string;
     notes?: string;
     requestItems: RequestItem[];
@@ -92,7 +90,7 @@ interface Request {
 interface ApproveRequestResponse {
     success: boolean;
     data: { request: Request };
-    message: string;
+    message?: string;
 }
 
 const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
@@ -123,23 +121,76 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
     const [operationLoading, setOperationLoading] = useState<boolean>(false);
     const [showFilters, setShowFilters] = useState<boolean>(false);
 
+    const navigate = useNavigate();
+
+    // WebSocket event handlers
+    useSocketEvent('requestCreated', (requestData: Request) => {
+        setAllRequests((prevRequests) => {
+            const exists = prevRequests.some((req) => req.id === requestData.id);
+            if (!exists) {
+                return [requestData, ...prevRequests];
+            }
+            return prevRequests;
+        });
+    });
+
+    useSocketEvent('requestUpdated', (requestData: Request) => {
+        setAllRequests((prevRequests) =>
+            prevRequests.map((r) => (r.id === requestData.id ? requestData : r))
+        );
+    });
+
+    useSocketEvent('requestApproved', (requestData: Request) => {
+        setAllRequests((prevRequests) =>
+            prevRequests.map((r) => (r.id === requestData.id ? requestData : r))
+        );
+    });
+
+    useSocketEvent('requestRejected', (requestData: Request) => {
+        setAllRequests((prevRequests) =>
+            prevRequests.map((r) => (r.id === requestData.id ? requestData : r))
+        );
+    });
+
+    useSocketEvent('materialsIssued', (requestData: Request) => {
+        setAllRequests((prevRequests) =>
+            prevRequests.map((r) => (r.id === requestData.id ? requestData : r))
+        );
+    });
+
+    useSocketEvent('materialsReceived', (requestData: Request) => {
+        setAllRequests((prevRequests) =>
+            prevRequests.map((r) => (r.id === requestData.id ? requestData : r))
+        );
+    });
+
+    useSocketEvent('requestClosed', (requestData: Request) => {
+        setAllRequests((prevRequests) =>
+            prevRequests.map((r) => (r.id === requestData.id ? requestData : r))
+        );
+    });
+
     useEffect(() => {
-        const fetchRequests = async () => {
+        const fetchRequestsAndStockIns = async () => {
             try {
                 setLoading(true);
-                const response = await requestService.getAllRequests();
-                const requests = Array.isArray(response.data.requests) ? response.data.requests : [];
+                const [requestResponse, stockInResponse] = await Promise.all([
+                    requestService.getAllRequests(),
+                    stockService.getAllStockIns()
+                ]);
+                const requests = Array.isArray(requestResponse.data.requests) ? requestResponse.data.requests : [];
                 setAllRequests(requests);
+                setStockins(stockInResponse || []);
                 setError(null);
             } catch (err: any) {
-                const errorMessage = err.message || "Failed to load requests";
+                const errorMessage = err.message || "Failed to load requests or stock items";
                 setError(errorMessage);
                 showOperationStatus("error", errorMessage);
             } finally {
                 setLoading(false);
             }
         };
-        fetchRequests();
+        fetchRequestsAndStockIns();
     }, []);
 
     useEffect(() => {
@@ -161,6 +212,27 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
         });
     };
 
+    const getRequestedBy = (request: Request) => {
+        if (request?.requestedByAdminId && request.requestedByAdmin) {
+            return {
+                full_name: request.requestedByAdmin.adminName || 'N/A',
+                email: request.requestedByAdmin.adminEmail || 'N/A',
+                phone: request.requestedByAdmin.phone || 'N/A',
+                role: { name: 'ADMIN' },
+                active: request.requestedByAdmin.status === 'ACTIVE'
+            };
+        } else if (request?.requestedByEmployeeId && request.requestedByEmployee) {
+            return {
+                full_name: `${request.requestedByEmployee.first_name} ${request.requestedByEmployee.last_name}`,
+                email: request.requestedByEmployee.email,
+                phone: request.requestedByEmployee.phone,
+                role: { name: request.requestedByEmployee.position },
+                active: request.requestedByEmployee.status === 'ACTIVE'
+            };
+        }
+        return { full_name: 'N/A', email: 'N/A', phone: 'N/A', role: { name: 'N/A' }, active: false };
+    };
+
     const handleFilterAndSort = () => {
         let filtered = [...allRequests];
 
@@ -170,7 +242,8 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                     request.site?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     request.ref_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     request.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    request.id.includes(searchTerm)
+                    request.id.includes(searchTerm) ||
+                    getRequestedBy(request).full_name.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -227,6 +300,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                         <td style="font-size:10px;">${index + 1}</td>
                         <td style="font-size:10px;">${request.ref_no}</td>
                         <td style="font-size:10px;">${request.site?.name || 'N/A'}</td>
+                        <td style="font-size:10px;">${getRequestedBy(request).full_name}</td>
                         <td style="font-size:10px;">${totalQuantity}</td>
                         <td style="font-size:10px; color: ${getStatusColor(request.status)};">
                             ${request.status}
@@ -257,6 +331,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                                 <th>#</th>
                                 <th>Ref No</th>
                                 <th>Site</th>
+                                <th>Requested By</th>
                                 <th>Quantity</th>
                                 <th>Status</th>
                                 <th>Created At</th>
@@ -319,8 +394,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
     };
 
     const handleViewRequest = (request: Request) => {
-        setSelectedRequest(request);
-        setIsViewModalOpen(true);
+        navigate(request.id);
     };
 
     const handleDeleteRequest = (request: Request) => {
@@ -335,7 +409,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                 r.id === updatedRequest.id ? updatedRequest : r
             )
         );
-        showOperationStatus('success', `Request #${updatedRequest.ref_no} ${updatedRequest.status.toLowerCase()} successfully`);
+        showOperationStatus('success', response.message || `Request #${updatedRequest.ref_no} approved successfully`);
         setIsApproveModalOpen(false);
         setSelectedRequest(null);
     };
@@ -375,7 +449,13 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                 if (!newRequest) {
                     throw new Error('No request data returned from createRequest');
                 }
-                setAllRequests((prevRequests) => [...prevRequests, newRequest]);
+                setAllRequests((prevRequests: any) => {
+                    const exists = prevRequests.some((req: any) => req.id === newRequest.id);
+                    if (!exists) {
+                        return [newRequest, ...prevRequests];
+                    }
+                    return prevRequests;
+                });
                 showOperationStatus('success', `Request #${newRequest.ref_no} created successfully`);
                 setIsAddModalOpen(false);
             } else {
@@ -449,8 +529,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
 
         const actionButtons = [];
 
-        // Both admin and employee can edit PENDING requests
-        if ((role === 'employee' && status === 'PENDING') || (role === 'admin' && status === 'APPROVED')  ) {
+        if ((role === 'employee' && status === 'PENDING') || (role === 'admin' && status === 'APPROVED')) {
             actionButtons.push(
                 <button
                     key="edit"
@@ -464,7 +543,6 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
             );
         }
 
-        // Employee can receive materials for ISSUED or PARTIALLY_ISSUED requests
         if (role === 'employee' && ['ISSUED', 'PARTIALLY_ISSUED'].includes(status)) {
             actionButtons.push(
                 <button
@@ -479,18 +557,18 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
             );
         }
 
-        // Admin can approve/reject PENDING requests and issue materials for APPROVED requests
         if (role === 'admin') {
             if (status === 'PENDING') {
                 actionButtons.push(
                     <div key="approve-reject" className="flex items-center space-x-1">
                         <button
-                            onClick={() => handleApproveRequest(request)}
+                            key="issue"
+                            onClick={() => handleIssueMaterials(request)}
                             disabled={operationLoading}
-                            className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors disabled:opacity-50"
-                            title="Approve Request"
+                            className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors disabled:opacity-50"
+                            title="Issue Materials"
                         >
-                            <Check className="w-4 h-4" />
+                            <Truck className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => handleRejectRequest(request)}
@@ -503,7 +581,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                     </div>
                 );
             }
-            if (status === 'APPROVED') {
+            if (status === 'APPROVED' || status == 'RECEIVED') {
                 actionButtons.push(
                     <button
                         key="issue"
@@ -516,17 +594,6 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                     </button>
                 );
             }
-            // actionButtons.push(
-            //     <button
-            //         key="delete"
-            //         onClick={() => handleDeleteRequest(request)}
-            //         disabled={operationLoading}
-            //         className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50"
-            //         title="Delete Request"
-            //     >
-            //         <Trash2 className="w-4 h-4" />
-            //     </button>
-            // );
         }
 
         return actionButtons.length > 0 ? (
@@ -589,9 +656,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                             >
                                 <td className="py-2 px-2 text-gray-700">{startIndex + index + 1}</td>
                                 <td className="py-2 px-2 text-gray-700">{request.site?.name || 'N/A'}</td>
-                                <td className="py-2 px-2 text-gray-700">
-                                    {request.requestedByAdmin ? request.requestedByAdmin.full_name : request.requestedByEmployee?.full_name || 'N/A'}
-                                </td>
+                                <td className="py-2 px-2 text-gray-700">{getRequestedBy(request).full_name}</td>
                                 <td className="py-2 px-2 text-gray-700">{`${request.requestItems.length} items` || 'N/A'}</td>
                                 <td className="py-2 px-2">
                                     <span
@@ -636,9 +701,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-900 text-xs truncate">{request.site?.name || 'N/A'}</div>
-                            <div className="text-gray-500 text-xs truncate">
-                                {request.requestedByAdmin ? request.requestedByAdmin.full_name : request.requestedByEmployee?.full_name || 'N/A'}
-                            </div>
+                            <div className="text-gray-500 text-xs truncate">{getRequestedBy(request).full_name}</div>
                         </div>
                     </div>
                     <div className="space-y-1 mb-3">
@@ -696,7 +759,7 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                                     #{request.ref_no} - {request.site?.name || 'N/A'}
                                 </div>
                                 <div className="text-gray-500 text-xs truncate">
-                                    Requested by: {request.requestedByAdmin ? request.requestedByAdmin.full_name : request.requestedByEmployee?.full_name || 'N/A'}
+                                    Requested by: {getRequestedBy(request).full_name}
                                 </div>
                                 <div className="text-gray-500 text-xs truncate">
                                     Created: {formatDate(request.createdAt || '')}
@@ -808,53 +871,37 @@ const StockRequestManagement = ({ role }: { role: 'admin' | 'employee' }) => {
                 onSave={handleSaveRequest}
                 stockins={stockins}
             />
-            {/* <DeleteRequestModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                request={selectedRequest}
-                onDelete={handleDelete}
-            />
-            <ViewRequestModal
-                isOpen={isViewModalOpen}
-                request={selectedRequest}
-                onClose={() => setIsViewModalOpen(false)}
-            />
-            <ApproveRequestModal
-                isOpen={isApproveModalOpen}
-                request={selectedRequest}
+            <IssueMaterialsModal
+                isOpen={isIssueModalOpen}
                 onClose={() => {
-                    setIsApproveModalOpen(false);
+                    setIsIssueModalOpen(false);
                     setSelectedRequest(null);
                 }}
-                onApprove={handleApproveSuccess}
+                request={selectedRequest}
+                onIssue={handleIssueSuccess}
+                role={role}
+                stockins={stockins}
+            />
+            <ReceiveMaterialsModal
+                isOpen={isReceiveModalOpen}
+                onClose={() => {
+                    setIsReceiveModalOpen(false);
+                    setSelectedRequest(null);
+                }}
+                requisition={selectedRequest}
+                onReceive={handleReceiveSuccess}
+                role={role}
+                stockins={stockins}
             />
             <RejectRequestModal
                 isOpen={isRejectModalOpen}
-                request={selectedRequest}
+                requisition={selectedRequest}
                 onClose={() => {
                     setIsRejectModalOpen(false);
                     setSelectedRequest(null);
                 }}
                 onReject={handleRejectSuccess}
             />
-            <IssueMaterialsModal
-                isOpen={isIssueModalOpen}
-                request={selectedRequest}
-                onClose={() => {
-                    setIsIssueModalOpen(false);
-                    setSelectedRequest(null);
-                }}
-                onIssue={handleIssueSuccess}
-            />
-            <ReceiveMaterialsModal
-                isOpen={isReceiveModalOpen}
-                request={selectedRequest}
-                onClose={() => {
-                    setIsReceiveModalOpen(false);
-                    setSelectedRequest(null);
-                }}
-                onReceive={handleReceiveSuccess}
-            /> */}
             {operationStatus && (
                 <div className="fixed top-4 right-4 z-50">
                     <div

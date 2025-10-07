@@ -34,6 +34,7 @@ model Admin {
    requestedBy    Request[] @relation("RequestedByAdmin")
   closedBy       Request[] @relation("ClosedByAdmin")
   issuedBy       Request[] @relation("IssuedByAdmin")
+  rejectedBy       Request[] @relation("rejectedByAdmin")
   // 🔹 StockHistory
   stockHistoriesCreated StockHistory[] 
    feed  Feed[]
@@ -117,6 +118,7 @@ enum MaritalStatus {
   requestedBy    Request[] @relation("RequestedByEmployee")
   closedBy       Request[] @relation("ClosedByEmployee")
   issuedBy       Request[] @relation("IssuedByEmployee")
+  rejectedBy       Request[] @relation("rejectedByEmployee")
 
   // 🔹 StockHistory
   stockHistoriesCreated StockHistory[] 
@@ -512,7 +514,18 @@ model Request {
   issuedByAdmin     Admin?       @relation("IssuedByAdmin", fields: [issuedByAdminId], references: [id])
   issuedByEmployeeId String?
   issuedByEmployee   Employee?   @relation("IssuedByEmployee", fields: [issuedByEmployeeId], references: [id])
+  
+  rejectedAt      DateTime?      
+  rejectedByAdminId   String?
+  rejectedByAdmin     Admin?       @relation("rejectedByAdmin", fields: [rejectedByAdminId], references: [id])
+  rejectedByEmployeeId String?
+  rejectedByEmployee   Employee?   @relation("rejectedByEmployee", fields: [rejectedByEmployeeId], references: [id])
 
+  comments   Json?
+  
+attachments Json?  //  {"fileName":"string","fileUrl":"string","uploadedBy":"string","uploadedById":"string","uploadedAt":"string","description":"string"}[]
+
+ 
   // 🔹 Relations
   requestItems  RequestItem[]
   stockhistory  StockHistory[]
@@ -531,12 +544,12 @@ model RequestItem {
   stockIn        StockIn     @relation(fields: [stockInId], references: [id],onDelete: Cascade, onUpdate: Cascade)
 
   qtyRequested   Decimal     @db.Decimal(12, 3)
-  qtyApproved    Decimal?    @db.Decimal(12, 3)
+
   qtyIssued      Decimal     @default(0) @db.Decimal(12, 3)
   qtyRemaining   Decimal     @default(0) @db.Decimal(12, 3)
   qtyReceived    Decimal?    @default(0) @db.Decimal(12, 3)
 
- 
+
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -548,6 +561,7 @@ enum RequestStatus {
   PARTIALLY_ISSUED
   ISSUED
   REJECTED
+  RECEIVED
   CLOSED
 }
 

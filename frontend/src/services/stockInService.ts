@@ -32,6 +32,26 @@ export interface StockIn {
   updatedAt?: Date;
   stockcategory?: StockCategory;
 }
+export type MovementType = 'IN' | 'OUT' | 'ADJUSTMENT';
+export type SourceType = 'GRN' | 'ISSUE' | 'ADJUSTMENT' | 'RECEIPT';
+export interface StockHistory {
+  id: string;
+  stockInId: string;
+  movementType: MovementType;
+  sourceType: SourceType;
+  sourceId?: string; // request id 
+  request:any; // request object here
+   qtyBefore: number;
+  qtyChange: number;
+  qtyAfter: number;
+  unitPrice?: number;
+  notes?: string;
+  createdByAdminId?: string;
+  createdByEmployeeId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 
 // Input types
 export type CreateCategoryInput = Omit<StockCategory, 'id' | 'createdAt' | 'updatedAt' | 'stockins'>;
@@ -188,6 +208,52 @@ class StockService {
     if (data.unitPrice < 0) errors.push('Unit price cannot be negative');
     return { isValid: errors.length === 0, errors };
   }
+
+ // Inside StockService class
+  // -----------------------------
+  // STOCK HISTORY
+  // -----------------------------
+  async getAllStockHistory(): Promise<StockHistory[]> {
+    try {
+      const response: AxiosResponse<StockHistory[]> = await this.api.get('/stock/history');
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching stock history:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch stock history');
+    }
+  }
+
+  async getStockHistoryByStock(stockInId: string): Promise<StockHistory[]> {
+    try {
+      const response: AxiosResponse<StockHistory[]> = await this.api.get(`/stock/history/stock/${stockInId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching stock history for stock item:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch stock history for stock item');
+    }
+  }
+
+  async getStockHistoryByRequest(requestId: string): Promise<StockHistory[]> {
+    try {
+      const response: AxiosResponse<StockHistory[]> = await this.api.get(`/stock/history/request/${requestId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching stock history for request:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch stock history for request');
+    }
+  }
+
+  async getStockHistoryByMovement(type: MovementType): Promise<StockHistory[]> {
+    try {
+      const response: AxiosResponse<StockHistory[]> = await this.api.get(`/stock/history/movement`, {
+        params: { type },
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching stock history by movement type:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to fetch stock history by movement type');
+    }
+  } 
 }
 
 // Singleton
@@ -208,4 +274,8 @@ export const {
   updateStockIn,
   deleteStockIn,
   validateStockInData,
+  getAllStockHistory,
+  getStockHistoryByMovement,
+  getStockHistoryByRequest,
+  getStockHistoryByStock,
 } = stockService;

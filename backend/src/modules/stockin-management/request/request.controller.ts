@@ -10,10 +10,14 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { RequestService } from './request.service';
 import { RequestStatus } from 'generated/prisma';
 import { RequestGateway } from './request.gateway';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { AttachmentsFileFields, AttachmentsUploadConfig } from 'src/common/utils/file-upload.utils';
 
 // DTOs
 export class CreateRequestDto {
@@ -135,38 +139,7 @@ export class RequestController {
     };
   }
 
-  @Get('issuable')
-  async getIssuableRequests(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('siteId') siteId?: string,
-  ) {
-    const result = await this.requestService.getIssuableRequests({
-      page: page ? Number(page) : undefined,
-      limit: limit ? Number(limit) : undefined,
-      siteId,
-    });
-
-    return {
-      success: true,
-      data: result.requests,
-      pagination: result.pagination,
-    };
-  }
-
-  @Patch(':id/approve')
-  async approve(
-    @Param('id') id: string,
-    @Body() approveRequestDto: ApproveRequestDto,
-  ) {
-    const request = await this.requestService.approveRequest(id, approveRequestDto);
-     this.requestGateway.emitRequestApproved(request)
-    return {
-      success: true,
-      data: { request },
-      message: 'Request approved successfully',
-    };
-  }
+ 
   @Patch(':id/modify-approve')
   async modifyAndApprove(
     @Param('id') id: string,
@@ -180,8 +153,7 @@ export class RequestController {
     // Call the service function
     const updatedRequest: any = await this.requestService.modifyAndApproveRequest(
       id,
-      data.userId,
-      data.userRole,
+      
       data,
     );
 
@@ -212,7 +184,7 @@ export class RequestController {
   @Post('issue-materials')
   async issueMaterials(@Body() issueMaterialsDto: IssueMaterialsDto) {
     const result = await this.requestService.issueMaterials(issueMaterialsDto);
-     this.requestGateway.emitMaterialsIssued(result)
+     this.requestGateway.emitMaterialsIssued(result.request)
     return {
       success: true,
       data: result,
@@ -223,12 +195,45 @@ export class RequestController {
   @Post('receive-materials')
   async receiveMaterials(@Body() receiveMaterialsDto: ReceiveMaterialsDto) {
     const result = await this.requestService.receiveMaterials(receiveMaterialsDto);
-     this.requestGateway.emitMaterialsReceived(result)
+     this.requestGateway.emitMaterialsReceived(result.request)
     return {
       success: true,
       data: result,
       message: 'Materials received successfully',
     };
+  }
+
+    @Post(':id/attachments')
+     @UseInterceptors(
+            FileFieldsInterceptor(AttachmentsFileFields, AttachmentsUploadConfig)
+        )
+  async addAttachment(
+    
+    @Param('id') id: string,
+    @UploadedFiles() files: { attachmentImg?: Express.Multer.File[] },
+    @Body() body: { fileUrl: string; role: string; userId: string; createdAt?: string; description?: string },
+  ) {
+
+
+    
+        if (files?.attachmentImg?.[0]?.filename) {
+            body.fileUrl = `/uploads/attachment_images/${files.attachmentImg[0].filename}`;
+        }
+
+
+    
+    const attachments = await this.requestService.addAttachment(id, body as any);
+    return attachments;
+  }
+
+  @Post(':id/comments')
+  async addComment(
+    @Param('id') id: string,
+    @Body() body: { userId: string; role: string; description: string; uploadedAt?: string }
+  ) {
+
+    const comments = await this.requestService.addComment(id, body as any);
+    return comments;
   }
 }
 

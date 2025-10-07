@@ -6,6 +6,7 @@ import stockService, { type StockIn } from '../../../services/stockInService';
 import siteService, { type Site } from '../../../services/siteService';
 // import siteAssignmentService from '../../../services/';
 import Swal from 'sweetalert2';
+import useEmployeeAuth from '../../../context/EmployeeAuthContext';
 
 interface AddRequestModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ const AddRequestModal = ({ isOpen, onClose, onSave }: AddRequestModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingSites, setIsLoadingSites] = useState(false);
   const [isLoadingStockIns, setIsLoadingStockIns] = useState(false);
+  const {user} = useEmployeeAuth()
 
   // Load sites and stock items when modal opens
   useEffect(() => {
@@ -185,7 +187,7 @@ const AddRequestModal = ({ isOpen, onClose, onSave }: AddRequestModalProps) => {
     }
 
     try {
-      await onSave(formData);
+      await onSave({...formData,requestedByEmployeeId:user?.id || undefined});
       setErrors([]);
       setFormData({
         siteId: 0,

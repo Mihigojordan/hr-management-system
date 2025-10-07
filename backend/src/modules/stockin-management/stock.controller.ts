@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { StockGateway } from './stock.gateway';
@@ -88,6 +89,31 @@ export class StockController {
   @Get('stockin/:id')
   async getStockIn(@Param('id') id: string) {
     return this.stockService.getStockInById(id);
+  }
+
+  @Get('history')
+  async getAll() {
+    return this.stockService.getAllStockHistory();
+  }
+
+  // GET /stock-history/stock/:stockInId
+  @Get('history/stock/:stockInId')
+  async getByStock(@Param('stockInId') stockInId: string) {
+    return this.stockService.getStockHistoryByStock(stockInId);
+  }
+
+  // GET /stock-history/request/:requestId
+  @Get('history/request/:requestId')
+  async getByRequest(@Param('requestId') requestId: string) {
+    return this.stockService.getStockHistoryByRequest(requestId);
+  }
+
+  // GET /stock-history/movement?type=IN
+  @Get('history/movement')
+  async getByMovement(
+    @Query('type') type: 'IN' | 'OUT' | 'ADJUSTMENT',
+   ) {
+    return this.stockService.getStockHistoryByMovement(type);
   }
 
   @Put('stockin/:id')

@@ -46,6 +46,8 @@ import StockManagement from '../pages/dashboard/StockManagement';
 import StockInForm from '../components/dashboard/stock/StockFormPage';
 import StockInViewPage from '../components/dashboard/stock/StockInViewPage';
 import StockRequestManagement from '../pages/dashboard/StockRequestManagement';
+import StockRequestManagementDetails from '../pages/dashboard/StockRequestManagementDetails';
+import StockHistory from '../pages/dashboard/StockHistory';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -500,6 +502,30 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+               {
+                path: 'stock-request/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockRequestManagementDetails  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'stock-history',
+                element: (
+                  <SuspenseWrapper>
+                    <StockHistory  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-history/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockHistory  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
             ],
           },
         ],
@@ -584,6 +610,78 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <CageManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'category-management',
+                element: (
+                  <SuspenseWrapper>
+                    <CategoryManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management',
+                element: (
+                  <SuspenseWrapper>
+                    <StockManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management/create',
+                element: (
+                  <SuspenseWrapper>
+                    <StockInForm  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockInForm  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-management/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockInViewPage  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-request',
+                element: (
+                  <SuspenseWrapper>
+                    <StockRequestManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-request/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockRequestManagementDetails  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-history',
+                element: (
+                  <SuspenseWrapper>
+                    <StockHistory  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'stock-history/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <StockHistory  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

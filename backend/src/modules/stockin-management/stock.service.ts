@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Unit } from 'generated/prisma';
+import { Unit,StockHistory } from 'generated/prisma';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -98,9 +98,9 @@ async createStockIn(data: {
   // Generate SKU if not provided
   // ----------------------
   if (!data.sku || data.sku.trim() === '') {
-    const words = data.productName
+    const words = data.productName.trim()
       .split(' ')
-      .map((w) => w[0].toUpperCase())
+      .map((w) => w[0].trim().toUpperCase())
       .join(''); // take first letters of each word, uppercase
 
     const uuidSegment = uuidv4().replace(/-/g, '').slice(0, 4); // take 4 chars from UUID
@@ -176,5 +176,58 @@ async createStockIn(data: {
     } catch (e) {
       throw new NotFoundException('Stock item not found or already deleted');
     }
+  }
+
+    async getAllStockHistory(): Promise<StockHistory[]> {
+    return this.prisma.stockHistory.findMany({
+      include: {
+        stockIn: true,
+        createdByAdmin: true,
+        createdByEmployee: true,
+        request: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // Fetch by stockInId
+  async getStockHistoryByStock(stockInId: string): Promise<StockHistory[]> {
+    return this.prisma.stockHistory.findMany({
+      where: { stockInId },
+      include: {
+        stockIn: true,
+        createdByAdmin: true,
+        createdByEmployee: true,
+        request: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // Fetch by source/request
+  async getStockHistoryByRequest(requestId: string): Promise<StockHistory[]> {
+    return this.prisma.stockHistory.findMany({
+      where: { sourceId: requestId },
+      include: {
+        stockIn: true,
+        createdByAdmin: true,
+        createdByEmployee: true,
+        request: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+   async getStockHistoryByMovement(movementType: 'IN' | 'OUT' | 'ADJUSTMENT'): Promise<StockHistory[]> {
+    return this.prisma.stockHistory.findMany({
+      where: { movementType },
+      include: {
+        stockIn: true,
+        createdByAdmin: true,
+        createdByEmployee: true,
+        request: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

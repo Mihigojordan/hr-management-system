@@ -1,6 +1,5 @@
-// stockRequestService.js
 import { type AxiosInstance, type AxiosResponse } from 'axios';
-import api from '../api/api'; // Adjust this path to your axios instance
+import api from '../api/api';
 
 // Type definitions for request and request items
 export type RequestStatus = 
@@ -15,10 +14,25 @@ export interface RequestItem {
   id: string;
   stockInId: string;
   qtyRequested: number;
-  qtyApproved?: number;
   qtyIssued?: number;
   qtyRemaining?: number;
   qtyReceived?: number;
+}
+
+export interface Attachment {
+  fileName: string;
+  fileUrl: string;
+  uploadedBy: 'ADMIN' | 'EMPLOYEE';
+  uploadedById: string;
+  uploadedAt: string;
+  description?: string;
+}
+
+export interface Comment {
+  userId: string;
+  role: 'ADMIN' | 'EMPLOYEE';
+  description: string;
+  uploadedAt: string;
 }
 
 export interface Request {
@@ -30,12 +44,14 @@ export interface Request {
   status: RequestStatus;
   notes?: string;
   requestItems: RequestItem[];
+  attachments?: Attachment[];
+  comments?: Comment[];
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 // Input types
-export type CreateRequestInput = Omit<Request, 'id' | 'status' | 'requestItems' | 'createdAt' | 'updatedAt'> & {
+export type CreateRequestInput = Omit<Request, 'id' | 'status' | 'requestItems' | 'createdAt' | 'updatedAt' | 'attachments' | 'comments'> & {
   items: { stockInId: string; qtyRequested: number }[];
 };
 
@@ -77,8 +93,8 @@ class RequestService {
   // Create request
   async createRequest(data: CreateRequestInput): Promise<Request> {
     try {
-      const response: AxiosResponse<Request> = await this.api.post(`${this.baseUrl}`, data);
-      return response.data;
+      const response: AxiosResponse<{ data: { request: Request } }> = await this.api.post(`${this.baseUrl}`, data);
+      return response.data.data.request;
     } catch (error: any) {
       console.error('Error creating request:', error);
       throw new Error(error.response?.data?.message || error.message || 'Failed to create request');
@@ -86,9 +102,9 @@ class RequestService {
   }
 
   // Get all requests
-  async getAllRequests(): Promise<{data:{requests:Request[]}}> {
+  async getAllRequests(): Promise<{ data: { requests: Request[] } }> {
     try {
-      const response: AxiosResponse<{data:{requests:Request[]}}> = await this.api.get(`${this.baseUrl}`);
+      const response: AxiosResponse<{ data: { requests: Request[] } }> = await this.api.get(`${this.baseUrl}`);
       return response.data;
     } catch (error: any) {
       console.error('Error fetching requests:', error);
@@ -99,8 +115,8 @@ class RequestService {
   // Get request by ID
   async getRequestById(id: string): Promise<Request | null> {
     try {
-      const response: AxiosResponse<Request> = await this.api.get(`${this.baseUrl}/${id}`);
-      return response.data;
+      const response: AxiosResponse<{ data: { request: Request } }> = await this.api.get(`${this.baseUrl}/${id}`);
+      return response.data.data.request;
     } catch (error: any) {
       if (error.response?.status === 404) return null;
       console.error('Error fetching request by ID:', error);
@@ -111,7 +127,7 @@ class RequestService {
   // Approve request
   async approveRequest(id: string, data: ApproveRequestInput): Promise<Request> {
     try {
-      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/approve/${id}`, data);
+      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/${id}/approve`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error approving request:', error);
@@ -122,7 +138,7 @@ class RequestService {
   // Reject request
   async rejectRequest(id: string, notes?: string): Promise<Request> {
     try {
-      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/reject/${id}`, { notes });
+      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/${id}/reject`, { notes });
       return response.data;
     } catch (error: any) {
       console.error('Error rejecting request:', error);
@@ -133,7 +149,7 @@ class RequestService {
   // Issue materials
   async issueMaterials(data: IssueMaterialsInput): Promise<any> {
     try {
-      const response: AxiosResponse<any> = await this.api.patch(`${this.baseUrl}/issue`, data);
+      const response: AxiosResponse<any> = await this.api.post(`${this.baseUrl}/issue-materials`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error issuing materials:', error);
@@ -144,7 +160,7 @@ class RequestService {
   // Receive materials
   async receiveMaterials(data: ReceiveMaterialsInput): Promise<any> {
     try {
-      const response: AxiosResponse<any> = await this.api.patch(`${this.baseUrl}/receive`, data);
+      const response: AxiosResponse<any> = await this.api.post(`${this.baseUrl}/receive-materials`, data);
       return response.data;
     } catch (error: any) {
       console.error('Error receiving materials:', error);
@@ -155,11 +171,59 @@ class RequestService {
   // Update request
   async updateRequest(id: string, data: UpdateRequestInput): Promise<Request> {
     try {
-      const response: AxiosResponse<Request> = await this.api.patch(`${this.baseUrl}/${id}/modify-approve`, data);
-      return response.data;
+      const response: AxiosResponse<{ data: { request: Request } }> = await this.api.patch(`${this.baseUrl}/${id}/modify-approve`, data);
+      return response.data.data.request;
     } catch (error: any) {
       console.error('Error updating request:', error);
       throw new Error(error.response?.data?.message || error.message || 'Failed to update request');
+    }
+  }
+
+  // Upload attachment
+  async uploadAttachment(
+    id: string,
+    file: File,
+    body: { role: string; userId: string; description?: string }
+  ): Promise<Attachment[]> {
+    try {
+      const formData = new FormData();
+      formData.append('attachmentImg', file);
+      formData.append('role', body.role);
+      formData.append('userId', body.userId);
+      if (body.description) formData.append('description', body.description);
+      formData.append('createdAt', new Date().toISOString());
+
+      const response: AxiosResponse<{ data: { attachments: Attachment[] } }> = await this.api.post(
+        `${this.baseUrl}/${id}/attachments`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      return response.data.attachments;
+    } catch (error: any) {
+      console.error('Error uploading attachment:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to upload attachment');
+    }
+  }
+
+  // Add comment
+  async addComment(
+    id: string,
+    data: { userId: string; role: string; description: string; uploadedAt?: string }
+  ): Promise<Comment[]> {
+    try {
+      const response: AxiosResponse<{ data: { comments: Comment[] } }> = await this.api.post(
+        `${this.baseUrl}/${id}/comments`,
+        data
+      );
+      return response.data.comments;
+    } catch (error: any) {
+      console.error('Error adding comment:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to add comment');
     }
   }
 
@@ -188,5 +252,7 @@ export const {
   issueMaterials,
   receiveMaterials,
   updateRequest,
+  uploadAttachment,
+  addComment,
   deleteRequest,
 } = requestService;
