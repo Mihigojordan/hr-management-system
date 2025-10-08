@@ -238,7 +238,7 @@ async approveAndIssueRequest(
       data: { status: finalStatus },
       include: { items: true, employee: true },
     });
-    
+
     this.assetGateway.emitRequestStatusChanged(requestId, finalStatus);
     return updatedRequest;
   } catch (error) {
@@ -246,13 +246,24 @@ async approveAndIssueRequest(
   }
 }
 
-
-
   // Fetch all items that need procurement
   async getItemsForProcurement() {
     try {
       return await this.prisma.assetRequestItem.findMany({
         where: { status: 'PENDING_PROCUREMENT' },
+        include: { asset: true, request: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+
+  // Fetch all items that need procurement
+  async getItemForProcurementById(id:string) {
+    try {
+      return await this.prisma.assetRequestItem.findMany({
+        where: { status: 'PENDING_PROCUREMENT', id: id },
         include: { asset: true, request: true },
       });
     } catch (error) {

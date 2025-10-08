@@ -29,6 +29,13 @@ export interface AssetRequestItem extends AssetRequestItemData {
   asset?: {
     id: string;
     name: string;
+    quantity?: string;
+    [key: string]: any;
+  };
+  request?: {
+    id: string;
+    employeeId: string;
+    status: RequestStatus;
     [key: string]: any;
   };
 }
@@ -99,7 +106,7 @@ class AssetRequestService {
       return response.data;
     } catch (error: any) {
       console.error('Error creating asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to create asset request');
+      throw new Error(error.response?.data?.error || 'Failed to create asset request');
     }
   }
 
@@ -112,7 +119,7 @@ class AssetRequestService {
       return response.data;
     } catch (error: any) {
       console.error('Error fetching asset requests:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch asset requests');
+      throw new Error(error.response?.data?.error || 'Failed to fetch asset requests');
     }
   }
 
@@ -128,7 +135,7 @@ class AssetRequestService {
     } catch (error: any) {
       if (error.response?.status === 404) return null;
       console.error('Error fetching asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch asset request');
+      throw new Error(error.response?.data?.error || 'Failed to fetch asset request');
     }
   }
 
@@ -147,7 +154,7 @@ class AssetRequestService {
       return response.data;
     } catch (error: any) {
       console.error('Error updating asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to update asset request');
+      throw new Error(error.response?.data?.error || 'Failed to update asset request');
     }
   }
 
@@ -162,7 +169,7 @@ class AssetRequestService {
       return response.data;
     } catch (error: any) {
       console.error('Error deleting asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to delete asset request');
+      throw new Error(error.response?.data?.error || 'Failed to delete asset request');
     }
   }
 
@@ -181,7 +188,7 @@ class AssetRequestService {
       return response.data;
     } catch (error: any) {
       console.error('Error approving and issuing asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to approve and issue asset request');
+      throw new Error(error.response?.data?.error || 'Failed to approve and issue asset request');
     }
   }
 
@@ -196,7 +203,35 @@ class AssetRequestService {
       return response.data;
     } catch (error: any) {
       console.error('Error rejecting asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to reject asset request');
+      throw new Error(error.response?.data?.error || 'Failed to reject asset request');
+    }
+  }
+
+  /**
+   * Get all items that need procurement
+   */
+  async getItemsForProcurement(): Promise<AssetRequestItem[]> {
+    try {
+      const response: AxiosResponse<AssetRequestItem[]> = await this.api.get('/asset-requests/procurement');
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching items for procurement:', error);
+      throw new Error(error.response?.data?.error || 'Failed to fetch items for procurement');
+    }
+  }
+
+  /**
+   * Get a single procurement item by ID
+   */
+  async getItemForProcurementById(id: string): Promise<AssetRequestItem[]> {
+    try {
+      const response: AxiosResponse<AssetRequestItem[]> = await this.api.get(
+        `/asset-requests/procurement/${id}`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching procurement item by ID:', error);
+      throw new Error(error.response?.data?.error || 'Failed to fetch procurement item');
     }
   }
 
@@ -292,6 +327,8 @@ export const {
   deleteRequest,
   approveAndIssueRequest,
   rejectRequest,
+  getItemsForProcurement,
+  getItemForProcurementById,
   getRequestsByStatus,
   getRequestsByEmployee,
   validateRequestData,

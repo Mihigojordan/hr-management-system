@@ -17,6 +17,7 @@ import {
   XCircle,
   AlertCircle,
   Package,
+  Trash,
 } from 'lucide-react';
 
 import assetRequestService, {
@@ -182,7 +183,7 @@ const RequestModal: React.FC<{
                       onClick={() => handleRemoveItem(index)}
                       className="text-red-600 hover:text-red-700"
                     >
-                      <X className="w-4 h-4" />
+                      <Trash className="w-4 h-4" />
                     </button>
                   )}
                 </div>
