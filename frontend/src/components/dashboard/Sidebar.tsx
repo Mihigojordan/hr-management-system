@@ -13,6 +13,8 @@ import {
   Settings,
   Grid,
   ShoppingBasket,
+  LucideBoxes,
+  Inbox,
   PackageSearch,
   History,
   Store,
@@ -102,6 +104,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         ],
       },
       {
+        id: "requestedAssets-management",
+        label: "requested assets Management",
+        icon: Inbox,
+        path: `${basePath}/requestedAssets-management`,
+        allowedRoles: ["admin"],
+      },
+      {
         id: "clients",
         label: "Clients Management",
         icon: User2,
@@ -115,7 +124,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/asset-management`,
       },
       {
-        id: "site-management",
+        id: "assets request",
+        label: "Asset request Management",
+        icon: Inbox,
+        path: `${basePath}/asset-request-management`,
+         allowedRoles: ["employee"],
+      },
+      {
+        id: "sites",
+        // id: "site-management",
         label: "Site Management",
         icon: MapPinned,
         items: [

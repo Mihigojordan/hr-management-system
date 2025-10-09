@@ -56,6 +56,8 @@ const AboutPage = lazy(() => import('../pages/landing/AboutPage'));
 const DepartmentDashboard = lazy(() => import('../pages/dashboard/DepartmentManagement'));
 const SiteManagement = lazy(() => import('../pages/dashboard/SiteManagement')); 
 const SiteAssignmentManagement = lazy(()=> import('../pages/dashboard/SiteAssignmentManagement'));
+const AssetRequestManagement = lazy(() => import('../pages/dashboard/AssetRequestManagement'));
+const RequestAssetsManagement = lazy(() => import('../pages/dashboard/admin/RequestedAssetsManagement'));
 
 /**
  * Loading spinner component for Suspense fallback
@@ -315,6 +317,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <AssetManagement role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'requestedAssets-management',
+                element: (
+                  <SuspenseWrapper>
+                    <RequestAssetsManagement role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -612,6 +622,14 @@ const routes = createBrowserRouter([
                     <CageManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
+              },
+              {
+                path: 'asset-request-management',
+                element: (
+                  <SuspenseWrapper>
+                    <AssetRequestManagement  role='employee' />
+                  </SuspenseWrapper>
+                )
               },
                {
                 path: 'category-management',
