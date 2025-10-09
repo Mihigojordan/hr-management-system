@@ -523,7 +523,7 @@ const updateRequest = await this.prisma.request.findUnique({
               stockInId: item.stockInId,
               qtyRequested: new Decimal(item.qtyRequested),
               // qtyRemaining equals qtyRequested
-              qtyRemaining: new Decimal(item.qtyRequested),
+              qtyRemaining: new Decimal(0),
               qtyIssued: new Decimal(0),
               qtyReceived: new Decimal(0),
             },

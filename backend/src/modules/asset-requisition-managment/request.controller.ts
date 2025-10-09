@@ -51,9 +51,12 @@ export class AssetRequestController {
   }
 
   @Patch(':id/approve')
-  async approve(@Param('id') id: string) {
+  async approve(
+    @Param('id') id: string,
+    @Body('issuedItems') issuedItems: { itemId: string; issuedQuantity: number }[],
+  ) {
     try {
-      return await this.assetRequestService.approve(id);
+      return await this.assetRequestService.approveAndIssueRequest(id, issuedItems);
     } catch (error) {
       return { error: error.message };
     }
@@ -63,15 +66,6 @@ export class AssetRequestController {
   async reject(@Param('id') id: string) {
     try {
       return await this.assetRequestService.reject(id);
-    } catch (error) {
-      return { error: error.message };
-    }
-  }
-
-  @Patch(':id/issue')
-  async issue(@Param('id') id: string) {
-    try {
-      return await this.assetRequestService.issue(id);
     } catch (error) {
       return { error: error.message };
     }

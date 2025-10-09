@@ -101,9 +101,9 @@ export class AdminService {
     if (!admin) throw new UnauthorizedException('Admin not found');
     return admin;
   }
-  async adminLogin(data: { identifier: string; password: string }) {
-    const { identifier, password } = data;
-    const admin = await this.findAdminByLogin(identifier);
+  async adminLogin(data: { adminEmail: string; password: string }) {
+    const { adminEmail, password } = data;
+    const admin = await this.findAdminByLogin(adminEmail);
 
     const isPasswordValid = await bcrypt.compare(password, admin.password ?? '');
     if (!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
@@ -113,7 +113,7 @@ export class AdminService {
       const otp = await this.otpService.generateOTP(admin.id);
 
       // Send OTP to the correct channel
-      if (admin.adminEmail === identifier) {
+      if (admin.adminEmail === adminEmail) {
         await this.email.sendEmail(
           String(admin.adminEmail),
           'Your OTP Code',
@@ -135,7 +135,7 @@ export class AdminService {
 
       return {
         twoFARequired: true,
-        message: `OTP sent to your ${admin.adminEmail === identifier ? 'email' : 'phone'}`,
+        message: `OTP sent to your ${admin.adminEmail === adminEmail ? 'email' : 'phone'}`,
         adminId: admin.id,
       };
     }

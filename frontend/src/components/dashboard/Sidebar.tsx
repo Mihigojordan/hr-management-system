@@ -13,6 +13,8 @@ import {
   Settings,
   Grid,
   ShoppingBasket,
+  LucideBoxes,
+  Inbox,
   PackageSearch,
   History,
   Store,
@@ -23,8 +25,6 @@ import {
   ChevronRight,
   Layers,
   MapPinned,
-  LucideBoxes,
-  Inbox,
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
@@ -126,6 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
       },
       {
         id: "sites",
+        // id: "site-management",
         label: "Site Management",
         icon: MapPinned,
         items: [
