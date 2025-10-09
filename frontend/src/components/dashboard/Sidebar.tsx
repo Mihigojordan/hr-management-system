@@ -384,7 +384,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
       <div
         className={`fixed left-0 top-0 min-h-screen bg-white flex flex-col border-r border-primary-200 shadow-lg transform transition-transform duration-300 z-50 lg:relative lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } w-64`}
+        } w-72`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-3 border-b border-primary-200">

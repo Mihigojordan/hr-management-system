@@ -1,147 +1,159 @@
-import React from 'react';
-import { ArrowRight, Play, Sparkles, Zap, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Fish, Waves, Droplets, Award, Users, TrendingUp, Mail, Globe, MapPin, ChevronDown } from 'lucide-react';
 
-const HeroSection = () => {
+const FineFishHero: React.FC = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % 3);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const slides = [
+    {
+      title: "Pioneering Sustainable Aquaculture",
+      subtitle: "Premium Nile Tilapia from Lake Kivu's Crystal Waters",
+      stat: "90+ Tonnes",
+      statLabel: "Monthly Production",
+      image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=1200&q=80"
+    },
+    {
+      title: "Certified Hatchery Excellence",
+      subtitle: "Supplying Millions of Healthy Fingerlings Nationwide",
+      stat: "200+ Cages",
+      statLabel: "Advanced Infrastructure",
+      image: "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&q=80"
+    },
+    {
+      title: "Empowering Communities",
+      subtitle: "Building Rwanda's Blue Economy Together",
+      stat: "Vision 2050",
+      statLabel: "Sustainable Future",
+      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&q=80"
+    }
+  ];
+
+  const features = [
+    { icon: Fish, title: "Cage Farming", desc: "200+ floating cages on Lake Kivu & Muhazi" },
+    { icon: Droplets, title: "Certified Hatchery", desc: "Millions of fingerlings annually" },
+    { icon: Waves, title: "Eco-Friendly", desc: "Deep-water methods preserve biodiversity" },
+    { icon: Users, title: "Community Focus", desc: "Training & job opportunities" }
+  ];
+
+  const stats = [
+    { icon: TrendingUp, value: "90+", label: "Tonnes Monthly", color: "from-primary-500 to-primary-600" },
+    { icon: Fish, value: "200+", label: "Floating Cages", color: "from-primary-500 to-teal-600" },
+    { icon: Award, value: "2035", label: "Vision Goal", color: "from-teal-500 to-primary-600" },
+    { icon: Users, value: "1000s", label: "Fingerlings", color: "from-primary-500 to-primary-700" }
+  ];
+
   return (
-    <section className="relative min-h-[90vh] bg-gradient-to-br from-white via-primary-50 to-white  overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-primary-100/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-40 right-20 w-96 h-96 bg-primary-200/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary-50/20 to-primary-100/20 rounded-full blur-3xl animate-spin-slow"></div>
-        
-        {/* Floating particles */}
-        {[...Array(20)].map((_, i) => (
+    <div className="relative min-h-screen bg-primary-50 overflow-hidden">
+      {/* Hero Slider with Images */}
+      <div className="relative h-screen">
+        {slides.map((slide, index) => (
           <div
-            key={i}
-            className="absolute animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${10 + Math.random() * 20}s`
-            }}
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              currentSlide === index ? 'opacity-100' : 'opacity-0'
+            }`}
           >
-            <div className="w-2 h-2 bg-primary-300/40 rounded-full"></div>
+            {/* Background Image */}
+            <div className="absolute inset-0">
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/60 to-slate-900/40"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+            </div>
+
+            {/* Content */}
+            <div className="relative h-full flex items-center">
+              <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
+                <div className="max-w-3xl">
+                  {/* Logo/Brand */}
+                  <div className={`flex items-center gap-3 mb-8 transition-all duration-1000 delay-200 ${
+                    currentSlide === index && isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  }`}>
+                    <div className="p-3 bg-gradient-to-br from-primary-500 to-secondary-600 rounded-xl">
+                      <Fish className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-2xl font-bold text-white">Fine Fish Ltd</h1>
+                      <p className="text-primary-400 text-sm">Rwanda's Aquaculture Leader</p>
+                    </div>
+                  </div>
+
+                  {/* Main Title */}
+                  <h2 className={`text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight transition-all duration-1000 delay-300 ${
+                    currentSlide === index && isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  }`}>
+                    {slide.title}
+                  </h2>
+
+                  {/* Subtitle */}
+                  <p className={`text-xl lg:text-2xl text-primary-300 mb-8 transition-all duration-1000 delay-400 ${
+                    currentSlide === index && isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  }`}>
+                    {slide.subtitle}
+                  </p>
+
+                  {/* Stat Badge */}
+                  <div className={`inline-flex items-center gap-4 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl px-8 py-4 mb-10 transition-all duration-1000 delay-500 ${
+                    currentSlide === index && isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  }`}>
+                    <div>
+                      <div className="text-4xl font-bold text-white">{slide.stat}</div>
+                      <div className="text-primary-300 text-sm">{slide.statLabel}</div>
+                    </div>
+                    <div className="w-px h-12 bg-white/20"></div>
+                    <Waves className="w-12 h-12 text-primary-400" />
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className={`flex flex-wrap gap-4 transition-all duration-1000 delay-600 ${
+                    currentSlide === index && isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  }`}>
+                    <button className="px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transform hover:scale-105 transition-all duration-300 shadow-lg shadow-primary-600/30">
+                      Explore Our Services
+                    </button>
+                    <button className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transform hover:scale-105 transition-all duration-300">
+                      Contact Us
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
-      </div>
 
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        {/* Slider Indicators */}
+        <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                currentSlide === index ? 'w-12 bg-primary-600' : 'w-2 bg-primary-300'
+              }`}
+            />
+          ))}
+        </div>
 
-      <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex justify-center w-full gap-12 items-center min-h-[80vh]">
-          
-          {/* Left Content */}
-          <div className="flex justify-center text-center items-center flex-col gap-10">
-            <div className="space-y-6">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100/50 to-primary-200/50 backdrop-blur-sm border border-primary-300/50 text-primary-600 px-6 py-3 rounded-full text-sm font-medium">
-                <Sparkles size={16} className="animate-pulse text-primary-500" />
-                Modern HR Solutions 2025
-                <Zap size={16} className="animate-pulse delay-500 text-primary-500" />
-              </div>
-              
-              {/* Main Heading */}
-              <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                <span className="bg-gradient-to-r from-gray-800 via-primary-500 to-gray-800 bg-clip-text text-transparent">
-                  Streamline Your
-                </span>
-                {' '}
-                <span className="bg-gradient-to-r from-primary-400 via-primary-600 to-primary-400 bg-clip-text text-transparent animate-pulse">
-                  HR Operations
-                </span>  <br />
-                <span className="bg-gradient-to-r from-gray-800 via-primary-500 to-gray-800 bg-clip-text text-transparent">
-                  with ABY System
-                </span>
-              </h1>
-              
-              {/* Description */}
-              <p className="text-lg text-gray-600 leading-relaxed max-w-3xl ">
-                Transform your human resource management with our comprehensive platform. From employee onboarding to payroll processing, manage your workforce efficiently and effectively.
-              </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button className="group relative bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:from-primary-600 hover:to-primary-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/25">
-                <span className="relative z-10">Get Started</span>
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
-              </button>
-              
-              <button className="group relative backdrop-blur-sm border-2 border-primary-400/50 text-primary-500 px-8 py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:border-primary-500 hover:bg-primary-100/20 transition-all duration-300 transform hover:scale-105">
-                <Play size={20} className="group-hover:scale-110 transition-transform text-primary-500" />
-                <span>Watch Demo</span>
-              </button>
-            </div>
-
-            {/* Stats */}
-            <div className="flex gap-8 pt-8">
-              {[
-                { number: '10K+', label: 'Companies Trust Us' },
-                { number: '500K+', label: 'Employees Managed' },
-                { number: '99%', label: 'Client Satisfaction' }
-              ].map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-                    {stat.number}
-                  </div>
-                  <div className="text-sm text-gray-500">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-{/*
-
-
-
-
-
-
-*/}
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -tranprimary-x-1/2 animate-bounce">
+          <ChevronDown className="w-8 h-8 text-primary-600" />
         </div>
       </div>
 
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 60s linear infinite;
-        }
-        
-        .bg-grid-pattern {
-          background-image: radial-gradient(circle at 1px 1px, rgba(239, 68, 68, 0.1) 1px, transparent 0);
-          background-size: 50px 50px;
-        }
-        
-        .delay-1000 {
-          animation-delay: 1s;
-        }
-        
-        .delay-500 {
-          animation-delay: 0.5s;
-        }
-        
-        .delay-1500 {
-          animation-delay: 1.5s;
-        }
-      `}</style>
-    </section>
+    </div>
   );
 };
 
-export default HeroSection;
+export default FineFishHero;

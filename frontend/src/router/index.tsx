@@ -48,6 +48,11 @@ import StockInViewPage from '../components/dashboard/stock/StockInViewPage';
 import StockRequestManagement from '../pages/dashboard/StockRequestManagement';
 import StockRequestManagementDetails from '../pages/dashboard/StockRequestManagementDetails';
 import StockHistory from '../pages/dashboard/StockHistory';
+import PrivacyPolicy from '../pages/landing/PrivacyPolicy';
+import TermsOfService from '../pages/landing/TermsOfService';
+import ServiceAgreement from '../pages/landing/ServiceAgreement';
+import DataProtection from '../pages/landing/DataProtection';
+import EnvironmentalCompliance from '../pages/landing/EnvironmentalCompliance';
 
 const ProductPage = lazy(() => import('../pages/landing/FeaturesPage'));
 const ServicesPage = lazy(() => import('../pages/landing/ServicePage'));
@@ -177,6 +182,46 @@ const routes = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <BlogViewPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: 'legal/privacy-policy',
+            element: (
+              <SuspenseWrapper>
+                <PrivacyPolicy />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: 'legal/terms',
+            element: (
+              <SuspenseWrapper>
+                <TermsOfService />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: 'legal/environmental',
+            element: (
+              <SuspenseWrapper>
+                <EnvironmentalCompliance />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: 'legal/data-protection',
+            element: (
+              <SuspenseWrapper>
+                <DataProtection />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: 'legal/service-agreement',
+            element: (
+              <SuspenseWrapper>
+                <ServiceAgreement />
               </SuspenseWrapper>
             ),
           },
