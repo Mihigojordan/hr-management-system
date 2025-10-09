@@ -236,23 +236,7 @@ const AddAssetPage: React.FC<{role:string}> = ({role}) => {
     <div className="min-h-screen bg-gray-50">
       <div className="w-11/12 mx-auto px-4 py-8">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Assets
-            </button>
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Add New Asset</h1>
-            <p className="text-sm text-gray-600">Create a new asset record</p>
-          </div>
-        </div>
-
+       
         {/* Form Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           {errors.general && (
@@ -264,6 +248,15 @@ const AddAssetPage: React.FC<{role:string}> = ({role}) => {
 
           <div className="space-y-6">
             <div className="text-center mb-8">
+              <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Assets
+            </button>
+          </div>
               <Package className="w-12 h-12 text-primary-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Asset Information</h2>
               <p className="text-gray-600">Provide details about the new asset</p>
@@ -513,32 +506,6 @@ const AddAssetPage: React.FC<{role:string}> = ({role}) => {
           </div>
         </div>
 
-        {/* Help Section */}
-        <div className="bg-primary-50 rounded-xl p-6 mt-8">
-          <div className="flex items-start gap-4">
-            <AlertCircle className="w-6 h-6 text-primary-600 flex-shrink-0 mt-1" />
-            <div>
-              <h3 className="font-semibold text-primary-900 mb-2">Need Help?</h3>
-              <p className="text-primary-800 text-sm mb-3">
-                Having trouble adding an asset? Here are some tips:
-              </p>
-              <ul className="text-primary-800 text-sm space-y-1">
-                <li>• Make sure all required fields are completed</li>
-                <li>• Upload images in supported formats (JPEG, PNG)</li>
-                <li>• Ensure quantity is a valid number</li>
-                <li>• Double-check asset details for accuracy</li>
-              </ul>
-              <div className="mt-4">
-                <a 
-                  href="mailto:support@abyhr.com" 
-                  className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                >
-                  Contact Support: support@abyhr.com
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

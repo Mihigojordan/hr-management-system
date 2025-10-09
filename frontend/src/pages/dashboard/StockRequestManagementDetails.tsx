@@ -268,8 +268,13 @@ const StockRequestManagementDetails: React.FC<Props> = ({ role }) => {
       return { label: 'Fully Issued', color: 'bg-green-100 text-green-800 border-green-200' };
     } else if (qtyIssued > 0 && qtyRemaining > 0) {
       return { label: 'Partially Issued', color: 'bg-orange-100 text-orange-800 border-orange-200' };
-    } else {
-      return { label: 'Not Issued', color: 'bg-gray-100 text-gray-800 border-gray-200' };
+    } 
+   
+    else {
+      if(request?.status == 'REJECTED'){
+        return { label: 'Rejected The Request', color: 'bg-red-100 text-red-800 border-red-200' }
+      }
+      return { label: 'Not Available', color: 'bg-gray-100 text-gray-800 border-gray-200' };
     }
   };
 

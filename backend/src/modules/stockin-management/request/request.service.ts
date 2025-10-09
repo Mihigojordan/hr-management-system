@@ -152,7 +152,7 @@ export class RequestService {
     const requestStatus: any = request.status;
 
     if (![RequestStatus.APPROVED, RequestStatus.PENDING, RequestStatus.RECEIVED].includes(requestStatus)) {
-      throw new BadRequestException('Request must be approved before issuing materials');
+      throw new BadRequestException('Request must be approved before issuing stocks');
     }
 
     const issuedItems: any = [];
@@ -324,7 +324,7 @@ export class RequestService {
     
 
     if (![RequestStatus.ISSUED, RequestStatus.PARTIALLY_ISSUED].includes(request.status as any)) {
-      throw new BadRequestException('Request must be issued before receiving materials');
+      throw new BadRequestException('Request must be issued before receiving stocks');
     }
 
     const receivedItems: any = [];

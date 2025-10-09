@@ -1,122 +1,290 @@
-import React, { useState } from 'react';
-import { 
-  Users,
-  Calculator,
-  Clock,
-  TrendingUp,
-  UserPlus,
-  BookOpen,
+import { useState } from "react";
+import {
+  Fish,
+  Sprout,
+  Truck,
+  GraduationCap,
+  Waves,
   Shield,
-  FileText,
-  ArrowRight,
-  Sparkles
-} from 'lucide-react';
+  TrendingUp,
+  CheckCircle,
+  Zap,
+  Heart,
+  Award,
+} from "lucide-react";
 
-// Define a type for a single category
-interface Category {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  name: string;
-  count: string;
-}
+export default function ServicesSection() {
+  const [activeService, setActiveService] = useState(0);
 
-const Categories: React.FC = () => {
-  const [hoveredCategory, setHoveredCategory] = useState<number | null>(null);
-
-  const categories: Category[] = [
-    { icon: Users, name: 'Employee Management', count: '500+ Features' },
-    { icon: Calculator, name: 'Payroll & Benefits', count: '200+ Tools' },
-    { icon: Clock, name: 'Time & Attendance', count: '150+ Options' },
-    { icon: TrendingUp, name: 'Performance Review', count: '100+ Metrics' },
-    { icon: UserPlus, name: 'Recruitment', count: '300+ Templates' },
-    { icon: BookOpen, name: 'Training & Development', count: '250+ Courses' },
-    { icon: Shield, name: 'Compliance', count: '50+ Regulations' },
-    { icon: FileText, name: 'Reports & Analytics', count: '400+ Reports' },
+  const services = [
+    {
+      id: 0,
+      icon: Fish,
+      title: "Cage Fish Farming",
+      description:
+        "Our flagship operation features over 200 floating cages strategically placed on Lake Kivu and Lake Muhazi, producing premium Nile tilapia using sustainable deep-water farming techniques.",
+      features: [
+        "200+ floating cages across two major lakes",
+        "90+ tonnes of fresh tilapia produced monthly",
+        "Deep-water farming preserves lake biodiversity",
+        "Consistent year-round supply to markets",
+        "Quality-controlled harvesting processes",
+      ],
+      image: "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&h=800&fit=crop",
+      highlight: "90+ Tonnes Monthly",
+      stats: [
+        { value: "200+", label: "Active Cages" },
+        { value: "90T", label: "Monthly Output" },
+        { value: "2", label: "Lake Locations" },
+      ],
+    },
+    {
+      id: 1,
+      icon: Sprout,
+      title: "Certified Hatchery Operations",
+      description:
+        "Our government-approved hatchery in Rwamagana is equipped with state-of-the-art facilities to breed and raise healthy Nile tilapia fingerlings, supporting Rwanda's aquaculture expansion.",
+      features: [
+        "RAB certified and approved facility",
+        "5+ million fingerlings produced annually",
+        "Advanced breeding and nursery systems",
+        "Quality genetics for optimal growth",
+        "Technical support for fingerling buyers",
+      ],
+      image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=1200&h=800&fit=crop",
+      highlight: "RAB Certified",
+      stats: [
+        { value: "5M+", label: "Fingerlings/Year" },
+        { value: "100%", label: "Survival Rate" },
+        { value: "RAB", label: "Certified" },
+      ],
+    },
+    {
+      id: 2,
+      icon: Truck,
+      title: "Distribution & Supply Chain",
+      description:
+        "We maintain a robust distribution network ensuring fresh tilapia reaches markets, restaurants, and retailers across Rwanda promptly while maintaining the cold chain.",
+      features: [
+        "Direct supply to major markets nationwide",
+        "Cold chain logistics for freshness",
+        "Partnerships with leading retailers",
+        "Bulk orders for institutions and hotels",
+        "Flexible delivery scheduling",
+      ],
+      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=800&fit=crop",
+      highlight: "Nationwide Coverage",
+      stats: [
+        { value: "50+", label: "Distribution Points" },
+        { value: "24hr", label: "Fresh Guarantee" },
+        { value: "15+", label: "Cities Served" },
+      ],
+    },
+    {
+      id: 3,
+      icon: GraduationCap,
+      title: "Training & Capacity Building",
+      description:
+        "Through partnerships with Karongi TVET and local cooperatives, we provide comprehensive training programs in modern aquaculture practices, empowering communities.",
+      features: [
+        "Hands-on aquaculture training programs",
+        "Partnership with Karongi TVET",
+        "Support for local fish farming cooperatives",
+        "Best practices in sustainable fishing",
+        "Employment opportunities for graduates",
+      ],
+      image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200&h=800&fit=crop",
+      highlight: "Community First",
+      stats: [
+        { value: "500+", label: "Trained Farmers" },
+        { value: "10+", label: "Cooperatives" },
+        { value: "100+", label: "Jobs Created" },
+      ],
+    },
   ];
 
+  const benefits = [
+    {
+      icon: Shield,
+      title: "Quality Assurance",
+      description: "Every fish meets strict quality standards",
+    },
+    {
+      icon: Waves,
+      title: "Sustainable Practices",
+      description: "Eco-friendly farming protecting our lakes",
+    },
+    {
+      icon: TrendingUp,
+      title: "Consistent Supply",
+      description: "Reliable production year-round",
+    },
+    {
+      icon: Award,
+      title: "Industry Leading",
+      description: "Rwanda's premier aquaculture company",
+    },
+  ];
+
+  const currentService = services[activeService];
+
   return (
-    <section className="py-20 relative overflow-hidden">
-      {/* Enhanced background decorations */}
-      <div className="absolute inset-0">
-        <div className="absolute top-20 -left-20 w-96 h-96 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-40 -right-20 w-96 h-96 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(239,68,68,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(239,68,68,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-      </div>
+    <section className="py-20 bg-white relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary-100 rounded-full filter blur-3xl opacity-20"></div>
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary-100 rounded-full filter blur-3xl opacity-20"></div>
 
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-2 rounded-full text-sm font-medium mb-6 shadow-lg shadow-primary-200">
-            <Sparkles size={16} className="animate-pulse" />
-            <span>Comprehensive HR Solutions</span>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-6">
+            <Waves className="w-8 h-8 text-primary-600" />
           </div>
-          
-          <h2 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-primary-800 to-gray-900 bg-clip-text text-transparent mb-6 leading-tight">
-            HR Management Areas
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+            Our <span className="text-primary-600">Services</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Discover our comprehensive suite of HR management tools designed to optimize every aspect of your human resource operations and drive organizational success
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Comprehensive aquaculture solutions from breeding to distribution, supporting Rwanda's food security
           </p>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          {categories.map((category, index) => (
-            <div
-              key={category.name}
-              className="group relative transform transition-all duration-500 ease-out hover:scale-105"
-              onMouseEnter={() => setHoveredCategory(index)}
-              onMouseLeave={() => setHoveredCategory(null)}
-            >
-              {/* Glow effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur"></div>
-              
-              {/* Main card */}
-              <div className="relative bg-white p-8 rounded-2xl shadow-lg border border-gray-100 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-primary-100/50 hover:-translate-y-2 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute top-0 right-0 w-20 h-20 bg-primary-100 rounded-full transform translate-x-6 -translate-y-6 opacity-0 group-hover:opacity-40 transition-all duration-500"></div>
-                <div className="absolute bottom-0 left-0 w-16 h-16 bg-primary-200 rounded-full transform -translate-x-4 translate-y-4 opacity-0 group-hover:opacity-30 transition-all duration-700"></div>
-                
-                <div className="relative z-10">
-                  <div className="mb-6 flex justify-center">
-                    <div className="relative p-4 bg-primary-50 rounded-2xl group-hover:bg-primary-100 transition-all duration-300 group-hover:scale-110">
-                      <category.icon 
-                        size={36} 
-                        className="text-primary-600 group-hover:text-primary-700 transition-colors duration-300" 
-                      />
-                      <div className="absolute inset-0 bg-primary-500 rounded-2xl opacity-0 group-hover:opacity-20 animate-ping"></div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary-900 transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-4 group-hover:text-gray-600 transition-colors duration-300">
-                      {category.count}
-                    </p>
-                    
-                    <div className="flex items-center justify-center gap-2 text-primary-600 font-medium text-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                      <span>Explore</span>
-                      <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          {services.map((service, index) => {
+            const IconComponent = service.icon;
+            return (
+              <button
+                key={service.id}
+                onClick={() => setActiveService(index)}
+                className={`flex items-center space-x-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 ${
+                  activeService === index
+                    ? "bg-primary-600 text-white shadow-lg scale-105"
+                    : "bg-gray-100 text-gray-700 hover:bg-primary-50 hover:text-primary-600"
+                }`}
+              >
+                <IconComponent className="w-5 h-5" />
+                <span className="hidden sm:inline">{service.title}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <div className="inline-flex items-center gap-3 bg-white px-8 py-4 rounded-full shadow-lg border border-gray-100 hover:shadow-xl hover:border-primary-200 transition-all duration-300 cursor-pointer group">
-            <span className="text-gray-700 font-medium">View Complete Platform</span>
-            <ArrowRight size={20} className="text-primary-600 group-hover:translate-x-1 transition-transform duration-300" />
+        <div className="mb-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl group">
+              <img
+                src={currentService.image}
+                alt={currentService.title}
+                className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary-900/80 via-primary-900/20 to-transparent"></div>
+              
+              <div className="absolute bottom-6 left-6 right-6 flex justify-around">
+                {currentService.stats.map((stat, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center border border-white/30"
+                  >
+                    <div className="text-2xl font-bold text-white">{stat.value}</div>
+                    <div className="text-xs text-white/90">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="absolute top-6 right-6 bg-primary-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                {currentService.highlight}
+              </div>
+            </div>
+
+            <div>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-6">
+                <currentService.icon className="w-8 h-8 text-primary-600" />
+              </div>
+              
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                {currentService.title}
+              </h3>
+              
+              <p className="text-lg text-gray-600 leading-relaxed mb-8">
+                {currentService.description}
+              </p>
+
+              <div className="space-y-4 mb-8">
+                {currentService.features.map((feature, idx) => (
+                  <div key={idx} className="flex items-start space-x-3 group">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary-100 rounded-lg flex items-center justify-center mt-0.5 group-hover:bg-primary-200 transition-colors">
+                      <CheckCircle className="w-4 h-4 text-primary-600" />
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">{feature}</p>
+                  </div>
+                ))}
+              </div>
+
+              <button className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center space-x-2">
+                <span>Learn More</span>
+                <Zap className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-3xl p-12 mb-20">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              Why Choose Fine Fish Ltd
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Our commitment to quality and sustainability sets us apart
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {benefits.map((benefit, index) => {
+              const IconComponent = benefit.icon;
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-2xl p-6 text-center shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group"
+                >
+                  <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-200 transition-colors">
+                    <IconComponent className="w-7 h-7 text-primary-600" />
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-2">
+                    {benefit.title}
+                  </h4>
+                  <p className="text-gray-600 text-sm">{benefit.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+          <div className="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1565098772267-60af42b81ef2?w=1400&h=500&fit=crop"
+              alt="Lake view"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-900/45 to-secondary-900/60"></div>
+          </div>
+
+          <div className="relative z-10 py-16 px-8 text-center text-white">
+            <Heart className="w-16 h-16 mx-auto mb-6 text-primary-300" />
+            <h3 className="text-3xl sm:text-4xl font-bold mb-4">
+              Partner With Rwanda's Leading Fish Farm
+            </h3>
+            <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+              Whether you need fresh fish, fingerlings, or training services, we're here to support your needs
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button className="bg-white text-primary-600 px-8 py-4 rounded-xl font-semibold hover:bg-primary-50 transition-all duration-300 hover:scale-105 shadow-lg">
+                Contact Us Today
+              </button>
+              <button className="bg-white/20 backdrop-blur-sm text-white border-2 border-white/50 px-8 py-4 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300">
+                View Our Products
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default Categories;
+}

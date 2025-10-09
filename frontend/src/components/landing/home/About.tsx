@@ -1,8 +1,8 @@
 import { useState, useEffect, type ReactNode } from "react";
 import {
-  Users,
+  Fish,
   Shield,
-  Zap,
+  Waves,
   Heart,
   TrendingUp,
   Building,
@@ -10,16 +10,16 @@ import {
   Star,
   Globe,
   Award,
-  Clock,
-  Briefcase,
+  Users,
+  Leaf,
 } from "lucide-react";
 
 // Types
 interface CountUpState {
-  companies: number;
+  cages: number;
   years: number;
-  employees: number;
-  satisfaction: number;
+  tonnes: number;
+  fingerlings: number;
 }
 
 interface Stat {
@@ -46,20 +46,20 @@ interface Achievement {
 export default function AboutSection() {
   const [activeValue, setActiveValue] = useState<number>(0);
   const [countUp, setCountUp] = useState<CountUpState>({
-    companies: 0,
+    cages: 0,
     years: 0,
-    employees: 0,
-    satisfaction: 0,
+    tonnes: 0,
+    fingerlings: 0,
   });
 
   // Counter animation effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setCountUp({
-        companies: 750,
-        years: 12,
-        employees: 85000,
-        satisfaction: 99.2,
+        cages: 200,
+        years: 8,
+        tonnes: 90,
+        fingerlings: 5,
       });
     }, 500);
     return () => clearTimeout(timer);
@@ -67,108 +67,153 @@ export default function AboutSection() {
 
   const stats: Stat[] = [
     {
-      key: "companies",
-      number: `${countUp.companies}+`,
-      label: "Companies Trust Us",
+      key: "cages",
+      number: `${countUp.cages}+`,
+      label: "Floating Cages",
       icon: <Building className="w-6 h-6" />,
-      color: "text-blue-600",
+      color: "text-primary-600",
     },
     {
       key: "years",
       number: `${countUp.years}+`,
       label: "Years of Excellence",
       icon: <Calendar className="w-6 h-6" />,
-      color: "text-green-600",
+      color: "text-secondary-600",
     },
     {
-      key: "employees",
-      number: `${Math.floor(countUp.employees / 1000)}K+`,
-      label: "Professionals Served",
-      icon: <Users className="w-6 h-6" />,
-      color: "text-purple-600",
+      key: "tonnes",
+      number: `${countUp.tonnes}+`,
+      label: "Tonnes Monthly",
+      icon: <Fish className="w-6 h-6" />,
+      color: "text-primary-600",
     },
     {
-      key: "satisfaction",
-      number: `${countUp.satisfaction}%`,
-      label: "Client Satisfaction",
+      key: "fingerlings",
+      number: `${countUp.fingerlings}M+`,
+      label: "Fingerlings Annually",
       icon: <Star className="w-6 h-6" />,
-      color: "text-yellow-600",
+      color: "text-secondary-600",
     },
   ];
 
   const values: ValueItem[] = [
     {
-      icon: <Shield className="w-8 h-8" />,
-      title: "Enterprise Security",
+      icon: <Waves className="w-8 h-8" />,
+      title: "Sustainable Cage Farming",
       description:
-        "Bank-grade encryption and compliance with international data protection standards ensure your sensitive HR data stays protected.",
-      highlight: "ISO 27001 Certified",
+        "Operating over 200 floating cages on Lake Kivu and Lake Muhazi, we use deep-water techniques that preserve biodiversity and maintain pristine water quality.",
+      highlight: "Eco-Friendly Operations",
     },
     {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Lightning Fast Performance",
+      icon: <Shield className="w-8 h-8" />,
+      title: "Certified Hatchery",
       description:
-        "Cloud-native architecture delivers instant responses and 99.9% uptime, keeping your team productive around the clock.",
-      highlight: "Sub-second Response Time",
+        "Our government-approved hatchery in Rwamagana produces millions of healthy Nile tilapia fingerlings annually, supporting farmers nationwide.",
+      highlight: "RAB Approved",
     },
     {
       icon: <Heart className="w-8 h-8" />,
-      title: "Employee-Centric Design",
+      title: "Community Empowerment",
       description:
-        "Intuitive interfaces and personalized experiences make HR processes enjoyable for both administrators and employees.",
-      highlight: "4.9/5 User Rating",
+        "Through partnerships with Karongi TVET and local cooperatives, we provide training and job opportunities in modern aquaculture practices.",
+      highlight: "Skills Development",
     },
     {
       icon: <TrendingUp className="w-8 h-8" />,
-      title: "Smart Analytics",
+      title: "Vision 2050 Partner",
       description:
-        "AI-powered insights and predictive analytics help you make data-driven decisions about your workforce strategy.",
-      highlight: "Machine Learning Powered",
+        "Contributing to Rwanda's goal of 80,000–112,000 tonnes annually by 2035, advancing the secondary economy and reducing fish imports.",
+      highlight: "National Impact",
     },
   ];
 
   const achievements: Achievement[] = [
     {
       icon: <Award className="w-6 h-6" />,
-      title: "Industry Leader",
-      description: "Recognized as the #1 HR platform in East Africa",
+      title: "Industry Pioneer",
+      description: "Leading sustainable aquaculture in Rwanda",
     },
     {
       icon: <Globe className="w-6 h-6" />,
-      title: "Global Reach",
-      description: "Serving companies across 15+ countries worldwide",
+      title: "Dual Lake Operations",
+      description: "Farming on Lake Kivu and Lake Muhazi",
     },
     {
-      icon: <Clock className="w-6 h-6" />,
-      title: "24/7 Support",
-      description: "Round-the-clock customer support in multiple languages",
+      icon: <Leaf className="w-6 h-6" />,
+      title: "Sustainable Practices",
+      description: "Protecting ecosystems while feeding communities",
     },
     {
-      icon: <Briefcase className="w-6 h-6" />,
-      title: "Enterprise Ready",
-      description: "Scalable solutions for companies of all sizes",
+      icon: <Users className="w-6 h-6" />,
+      title: "Local Employment",
+      description: "Creating jobs and training opportunities",
     },
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-primary-50 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-primary-50 via-white to-secondary-50 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-secondary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+      
+      {/* Wave patterns */}
+      <div className="absolute top-0 left-0 w-full h-32 opacity-10">
+        <svg className="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M0,0 C150,50 350,50 600,20 C850,50 1050,50 1200,0 L1200,120 L0,120 Z" fill="currentColor" className="text-primary-600"/>
+        </svg>
+      </div>
       
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-6">
-            <Users className="w-8 h-8 text-primary-600" />
+            <Fish className="w-8 h-8 text-primary-600" />
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            Why Choose <span className="text-primary-600">ABY HR</span>
+            Pioneering Sustainable <span className="text-primary-600">Aquaculture</span> in Rwanda
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            The most trusted HR management platform, empowering organizations worldwide with cutting-edge technology and unmatched reliability
+            From the shores of Lake Kivu to tables across Rwanda, Fine Fish Ltd delivers premium Nile tilapia through eco-friendly farming practices
           </p>
+        </div>
+
+        {/* Hero Image Section with Fish Cages */}
+        <div className="mb-20 relative">
+          <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl">
+            {/* Real fish farming image from Unsplash */}
+            <img 
+              src="https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&h=600&fit=crop" 
+              alt="Fish farming cages on water"
+              className="w-full h-full object-cover"
+            />
+            
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-primary-900/80 via-primary-900/40 to-transparent"></div>
+            
+            {/* Overlay content */}
+            <div className="absolute inset-0 flex items-end justify-center pb-12">
+              <div className="text-center text-white p-8">
+                <Fish className="w-20 h-20 mx-auto mb-4 opacity-90" />
+                <h3 className="text-3xl font-bold mb-2">Lake Kivu Operations</h3>
+                <p className="text-xl text-white/90">200+ Floating Cages Producing Premium Tilapia</p>
+              </div>
+            </div>
+
+            {/* Floating badges */}
+            <div className="absolute bottom-8 left-8 bg-white/20 backdrop-blur-md rounded-xl p-4 text-white border border-white/30">
+              <div className="flex items-center space-x-2">
+                <Waves className="w-5 h-5" />
+                <span className="font-semibold">Sustainable Farming</span>
+              </div>
+            </div>
+            <div className="absolute top-8 right-8 bg-white/20 backdrop-blur-md rounded-xl p-4 text-white border border-white/30">
+              <div className="flex items-center space-x-2">
+                <Leaf className="w-5 h-5" />
+                <span className="font-semibold">Eco-Friendly</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Stats Section with Animation */}
@@ -193,33 +238,44 @@ export default function AboutSection() {
         {/* Main Content - Single Column Layout */}
         <div className="w-10/12 mx-auto mb-20">
           
-          {/* Company Story Section */}
-          <div className="text-center mb-16">
-            <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-3xl p-12 text-white mb-12 relative overflow-hidden">
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-20 -translate-x-20"></div>
+          {/* Company Story Section with Image */}
+          <div className="mb-16">
+            <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
+              {/* Image */}
+              <div className="rounded-3xl overflow-hidden shadow-xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=800&h=600&fit=crop" 
+                  alt="Tilapia fish"
+                  className="w-full h-96 object-cover"
+                />
+              </div>
               
-              <div className="relative z-10">
-                <h3 className="text-3xl sm:text-4xl font-bold mb-6">Our Story</h3>
-                <p className="text-xl text-primary-100 leading-relaxed mb-8 max-w-3xl mx-auto">
-                  Founded by HR professionals who experienced firsthand the challenges of outdated systems, 
-                  ABY HR was born from a vision to revolutionize workforce management.
-                </p>
+              {/* Story Content */}
+              <div className="bg-gradient-to-br from-primary-600 to-secondary-600 rounded-3xl p-10 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+                <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-20 -translate-x-20"></div>
                 
-                {/* Timeline dots */}
-                <div className="flex justify-center items-center space-x-8 flex-wrap gap-4">
-                  <div className="flex items-center text-primary-100">
-                    <div className="w-3 h-3 bg-primary-300 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium">Started in Silicon Valley</span>
-                  </div>
-                  <div className="flex items-center text-primary-100">
-                    <div className="w-3 h-3 bg-primary-300 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium">Expanded globally in 3 years</span>
-                  </div>
-                  <div className="flex items-center text-primary-100">
-                    <div className="w-3 h-3 bg-primary-300 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium">Trusted by Fortune 500</span>
+                <div className="relative z-10">
+                  <h3 className="text-3xl font-bold mb-6">Our Story</h3>
+                  <p className="text-lg text-primary-100 leading-relaxed mb-6">
+                    Founded by Themistocle Munyangeyo, Fine Fish Ltd was born from a vision to revolutionize Rwanda's aquaculture industry. 
+                    Based on the shores of Lake Kivu in Karongi, Western Province, we specialize in sustainable Nile tilapia farming, 
+                    providing nutritious, locally sourced protein to communities across Rwanda.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-primary-100">
+                      <div className="w-3 h-3 bg-primary-300 rounded-full mr-3"></div>
+                      <span className="text-sm font-medium">Founded in Karongi</span>
+                    </div>
+                    <div className="flex items-center text-primary-100">
+                      <div className="w-3 h-3 bg-primary-300 rounded-full mr-3"></div>
+                      <span className="text-sm font-medium">Expanded to Lake Muhazi</span>
+                    </div>
+                    <div className="flex items-center text-primary-100">
+                      <div className="w-3 h-3 bg-primary-300 rounded-full mr-3"></div>
+                      <span className="text-sm font-medium">RAB Certified Hatchery</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -229,8 +285,8 @@ export default function AboutSection() {
           {/* What Sets Us Apart */}
           <div className="mb-16">
             <div className="text-center mb-12">
-              <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">What Sets Us Apart</h3>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">Experience the difference that comes from our core strengths</p>
+              <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">What We Do</h3>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">Leading Rwanda's aquaculture industry through innovation and sustainability</p>
             </div>
 
             {/* Values in Cards */}
@@ -282,11 +338,38 @@ export default function AboutSection() {
             </div>
           </div>
 
+          {/* Image Gallery Section */}
+          <div className="mb-16">
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img 
+                  src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop" 
+                  alt="Fresh fish"
+                  className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img 
+                  src="https://images.unsplash.com/photo-1565098772267-60af42b81ef2?w=600&h=400&fit=crop" 
+                  alt="Lake and nature"
+                  className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img 
+                  src="https://images.unsplash.com/photo-1560114928-40f1f1eb26a0?w=600&h=400&fit=crop" 
+                  alt="Aquaculture operations"
+                  className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Achievements Grid */}
-          <div className="bg-gray-50 rounded-3xl p-8 sm:p-12">
+          <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-3xl p-8 sm:p-12">
             <div className="text-center mb-10">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Why Companies Choose Us</h3>
-              <p className="text-lg text-gray-600">The achievements that set us apart in the industry</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Our Impact</h3>
+              <p className="text-lg text-gray-600">Contributing to Rwanda's food security and secondary economy</p>
             </div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -303,9 +386,39 @@ export default function AboutSection() {
               ))}
             </div>
           </div>
+
+          {/* Vision Section with Background Image */}
+          <div className="mt-16 relative rounded-3xl overflow-hidden shadow-2xl">
+            <div className="absolute inset-0">
+              <img 
+                src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=600&fit=crop" 
+                alt="Vision background"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-primary-800/50 to-primary-900/95"></div>
+            </div>
+            
+            <div className="relative z-10 text-center p-12 text-white">
+              <Globe className="w-16 h-16 mx-auto mb-6 text-primary-300" />
+              <h3 className="text-3xl font-bold mb-4">Our Vision</h3>
+              <p className="text-xl leading-relaxed max-w-3xl mx-auto mb-8 text-primary-100">
+                To lead East Africa in sustainable aquaculture, delivering affordable, high-quality fish 
+                while protecting natural ecosystems and uplifting communities across Rwanda and beyond.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <div className="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full text-white font-medium border border-white/30">
+                  🌊 Sustainable Growth
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full text-white font-medium border border-white/30">
+                  🐟 Quality Production
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full text-white font-medium border border-white/30">
+                  🤝 Community Impact
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-
-
       </div>
     </section>
   );
