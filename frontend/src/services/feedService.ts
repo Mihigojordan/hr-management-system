@@ -104,7 +104,7 @@ class FeedService {
     if (feedData.proteinContent < 0) errors.push('Protein content must be non-negative');
     if (feedData.quantityAvailable < 0) errors.push('Quantity available must be non-negative');
     if (feedData.feedingRate <= 0) errors.push('Feeding rate must be greater than 0');
-    if (!feedData.cageId) errors.push('Cage ID is required');
+    if (!feedData.cageId)  errors.push('Cage ID is required');
     if (!feedData.date) errors.push('Feeding date is required');
     if (feedData.quantityGiven <= 0) errors.push('Quantity given must be greater than 0');
 

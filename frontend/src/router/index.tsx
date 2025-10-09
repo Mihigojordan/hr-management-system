@@ -56,6 +56,8 @@ const AboutPage = lazy(() => import('../pages/landing/AboutPage'));
 const DepartmentDashboard = lazy(() => import('../pages/dashboard/DepartmentManagement'));
 const SiteManagement = lazy(() => import('../pages/dashboard/SiteManagement')); 
 const SiteAssignmentManagement = lazy(()=> import('../pages/dashboard/SiteAssignmentManagement'));
+const AssetRequestManagement = lazy(() => import('../pages/dashboard/AssetRequestManagement'));
+const RequestAssetsManagement = lazy(() => import('../pages/dashboard/admin/RequestedAssetsManagement'));
 
 /**
  * Loading spinner component for Suspense fallback
@@ -315,6 +317,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <AssetManagement role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'requestedAssets-management',
+                element: (
+                  <SuspenseWrapper>
+                    <RequestAssetsManagement role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -613,75 +623,11 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
-               {
-                path: 'category-management',
-                element: (
-                  <SuspenseWrapper>
-                    <CategoryManagement  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
               {
-                path: 'stock-management',
+                path: 'asset-request-management',
                 element: (
                   <SuspenseWrapper>
-                    <StockManagement  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: 'stock-management/create',
-                element: (
-                  <SuspenseWrapper>
-                    <StockInForm  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: 'stock-management/update/:id',
-                element: (
-                  <SuspenseWrapper>
-                    <StockInForm  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: 'stock-management/:id',
-                element: (
-                  <SuspenseWrapper>
-                    <StockInViewPage  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: 'stock-request',
-                element: (
-                  <SuspenseWrapper>
-                    <StockRequestManagement  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: 'stock-request/:id',
-                element: (
-                  <SuspenseWrapper>
-                    <StockRequestManagementDetails  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: 'stock-history',
-                element: (
-                  <SuspenseWrapper>
-                    <StockHistory  role='employee' />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: 'stock-history/:id',
-                element: (
-                  <SuspenseWrapper>
-                    <StockHistory  role='employee' />
+                    <AssetRequestManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

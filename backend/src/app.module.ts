@@ -19,6 +19,7 @@ import { MedicationModule } from './modules/medication-management/medication.mod
 import { FeedModule } from './modules/feed/feed.module';
 import { StockModule } from './modules/stockin-management/stock.module';
 
+import { AssetRequestModule } from './modules/asset-requisition-managment/request.module';
 
 @Module({ 
   imports: [
@@ -40,6 +41,7 @@ import { StockModule } from './modules/stockin-management/stock.module';
     FeedModule,
     StockModule,
   
+    AssetRequestModule
   ],
   controllers: [AppController],
 })
