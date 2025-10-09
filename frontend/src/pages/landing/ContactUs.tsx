@@ -1,8 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent, type JSX } from "react";
 import { 
-  Phone, Mail, MapPin, Clock, Send, MessageCircle, Building, HelpCircle, User, ArrowRight, Users,
-  Briefcase,
-  CheckCircle
+  Phone, Mail, MapPin, Clock, Send, MessageCircle, Fish, HelpCircle, User, ArrowRight
 } from "lucide-react";
 import HeaderBanner from "../../components/landing/HeaderBanner";
 
@@ -11,9 +9,9 @@ interface FormData {
   name: string;
   email: string;
   phone: string;
-  department: string;
+  organization: string;
   inquiryType: string;
-  employeeId: string;
+  farmerId: string;
   message: string;
 }
 
@@ -35,14 +33,14 @@ interface OfficeLocation {
   services: string[];
 }
 
-export default function HRContactPage() {
+export default function ContactPage() {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     phone: '',
-    department: '',
+    organization: '',
     inquiryType: '',
-    employeeId: '',
+    farmerId: '',
     message: ''
   });
 
@@ -65,9 +63,9 @@ export default function HRContactPage() {
         name: '',
         email: '',
         phone: '',
-        department: '',
+        organization: '',
         inquiryType: '',
-        employeeId: '',
+        farmerId: '',
         message: ''
       });
     }, 3000);
@@ -76,60 +74,59 @@ export default function HRContactPage() {
   const contactMethods: ContactMethod[] = [
     {
       icon: <Phone className="w-8 h-8" />,
-      title: "HR Helpline",
-      description: "Speak directly with our HR specialists",
+      title: "Aquaculture Support Line",
+      description: "Speak directly with our aquaculture specialists",
       info: ["+250 788 123 456", "+250 788 654 321"],
-      action: "Call HR",
-      availability: "24/7 Emergency Support"
+      action: "Call Support",
+      availability: "Mon-Fri: 8 AM - 6 PM"
     },
     {
       icon: <Mail className="w-8 h-8" />,
       title: "Email Support",
-      description: "Send us your HR queries anytime",
-      info: ["hr@company.rw", "support@hrms.rw"],
+      description: "Send us your aquaculture queries anytime",
+      info: ["info@finefish.rw", "support@finefish.rw"],
       action: "Send Email",
-      availability: "Response within 4 hours"
+      availability: "Response within 24 hours"
     },
     {
       icon: <MessageCircle className="w-8 h-8" />,
-      title: "Live Chat",
-      description: "Get instant help from HR team",
-      info: ["Available on portal", "WhatsApp: +250 788 123 456"],
+      title: "WhatsApp Support",
+      description: "Get instant help via WhatsApp",
+      info: ["WhatsApp: +250 788 123 456"],
       action: "Start Chat",
-      availability: "8 AM - 6 PM"
+      availability: "8 AM - 5 PM"
     }
   ];
 
   const officeLocations: OfficeLocation[] = [
     {
-      name: "Main HR Office",
-      address: "KG 15 Ave, Kimihurura",
-      city: "Kigali, Rwanda",
+      name: "Rwamagana Hatchery & Feed Plant",
+      address: "Industrial Area, Rwamagana District",
+      city: "Eastern Province, Rwanda",
       phone: "+250 788 123 456",
-      hours: "Mon - Fri: 8:00 AM - 6:00 PM",
-      services: ["Employee Relations", "Recruitment", "Payroll Support"]
+      hours: "Mon - Fri: 8:00 AM - 5:00 PM",
+      services: ["Fingerling Production", "Fish Feed Supply", "Aquaculture Training"]
     },
     {
-      name: "Training Center",
-      address: "KN 3 Rd, Nyarutarama",
-      city: "Kigali, Rwanda",
+      name: "Lake Kivu Operations",
+      address: "Lake Shores, Rubavu District",
+      city: "Northern Province, Rwanda",
       phone: "+250 788 654 321",
-      hours: "Mon - Fri: 9:00 AM - 5:00 PM",
-      services: ["Training Programs", "Career Development", "Skills Assessment"]
+      hours: "Mon - Fri: 8:00 AM - 6:00 PM",
+      services: ["Cage Fish Farming", "Technical Consulting", "Partnership Inquiries"]
     }
   ];
 
   const inquiryTypes = [
-    "Payroll Inquiry",
-    "Benefits Question",
-    "Leave Request",
-    "Performance Review",
-    "Training Request",
-    "Policy Clarification",
-    "Grievance Report",
-    "System Access Issue",
-    "Document Request",
-    "General HR Support",
+    "Fingerling Order",
+    "Fish Feed Inquiry",
+    "Aquaculture Training",
+    "Partnership Request",
+    "Technical Support",
+    "Market Access",
+    "Sustainability Consulting",
+    "General Inquiry",
+    "Complaint",
     "Other"
   ];
 
@@ -142,20 +139,19 @@ export default function HRContactPage() {
       </div>
       
       <HeaderBanner
-        title="Contact HR"
+        title="Contact Us"
         subtitle="Home / Contact Us"
         backgroundStyle="image"
-        icon={<Users className="w-10 h-10" />}
+        icon={<Fish className="w-10 h-10" />}
       />
 
-  <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative py-5">
+      <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative py-5">
         <div className="text-center mb-16">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 via-primary-500 to-gray-800 bg-clip-text text-transparent mb-6">
-            Contact Human Resources
+            Connect with Fine Fish Ltd
           </h1>
           <p className="text-md md:text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed mb-8">
-            Need HR assistance? Have questions about policies or benefits? Want to discuss your career development? 
-            We're here to support you every step of the way with expert HR solutions and exceptional employee service.
+            Have questions about tilapia farming, fingerling supply, or partnerships? Our team is here to support farmers, cooperatives, and stakeholders with expert aquaculture solutions in Rwamagana, Rubavu, and beyond.
           </p>
           
           {/* Quick contact badges */}
@@ -166,7 +162,7 @@ export default function HRContactPage() {
             </div>
             <div className="flex items-center bg-primary-50 text-primary-700 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
               <Mail size={16} className="mr-2" />
-              <span className="font-medium">hr@company.rw</span>
+              <span className="font-medium">info@finefish.rw</span>
             </div>
             <div className="flex items-center bg-primary-50 text-primary-700 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
               <Clock size={16} className="mr-2" />
@@ -182,7 +178,7 @@ export default function HRContactPage() {
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Preferred Way</h3>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Multiple ways to reach HR - pick what works best for you
+              Multiple ways to reach our aquaculture team - pick what works best for you
             </p>
           </div>
 
@@ -221,14 +217,14 @@ export default function HRContactPage() {
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">Send HR a Message</h3>
-              <p className="text-gray-600 mb-8">Fill out the form and we'll get back to you within 4 hours</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2">Send Us a Message</h3>
+              <p className="text-gray-600 mb-8">Fill out the form and we'll get back to you within 24 hours</p>
 
               {formSubmitted ? (
                 <div className="text-center py-12">
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                   <h4 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h4>
-                  <p className="text-gray-600">Thank you for contacting HR. We'll respond soon.</p>
+                  <p className="text-gray-600">Thank you for contacting Fine Fish Ltd. We'll respond soon.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -260,7 +256,7 @@ export default function HRContactPage() {
                         onChange={handleInputChange}
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="your@company.rw"
+                        placeholder="your@email.rw"
                       />
                     </div>
                   </div>
@@ -282,16 +278,16 @@ export default function HRContactPage() {
                     </div>
                     <div>
                       <label className="block text-gray-700 font-semibold mb-2">
-                        <Building className="w-4 h-4 inline mr-2" />
-                        Department
+                        <Fish className="w-4 h-4 inline mr-2" />
+                        Organization/Cooperative
                       </label>
                       <input
                         type="text"
-                        name="department"
-                        value={formData.department}
+                        name="organization"
+                        value={formData.organization}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="Your department"
+                        placeholder="Your organization or cooperative"
                       />
                     </div>
                   </div>
@@ -299,16 +295,16 @@ export default function HRContactPage() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-gray-700 font-semibold mb-2">
-                        <Briefcase className="w-4 h-4 inline mr-2" />
-                        Employee ID (Optional)
+                        <Fish className="w-4 h-4 inline mr-2" />
+                        Farmer ID (Optional)
                       </label>
                       <input
                         type="text"
-                        name="employeeId"
-                        value={formData.employeeId}
+                        name="farmerId"
+                        value={formData.farmerId}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="EMP001234"
+                        placeholder="FRM001234"
                       />
                     </div>
                     <div>
@@ -342,7 +338,7 @@ export default function HRContactPage() {
                       required
                       rows={5}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
-                      placeholder="Tell us about your HR inquiry or concern..."
+                      placeholder="Tell us about your aquaculture inquiry or concern..."
                     ></textarea>
                   </div>
 
@@ -357,10 +353,10 @@ export default function HRContactPage() {
               )}
             </div>
 
-            {/* HR Office Locations */}
+            {/* Office Locations */}
             <div className="space-y-8">
               <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-8">Visit Our HR Offices</h3>
+                <h3 className="text-3xl font-bold text-gray-900 mb-8">Visit Our Facilities</h3>
                 {officeLocations.map((office, index) => (
                   <div key={index} className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow duration-300">
                     <h4 className="text-xl font-bold text-primary-700 mb-3">{office.name}</h4>
@@ -394,8 +390,6 @@ export default function HRContactPage() {
                   </div>
                 ))}
               </div>
-
-            
             </div>
           </div>
         </div>

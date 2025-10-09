@@ -2,30 +2,39 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 
-const Testimonials = () => {
-  const testimonials = [
+interface Testimonial {
+  id: number;
+  name: string;
+  role: string;
+  avatar: string;
+  content: string;
+  rating: number;
+}
+
+const Testimonials: React.FC = () => {
+  const testimonials: Testimonial[] = [
     {
       id: 1,
-      name: "Sarah Johnson",
-      role: "HR Director",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      content: "ABY HR Management System has revolutionized how we handle employee data and streamline our HR processes. It's intuitive and powerful.",
+      name: "Jean Bosco",
+      role: "Local Farmer, Karongi",
+      avatar: "https://images.unsplash.com/photo-1506794778202-36a61b7b8d9b?w=100&h=100&fit=crop&crop=face",
+      content: "Fine Fish Ltd’s high-quality fingerlings have transformed my farm. Their training and support helped me increase my yield significantly.",
       rating: 5
     },
     {
       id: 2,
-      name: "Michael Chen",
-      role: "Operations Manager",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      content: "The payroll automation and employee self-service features have saved us countless hours. Our team loves the user-friendly interface.",
+      name: "Marie Uwimana",
+      role: "Cooperative Leader, Rwamagana",
+      avatar: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face",
+      content: "The tilapia from Fine Fish is top-notch, and their reliable supply chain ensures we meet market demand. They’re true partners in our success.",
       rating: 5
     },
     {
       id: 3,
-      name: "Emily Rodriguez",
-      role: "Team Lead",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: "Performance tracking and attendance management have never been easier. ABY HR System provides all the tools we need in one place.",
+      name: "Paul Nkurunziza",
+      role: "Karongi TVET Trainer",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+      content: "Partnering with Fine Fish has empowered our students with practical aquaculture skills, opening new career paths in Rwanda’s blue economy.",
       rating: 5
     }
   ];
@@ -40,9 +49,9 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Users Say</h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Community Says</h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Hear from HR professionals who trust ABY HR Management System for their workforce management needs
+            Hear from farmers, partners, and community members who trust Fine Fish Ltd for sustainable aquaculture solutions.
           </p>
         </motion.div>
 

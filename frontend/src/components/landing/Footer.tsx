@@ -7,52 +7,50 @@ import {
   Facebook, 
   Twitter, 
   Instagram, 
-  Linkedin,
   ArrowRight,
-  Users
+  Fish
 } from 'lucide-react';
 
-const Footer = () => {
+const Footer: React.FC = () => {
   const footerLinks = {
     solutions: [
-      'Employee Management',
-      'Payroll Processing',
-      'Attendance Tracking',
-      'Performance Reviews',
-      'Recruitment Portal',
-      'Training Management',
-      'Compliance Tools'
+      { label: 'Cage Fish Farming', path: '/services/cage-farming' },
+      { label: 'Fingerling Supply', path: '/services/fingerlings' },
+      { label: 'Fish Feed Production', path: '/services/fish-feed' },
+      { label: 'Aquaculture Training', path: '/services/training' },
+      { label: 'Sustainability Consulting', path: '/services/sustainability' },
+      { label: 'Hatchery Services', path: '/services/hatchery' },
+      { label: 'Market Access Support', path: '/services/market-access' }
     ],
     company: [
-      'About ABY HR',
-      'Our Mission',
-      'Careers',
-      'News & Updates',
-      'Blog',
-      'Contact Us'
+      { label: 'About Fine Fish', path: '/about' },
+      { label: 'Our Mission', path: '/about/mission' },
+      { label: 'Careers', path: '/careers' },
+      { label: 'News & Updates', path: '/news' },
+      { label: 'Blog', path: '/blog' },
+      { label: 'Contact Us', path: '/contact' }
     ],
     support: [
-      'Help Center',
-      'Documentation',
-      'System Status',
-      'Implementation',
-      'Training Resources',
-      'Technical Support'
+      { label: 'Farmer Support', path: '/support/farmers' },
+      { label: 'Technical Assistance', path: '/support/technical' },
+      { label: 'Training Resources', path: '/support/training' },
+      { label: 'Aquaculture Guides', path: '/support/guides' },
+      { label: 'Partnership Inquiries', path: '/support/partnerships' },
+      { label: 'Customer Service', path: '/support/customer-service' }
     ],
     legal: [
-      'Privacy Policy',
-      'Terms of Service',
-      'Data Security',
-      'GDPR Compliance',
-      'Service Agreement'
+      { label: 'Privacy Policy', path: '/legal/privacy-policy' },
+      { label: 'Terms of Service', path: '/legal/terms' },
+      { label: 'Environmental Compliance', path: '/legal/environmental' },
+      { label: 'Data Protection', path: '/legal/data-protection' },
+      { label: 'Service Agreement', path: '/legal/service-agreement' }
     ]
   };
 
   const socialLinks = [
-    { icon: Facebook, href: '#', name: 'Facebook' },
-    { icon: Twitter, href: '#', name: 'Twitter' },
-    { icon: Instagram, href: '#', name: 'Instagram' },
-    { icon: Linkedin, href: '#', name: 'LinkedIn' }
+    { icon: Facebook, href: 'https://www.facebook.com/finefishrw', name: 'Facebook' },
+    { icon: Twitter, href: 'https://www.twitter.com/finefishrw', name: 'Twitter' },
+    { icon: Instagram, href: 'https://www.instagram.com/finefishrw', name: 'Instagram' }
   ];
 
   return (
@@ -67,15 +65,15 @@ const Footer = () => {
             viewport={{ once: true }}
             className="text-center"
           >
-            <h3 className="text-2xl font-bold mb-4">Stay Connected with HR Insights</h3>
+            <h3 className="text-2xl font-bold mb-4">Stay Connected with Fine Fish</h3>
             <p className="text-primary-100 mb-8 max-w-2xl mx-auto">
-              Get the latest updates on HR best practices, system updates, and exclusive insights from ABY HR Management
+              Get updates on sustainable aquaculture, tilapia farming tips, and exclusive insights from Fine Fish Ltd.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-xl mx-auto">
               <input
                 type="email"
-                placeholder="Enter your business email"
+                placeholder="Enter your email"
                 className="flex-1 px-6 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
               />
               <motion.button
@@ -103,48 +101,47 @@ const Footer = () => {
             >
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-lg">
-                  <Users className="text-white" size={20} />
+                  <Fish className="text-white" size={20} />
                 </div>
-                <h2 className="text-2xl font-bold text-primary-400">ABY HR Management</h2>
+                <h2 className="text-2xl font-bold text-primary-400">Fine Fish Ltd</h2>
               </div>
               <p className="text-gray-400 mb-6 leading-relaxed">
-                Empowering organizations with comprehensive HR solutions. Streamline your workforce management 
-                with our innovative platform designed for modern businesses.
+                Leading Rwanda’s sustainable aquaculture with premium Nile tilapia and fingerlings from Lake Kivu and Lake Muhazi.
               </p>
               
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Mail size={18} className="text-primary-400" />
-                  <span className="text-gray-300">info@abyhr.com</span>
+                  <span className="text-gray-300">info@finefish.rw</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone size={18} className="text-primary-400" />
-                  <span className="text-gray-300">+250 123 456 789</span>
+                  <span className="text-gray-300">+250 788 123 456</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <MapPin size={18} className="text-primary-400" />
-                  <span className="text-gray-300">Kigali Business District, Rwanda</span>
+                  <span className="text-gray-300">Industrial Area, Rwamagana District, Eastern Province, Rwanda</span>
                 </div>
               </div>
             </motion.div>
           </div>
 
-          {/* HR Solutions */}
+          {/* Aquaculture Solutions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-lg font-semibold mb-4">HR Solutions</h3>
+            <h3 className="text-lg font-semibold mb-4">Aquaculture Solutions</h3>
             <ul className="space-y-2">
               {footerLinks.solutions.map((link, index) => (
                 <li key={index}>
                   <a
-                    href="#"
+                    href={link.path}
                     className="text-gray-400 hover:text-primary-400 transition-colors text-sm"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -163,10 +160,10 @@ const Footer = () => {
               {footerLinks.company.map((link, index) => (
                 <li key={index}>
                   <a
-                    href="#"
+                    href={link.path}
                     className="text-gray-400 hover:text-primary-400 transition-colors text-sm"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -185,10 +182,10 @@ const Footer = () => {
               {footerLinks.support.map((link, index) => (
                 <li key={index}>
                   <a
-                    href="#"
+                    href={link.path}
                     className="text-gray-400 hover:text-primary-400 transition-colors text-sm"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -207,10 +204,10 @@ const Footer = () => {
               {footerLinks.legal.map((link, index) => (
                 <li key={index}>
                   <a
-                    href="#"
+                    href={link.path}
                     className="text-gray-400 hover:text-primary-400 transition-colors text-sm"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -230,7 +227,7 @@ const Footer = () => {
               viewport={{ once: true }}
               className="text-gray-400 text-sm"
             >
-              © 2025 ABY HR Management. All rights reserved.
+              © 2025 Fine Fish Ltd. All rights reserved.
             </motion.p>
             
             <motion.div
@@ -244,7 +241,7 @@ const Footer = () => {
                 <motion.a
                   key={social.name}
                   href={social.href}
-                  whileHover={{ scale: 1.2, color: '#f87171' }}
+                  whileHover={{ scale: 1.2, color: '#60a5fa' }}
                   whileTap={{ scale: 0.9 }}
                   className="text-gray-400 hover:text-primary-400 transition-colors"
                   aria-label={social.name}
