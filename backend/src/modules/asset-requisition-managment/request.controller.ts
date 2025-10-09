@@ -39,6 +39,20 @@ export class AssetRequestController {
       return { error: error.message };
     }
   }
+  
+  @Patch('/procurement/update')
+  async updateProcurement(
+    @Body() body: { assetId: string; orderedQuantity: number },
+  ) {
+    try {
+      return await this.assetRequestService.updateProcurementStatus(
+        body.assetId,
+        body.orderedQuantity,
+      );
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {

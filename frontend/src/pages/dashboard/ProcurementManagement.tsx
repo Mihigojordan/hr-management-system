@@ -19,6 +19,7 @@ import {
   XSquare,
   Send,
   Truck,
+  RefreshCw as PartialIcon,
 } from "lucide-react";
 import assetRequestService from '../../services/assetRequestService';
 import { useSocketEvent } from '../../context/SocketContext';
@@ -26,7 +27,7 @@ import { useSocketEvent } from '../../context/SocketContext';
 type ViewMode = 'table' | 'grid' | 'list';
 type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'ISSUED' | 'PARTIALLY_ISSUED' | 'CLOSED';
 type RequestedItemStatus = 'PENDING' | 'ISSUED' | 'PARTIALLY_ISSUED' | 'PENDING_PROCUREMENT';
-type ProcurementStatus = 'NOT_REQUIRED' | 'REQUIRED' | 'ORDERED' | 'COMPLETED';
+type ProcurementStatus = 'NOT_REQUIRED' | 'REQUIRED' | 'ORDERED' | 'PARTIALLY_ORDERED' | 'COMPLETED';
 
 interface OperationStatus {
   type: "success" | "error" | "info";
@@ -93,7 +94,6 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(8);
-  const [actionConfirm, setActionConfirm] = useState<{item: ProcurementItem, action: 'order'} | null>(null);
   const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
   const [operationLoading, setOperationLoading] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
@@ -101,6 +101,8 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
   const [selectedItem, setSelectedItem] = useState<ProcurementItem | null>(null);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [procuredQuantity, setProcuredQuantity] = useState<number>(0);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [orderedQuantity, setOrderedQuantity] = useState<number>(0);
 
   useEffect(() => {
     loadData();
@@ -225,6 +227,7 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
         if (itemCreatedAt > existingCreatedAt) {
           existing.latestCreatedAt = item.createdAt || existing.latestCreatedAt;
         }
+        // Use the most advanced status, but for simplicity, keep first
       } else {
         aggregatedMap.set(key, {
           assetId: item.assetId,
@@ -283,24 +286,29 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
     setCurrentPage(1);
   };
 
-  const neededQuantity = (item: AssetRequestItem) => item.quantity - (item.quantityIssued || 0);
+  const neededQuantity = (item: ProcurementItem) => item.quantity - (item.quantityIssued || 0);
+
+  const aggregateNeeded = (aggItem: AggregatedProcurementItem) => aggItem.totalNeeded;
 
   const handleViewItem = (item: ProcurementItem) => {
     setSelectedItem(item);
     setShowViewModal(true);
   };
 
-  const handleMarkOrdered = async (item: ProcurementItem) => {
+  const confirmMarkOrdered = async () => {
+    if (!selectedItem) return;
     try {
       setOperationLoading(true);
-      setActionConfirm(null);
-      const updatedItem = await assetRequestService.updateProcurementStatus(item.id, 'ORDERED');
-      updateLocalItem(updatedItem);
-      showOperationStatus("success", `Item marked as ORDERED!`);
+      setShowOrderModal(false);
+      const response = await assetRequestService.updateProcurementStatus(selectedItem.assetId, orderedQuantity);
+      showOperationStatus("success", `Successfully marked ${response.asset.name} as ordered for ${orderedQuantity} units`);
+      loadData();
     } catch (err: any) {
       showOperationStatus("error", err.message || "Failed to mark as ordered");
     } finally {
       setOperationLoading(false);
+      setSelectedItem(null);
+      setOrderedQuantity(0);
     }
   };
 
@@ -309,34 +317,16 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
     try {
       setOperationLoading(true);
       setShowCompleteModal(false);
-      const updatedItem = await assetRequestService.updateProcurementStatus(
-        selectedItem.id,
-        'COMPLETED',
-        procuredQuantity
-      );
-      updateLocalItem(updatedItem);
-      showOperationStatus("success", `Procurement completed for item ${selectedItem.id}!`);
-      setSelectedItem(null);
-      setProcuredQuantity(0);
+      const response = await assetRequestService.updateProcurementStatus(selectedItem.assetId, procuredQuantity);
+      showOperationStatus("success", `Procurement completed for ${response.asset.name} - ${procuredQuantity} units added`);
+      loadData();
     } catch (err: any) {
       showOperationStatus("error", err.message || "Failed to complete procurement");
     } finally {
       setOperationLoading(false);
+      setSelectedItem(null);
+      setProcuredQuantity(0);
     }
-  };
-
-  const updateLocalItem = (updatedItem: AssetRequestItem) => {
-    setAllRequests((prev) =>
-      prev.map((r) => {
-        if (r.id === updatedItem.requestId) {
-          const items = r.items?.map((i) =>
-            i.id === updatedItem.id ? updatedItem : i
-          ) || [];
-          return { ...r, items };
-        }
-        return r;
-      })
-    );
   };
 
   const showOperationStatus = (type: "success" | "error" | "info", message: string) => {
@@ -359,9 +349,10 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
     const statusConfig = {
       REQUIRED: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock },
       ORDERED: { bg: 'bg-blue-100', text: 'text-blue-800', icon: Truck },
+      PARTIALLY_ORDERED: { bg: 'bg-purple-100', text: 'text-purple-800', icon: PartialIcon },
       COMPLETED: { bg: 'bg-green-100', text: 'text-green-800', icon: CheckSquare },
     };
-    const config = statusConfig[status];
+    const config = statusConfig[status] || statusConfig.REQUIRED;
     const Icon = config.icon;
     return (
       <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${config.bg} ${config.text}`}>
@@ -379,7 +370,7 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
   const stats = {
     total: aggregatedItems.length,
     required: aggregatedItems.filter((i) => i.procurementStatus === 'REQUIRED').length,
-    ordered: aggregatedItems.filter((i) => i.procurementStatus === 'ORDERED').length,
+    ordered: aggregatedItems.filter((i) => i.procurementStatus === 'ORDERED' || i.procurementStatus === 'PARTIALLY_ORDERED').length,
     completed: aggregatedItems.filter((i) => i.procurementStatus === 'COMPLETED').length,
   };
 
@@ -426,16 +417,20 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
                     >
                       <Eye className="w-3 h-3" />
                     </button>
-                    {/* {item.procurementStatus === 'REQUIRED' && (
+                    {item.procurementStatus === 'REQUIRED' && (
                       <button 
-                        onClick={() => setActionConfirm({item: item.items[0], action: 'order'})} 
+                        onClick={() => {
+                          setSelectedItem(item.items[0]);
+                          setOrderedQuantity(item.totalNeeded);
+                          setShowOrderModal(true);
+                        }} 
                         className="text-gray-400 hover:text-blue-600 p-1" 
                         title="Mark as Ordered"
                       >
                         <Truck className="w-3 h-3" />
                       </button>
-                    )} */}
-                    {item.procurementStatus === 'ORDERED' && (
+                    )}
+                    {(item.procurementStatus === 'ORDERED' || item.procurementStatus === 'PARTIALLY_ORDERED') && (
                       <button 
                         onClick={() => {
                           setSelectedItem(item.items[0]);
@@ -460,41 +455,45 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
 
   const renderGridView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-      {currentProcurementItems.map((item) => (
-        <div key={item.id} className="bg-white rounded border border-gray-200 p-3 hover:shadow-sm transition-shadow">
+      {currentAggregatedItems.map((item) => (
+        <div key={item.assetId} className="bg-white rounded border border-gray-200 p-3 hover:shadow-sm transition-shadow">
           <div className="flex items-center justify-between mb-2">
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
               <Package className="w-4 h-4 text-blue-700" />
             </div>
-            {getStatusBadge(item.procurementStatus as ProcurementStatus)}
+            {getStatusBadge(item.procurementStatus)}
           </div>
           <div className="mb-2">
-            <div className="font-medium text-gray-900 text-xs">{item.asset?.name}</div>
-            <div className="text-gray-500 text-xs">{item.request.employee?.full_name}</div>
+            <div className="font-medium text-gray-900 text-xs">{item.assetName}</div>
+            <div className="text-gray-500 text-xs">{item.items[0].request.employee?.full_name}</div>
           </div>
           <div className="space-y-1 mb-3">
-            <div className="text-xs text-gray-600">Needed: {neededQuantity(item)}</div>
-            <div className="text-xs text-gray-500">{formatDate(item.createdAt)}</div>
+            <div className="text-xs text-gray-600">Needed: {item.totalNeeded}</div>
+            <div className="text-xs text-gray-500">{formatDate(item.latestCreatedAt)}</div>
           </div>
           <div className="flex items-center justify-between">
-            <button onClick={() => handleViewItem(item)} className="text-gray-400 hover:text-blue-600 p-1" title="View">
+            <button onClick={() => handleViewItem(item.items[0])} className="text-gray-400 hover:text-blue-600 p-1" title="View">
               <Eye className="w-3 h-3" />
             </button>
             <div className="flex space-x-1">
               {item.procurementStatus === 'REQUIRED' && (
                 <button 
-                  onClick={() => setActionConfirm({item, action: 'order'})} 
+                  onClick={() => {
+                    setSelectedItem(item.items[0]);
+                    setOrderedQuantity(item.totalNeeded);
+                    setShowOrderModal(true);
+                  }} 
                   className="text-gray-400 hover:text-blue-600 p-1" 
                   title="Mark as Ordered"
                 >
                   <Truck className="w-3 h-3" />
                 </button>
               )}
-              {item.procurementStatus === 'ORDERED' && (
+              {(item.procurementStatus === 'ORDERED' || item.procurementStatus === 'PARTIALLY_ORDERED') && (
                 <button 
                   onClick={() => {
-                    setSelectedItem(item);
-                    setProcuredQuantity(neededQuantity(item));
+                    setSelectedItem(item.items[0]);
+                    setProcuredQuantity(item.totalNeeded);
                     setShowCompleteModal(true);
                   }} 
                   className="text-gray-400 hover:text-green-600 p-1" 
@@ -512,27 +511,27 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
 
   const renderListView = () => (
     <div className="bg-white rounded border border-gray-200 divide-y divide-gray-100">
-      {currentProcurementItems.map((item) => (
-        <div key={item.id} className="px-4 py-3 hover:bg-gray-25">
+      {currentAggregatedItems.map((item) => (
+        <div key={item.assetId} className="px-4 py-3 hover:bg-gray-25">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 flex-1 min-w-0">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <Package className="w-5 h-5 text-blue-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-900 text-sm">{item.asset?.name}</div>
+                <div className="font-medium text-gray-900 text-sm">{item.assetName}</div>
                 <div className="text-gray-500 text-xs">
-                  {item.request.employee?.full_name} • Needed: {neededQuantity(item)}
+                  {item.items[0].request.employee?.full_name} • Needed: {item.totalNeeded}
                 </div>
               </div>
             </div>
             <div className="hidden md:flex items-center space-x-4 text-xs text-gray-600">
-              {getStatusBadge(item.procurementStatus as ProcurementStatus)}
-              <span>{formatDate(item.createdAt)}</span>
+              {getStatusBadge(item.procurementStatus)}
+              <span>{formatDate(item.latestCreatedAt)}</span>
             </div>
             <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
               <button 
-                onClick={() => handleViewItem(item)} 
+                onClick={() => handleViewItem(item.items[0])} 
                 className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors" 
                 title="View"
               >
@@ -540,18 +539,22 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
               </button>
               {item.procurementStatus === 'REQUIRED' && (
                 <button 
-                  onClick={() => setActionConfirm({item, action: 'order'})} 
+                  onClick={() => {
+                    setSelectedItem(item.items[0]);
+                    setOrderedQuantity(item.totalNeeded);
+                    setShowOrderModal(true);
+                  }} 
                   className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors" 
                   title="Mark as Ordered"
                 >
                   <Truck className="w-4 h-4" />
                 </button>
               )}
-              {item.procurementStatus === 'ORDERED' && (
+              {(item.procurementStatus === 'ORDERED' || item.procurementStatus === 'PARTIALLY_ORDERED') && (
                 <button 
                   onClick={() => {
-                    setSelectedItem(item);
-                    setProcuredQuantity(neededQuantity(item));
+                    setSelectedItem(item.items[0]);
+                    setProcuredQuantity(item.totalNeeded);
                     setShowCompleteModal(true);
                   }} 
                   className="text-gray-400 hover:text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors" 
@@ -660,7 +663,7 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
               </div>
             </div>
           </div>
-          {/* <div className="bg-white rounded shadow p-3">
+          <div className="bg-white rounded shadow p-3">
             <div className="flex items-center space-x-2">
               <Truck className="w-4 h-4 text-blue-600" />
               <div>
@@ -668,8 +671,8 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
                 <p className="text-lg font-semibold text-blue-700">{stats.ordered}</p>
               </div>
             </div>
-          </div> */}
-          {/* <div className="bg-white rounded shadow p-3">
+          </div>
+          <div className="bg-white rounded shadow p-3">
             <div className="flex items-center space-x-2">
               <CheckSquare className="w-4 h-4 text-green-600" />
               <div>
@@ -677,7 +680,7 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
                 <p className="text-lg font-semibold text-green-700">{stats.completed}</p>
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
 
         <div className="bg-white rounded border border-gray-200 p-3">
@@ -701,6 +704,7 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
                 <option value="ALL">All Status</option>
                 <option value="REQUIRED">Required</option>
                 <option value="ORDERED">Ordered</option>
+                <option value="PARTIALLY_ORDERED">Partially Ordered</option>
                 <option value="COMPLETED">Completed</option>
               </select>
             </div>
@@ -812,39 +816,62 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
         </div>
       )}
 
-      {actionConfirm && (
+      {showOrderModal && selectedItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded p-4 w-full max-w-sm">
-            <div className="flex items-center space-x-2 mb-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <Truck className="w-4 h-4 text-blue-600" />
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Mark as Ordered</h3>
+              <button onClick={() => setShowOrderModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                <p className="text-xs text-blue-800">
+                  <span className="font-medium">Asset:</span> {selectedItem.asset?.name}
+                </p>
+                <p className="text-xs text-blue-800 mt-1">
+                  <span className="font-medium">Needed:</span> {aggregateNeeded(aggregatedItems.find(i => i.assetId === selectedItem.assetId)!)}
+                </p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Mark as Ordered</h3>
-                <p className="text-xs text-gray-500">Confirm your action</p>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ordered Quantity
+                </label>
+                <input
+                  type="number"
+                  value={orderedQuantity}
+                  onChange={(e) => setOrderedQuantity(parseInt(e.target.value) || 0)}
+                  min={1}
+                  className="w-full px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                {orderedQuantity < 1 && (
+                  <p className="text-xs text-red-600 mt-1">Quantity must be at least 1</p>
+                )}
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <p className="text-xs text-yellow-800">
+                  <strong>Note:</strong> This will update the procurement status accordingly.
+                </p>
               </div>
             </div>
-            <div className="mb-4">
-              <p className="text-xs text-gray-700 mb-2">
-                Are you sure you want to mark this item as ordered?
-              </p>
-              <div className="bg-gray-50 rounded p-2 space-y-1">
-                <div className="text-xs"><span className="font-medium">Asset:</span> {actionConfirm.item.asset?.name}</div>
-                <div className="text-xs"><span className="font-medium">Needed:</span> {neededQuantity(actionConfirm.item)}</div>
-              </div>
-            </div>
-            <div className="flex items-center justify-end space-x-2">
+            <div className="flex items-center justify-end space-x-2 pt-4 mt-4 border-t border-gray-200">
               <button
-                onClick={() => setActionConfirm(null)}
-                className="px-3 py-1.5 text-xs text-gray-700 border border-gray-200 rounded hover:bg-gray-50"
+                onClick={() => setShowOrderModal(false)}
+                className="px-4 py-2 text-xs border border-gray-200 rounded hover:bg-gray-50 text-gray-700"
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleMarkOrdered(actionConfirm.item)}
-                className="px-3 py-1.5 text-xs text-white rounded bg-blue-600 hover:bg-blue-700"
+                onClick={confirmMarkOrdered}
+                disabled={orderedQuantity < 1}
+                className={`px-4 py-2 text-xs rounded text-white ${
+                  orderedQuantity < 1 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                Mark Ordered
+                Confirm Order
               </button>
             </div>
           </div>
@@ -993,14 +1020,15 @@ const ProcurementManagement: React.FC<{ role: string }> = ({ role }) => {
                   <button
                     onClick={() => {
                       setShowViewModal(false);
-                      setActionConfirm({item: selectedItem, action: 'order'});
+                      setOrderedQuantity(neededQuantity(selectedItem));
+                      setShowOrderModal(true);
                     }}
                     className="px-4 py-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
                     Mark Ordered
                   </button>
                 )}
-                {selectedItem.procurementStatus === 'ORDERED' && (
+                {(selectedItem.procurementStatus === 'ORDERED' || selectedItem.procurementStatus === 'PARTIALLY_ORDERED') && (
                   <button
                     onClick={() => {
                       setShowViewModal(false);

@@ -7,8 +7,6 @@ import { Decimal } from '@prisma/client/runtime/library';
 @Injectable()
 export class RequestService {
   constructor(private prisma: PrismaService) {}
-
-
   
   async rejectRequest(
     requestId: string,
