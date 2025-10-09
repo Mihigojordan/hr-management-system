@@ -80,9 +80,9 @@ const Navbar: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-                    ABY HR Management
+                    Fine Fish
                   </h1>
-                  <p className="text-xs text-gray-500 -mt-1">Complete HR Solutions</p>
+                  <p className="text-xs text-gray-500 -mt-1">Pioneering Sustainable Aquaculture in Rwanda</p>
                 </div>
               </div>
             </div>
