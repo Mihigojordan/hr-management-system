@@ -78,32 +78,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: basePath,
       },
       {
-        id: "hr-management",
-        label: "HR Management",
-        icon: UserPlus,
-        items: [
-          {
-            id: "departments",
-            label: "Departments",
-            icon: Building,
-            path: `${basePath}/department-management`,
-            allowedRoles: ["admin"],
-          },
-          {
-            id: "recruiting",
-            label: "Recruiting",
-            icon: Briefcase,
-            path: `${basePath}/recruiting-management`,
-            allowedRoles: ["admin"],
-          },
-          {
-            id: "employees",
-            label: "Employees",
-            icon: Users,
-            path: `${basePath}/employee-management`,
-            allowedRoles: ["admin"],
-          },
-        ],
+        id: "departments",
+        label: "Departments Management",
+        icon: Building,
+        path: `${basePath}/department-management`,
+        allowedRoles: ["admin"],
+      },
+      {
+        id: "recruiting",
+        label: "Recruiting Management",
+        icon: Briefcase,
+        path: `${basePath}/recruiting-management`,
+        allowedRoles: ["admin"],
+      },
+      {
+        id: "employees",
+        label: "Employees Management",
+        icon: Users,
+        path: `${basePath}/employee-management`,
+        allowedRoles: ["admin"],
       },
       {
         id: "requestedAssets-management",
@@ -131,6 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         label: "Asset Management",
         icon: Cog,
         path: `${basePath}/asset-management`,
+      
       },
       {
         id: "assets request",

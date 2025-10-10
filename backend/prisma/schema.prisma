@@ -110,7 +110,6 @@ enum MaritalStatus {
     supervisedSites Site[] @relation("SupervisorRelation")
     medications      Medication[]
     feeds  Feed[]
-    assetRequests     AssetRequest[]
       // Assigned site (one site only)
     siteId       String?
     site         Site?    @relation("SiteEmployees", fields: [siteId], references: [id] , onDelete: SetNull, onUpdate: Cascade)
@@ -128,7 +127,9 @@ enum MaritalStatus {
     updatedAt DateTime   @updatedAt
 
     
-  }
+  
+    AssetRequest AssetRequest[]
+}
 
 model Contract {
   id                     String       @id @default(uuid())
@@ -277,10 +278,7 @@ model Asset {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
-
-  //relationships
-
-  requests      AssetRequestItem[]
+  AssetRequestItem AssetRequestItem[]
 }
 
 enum AssetCategory {
@@ -561,7 +559,6 @@ model RequestItem {
   updatedAt      DateTime    @updatedAt
 }
 
-
 enum RequestStatus {
   PENDING
   APPROVED
@@ -569,7 +566,6 @@ enum RequestStatus {
   ISSUED
   REJECTED
   RECEIVED
-  RECIEVED
   CLOSED
 }
 
@@ -616,7 +612,6 @@ enum ProcurementStatus {
   NOT_REQUIRED
   REQUIRED
   ORDERED
-  PARTIALLY_ORDERED
   COMPLETED
 }
 enum MovementType {
@@ -658,3 +653,7 @@ createdByEmployee   Employee? @relation(fields: [createdByEmployeeId], reference
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 }
+
+
+
+git
