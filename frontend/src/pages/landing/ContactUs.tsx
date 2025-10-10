@@ -145,26 +145,26 @@ export default function ContactPage() {
         icon={<Fish className="w-10 h-10" />}
       />
 
-      <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative py-5">
-        <div className="text-center mb-16">
+      <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8 relative py-5">
+        <div className="text-center mb-6">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 via-primary-500 to-gray-800 bg-clip-text text-transparent mb-6">
             Connect with Fine Fish Ltd
           </h1>
-          <p className="text-md md:text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed mb-8">
+          <p className="text-md md:text-lg text-gray-600 mx-auto leading-relaxed mb-6">
             Have questions about tilapia farming, fingerling supply, or partnerships? Our team is here to support farmers, cooperatives, and stakeholders with expert aquaculture solutions in Rwamagana, Rubavu, and beyond.
           </p>
           
           {/* Quick contact badges */}
-          <div className="flex flex-wrap justify-center gap-4 mt-8">
-            <div className="flex items-center bg-primary-50 text-primary-700 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex flex-wrap justify-center gap-4 mt-4">
+            <div className="flex items-center bg-primary-50 text-primary-700 px-4  rounded-full shadow-sm hover:shadow-md transition-all duration-300">
               <Phone size={16} className="mr-2" />
               <span className="font-medium">+250 788 123 456</span>
             </div>
-            <div className="flex items-center bg-primary-50 text-primary-700 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center bg-primary-50 text-primary-700 px-4  rounded-full shadow-sm hover:shadow-md transition-all duration-300">
               <Mail size={16} className="mr-2" />
               <span className="font-medium">info@finefish.rw</span>
             </div>
-            <div className="flex items-center bg-primary-50 text-primary-700 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center bg-primary-50 text-primary-700 px-4  rounded-full shadow-sm hover:shadow-md transition-all duration-300">
               <Clock size={16} className="mr-2" />
               <span className="font-medium">Mon-Fri 8AM-6PM</span>
             </div>
@@ -173,11 +173,11 @@ export default function ContactPage() {
       </div>
 
       {/* Contact Methods */}
-      <section className="py-20">
-        <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+      <section className="py-4">
+        <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
             <h3 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Preferred Way</h3>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600  mx-auto">
               Multiple ways to reach our aquaculture team - pick what works best for you
             </p>
           </div>
@@ -212,8 +212,8 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Form & Offices Section */}
-      <section className="py-20">
-        <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-10">
+        <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -289,40 +289,6 @@ export default function ContactPage() {
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                         placeholder="Your organization or cooperative"
                       />
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-gray-700 font-semibold mb-2">
-                        <Fish className="w-4 h-4 inline mr-2" />
-                        Farmer ID (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        name="farmerId"
-                        value={formData.farmerId}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="FRM001234"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 font-semibold mb-2">
-                        <HelpCircle className="w-4 h-4 inline mr-2" />
-                        Inquiry Type
-                      </label>
-                      <select
-                        name="inquiryType"
-                        value={formData.inquiryType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                      >
-                        <option value="">Select inquiry type</option>
-                        {inquiryTypes.map((type, index) => (
-                          <option key={index} value={type}>{type}</option>
-                        ))}
-                      </select>
                     </div>
                   </div>
 

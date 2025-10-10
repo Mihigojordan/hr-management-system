@@ -40,14 +40,14 @@ const Testimonials: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-white">
-      <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-6 bg-white">
+      <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-8"
         >
           <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Community Says</h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
