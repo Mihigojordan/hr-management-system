@@ -13,8 +13,9 @@ const Home = () => {
         <HeroSection />
         <AboutSection />
         <Categories />
-        <Blog />
         <Testimonials />
+        <Blog />
+ 
       </main>
   )
 }

@@ -8,7 +8,7 @@ import {
   Shield,
   TrendingUp,
   CheckCircle,
-  Zap,
+
   Heart,
   Award,
 } from "lucide-react";
@@ -16,7 +16,7 @@ import image3 from '../../../assets/image1.jpg'
 import image1 from '../../../assets/image2.jpg'
 import image4 from '../../../assets/image4.jpg'
 import image5 from '../../../assets/image5.jpg'
-import image6 from '../../../assets/farm.jpg'
+// import image6 from '../../../assets/farm.jpg'
 import { useNavigate } from "react-router-dom";
 
 
@@ -139,11 +139,11 @@ export default function ServicesSection() {
   const currentService = services[activeService];
 
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
+    <section className="py-3 px-10 bg-white relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary-100 rounded-full filter blur-3xl opacity-20"></div>
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary-100 rounded-full filter blur-3xl opacity-20"></div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-2 relative z-10">
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-6">
             <Waves className="w-8 h-8 text-primary-600" />
@@ -163,7 +163,7 @@ export default function ServicesSection() {
               <button
                 key={service.id}
                 onClick={() => setActiveService(index)}
-                className={`flex items-center space-x-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 ${
+                className={`flex items-center space-x-3 px-6 py-4 -mb-6 -mt-10  rounded-xl font-semibold transition-all duration-300 ${
                   activeService === index
                     ? "bg-primary-600 text-white shadow-lg scale-105"
                     : "bg-gray-100 text-gray-700 hover:bg-primary-50 hover:text-primary-600"
@@ -204,9 +204,7 @@ export default function ServicesSection() {
             </div>
 
             <div>
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-6">
-                <currentService.icon className="w-8 h-8 text-primary-600" />
-              </div>
+             
               
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
                 {currentService.title}
@@ -227,17 +225,12 @@ export default function ServicesSection() {
                 ))}
               </div>
 
-              <button 
-               onClick={()=> navigate('/solutions')}  
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center space-x-2">
-                <span>Learn More</span>
-                <Zap className="w-5 h-5" />
-              </button>
+           
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-3xl p-12 mb-20">
+        <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-3xl p-12 mb-5 -mt-10">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
               Why Choose Fine Fish Ltd
