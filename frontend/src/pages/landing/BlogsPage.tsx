@@ -12,11 +12,10 @@ import {
   ChevronRight
 } from 'lucide-react';
 import HeaderBanner from '../../components/landing/HeaderBanner';
-import { blogs, blogsCategories,type BlogPost } from '../../store/Blogs';
+import { blogs, blogsCategories, type BlogPost } from '../../store/Blogs';
 import { useNavigate } from 'react-router-dom';
 
-
-export default function HRBlogsPage() {
+const HRBlogsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -44,8 +43,16 @@ export default function HRBlogsPage() {
   const currentPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
 
   const popularTags: string[] = [
-    "HR Best Practices", "Employee Engagement", "Remote Work", "Leadership",
-    "Payroll", "Compliance", "Analytics", "Culture", "Innovation", "Performance"
+    "Sustainable Aquaculture",
+    "Farmer Training",
+    "Community Empowerment",
+    "Tilapia Production",
+    "Lake Kivu",
+    "Rwamagana Hatchery",
+    "Eco-Friendly Practices",
+    "Vision 2050",
+    "Technical Support",
+    "Farmer Cooperatives"
   ];
 
   const handelViewMore = (id: number) => {
@@ -62,22 +69,22 @@ export default function HRBlogsPage() {
       </div>
 
       <HeaderBanner
-        title="HR Blogs"
-        subtitle="Home / Blogs"
+        title="Aquaculture Insights"
+        subtitle="Home / Aquaculture Blogs"
         backgroundStyle="image"
         icon={<BookOpen className="w-10 h-10" />}
       />
 
       {/* Search and Filter */}
-      <section className="py-12 relative">
-        <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-8 relative">
+        <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search articles, topics, or authors..."
+                  placeholder="Search aquaculture insights, farming tips, or authors..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
@@ -102,9 +109,9 @@ export default function HRBlogsPage() {
 
       {/* Featured Posts */}
       {featuredPosts.length > 0 && (
-        <section className="py-12 relative">
-          <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Featured Articles</h2>
+        <section className="py-8 relative">
+          <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">Featured Aquaculture Insights</h2>
             <div className="grid lg:grid-cols-2 gap-8">
               {featuredPosts.slice(0, 2).map(post => (
                 <div key={post.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer">
@@ -175,10 +182,10 @@ export default function HRBlogsPage() {
       )}
 
       {/* Main Blog Grid */}
-      <section className="py-12 relative">
-        <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-8 relative">
+        <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Latest Articles</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Latest Aquaculture Insights</h2>
             <div className="text-sm text-gray-600">
               Showing {currentPosts.length} of {filteredPosts.length} articles
             </div>
@@ -282,4 +289,6 @@ export default function HRBlogsPage() {
       </section>
     </div>
   );
-}
+};
+
+export default HRBlogsPage;
