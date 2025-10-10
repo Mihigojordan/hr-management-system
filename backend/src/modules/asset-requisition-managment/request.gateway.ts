@@ -45,4 +45,9 @@ export class AssetRequestGateway {
     // Emitted when an item is pending procurement
     this.server.emit('requestItemProcurementNeeded', item);
   }
+
+    // ✅ New event for procurement updates
+  emitProcurementUpdated(assetId: string, data: any) {
+    this.server.emit('procurementUpdated', { assetId, ...data });
+  }
 }
