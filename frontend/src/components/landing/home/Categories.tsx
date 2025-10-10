@@ -17,6 +17,10 @@ import image1 from '../../../assets/image2.jpg'
 import image4 from '../../../assets/image4.jpg'
 import image5 from '../../../assets/image5.jpg'
 import image6 from '../../../assets/farm.jpg'
+
+
+
+
 export default function ServicesSection() {
   const [activeService, setActiveService] = useState(0);
 
