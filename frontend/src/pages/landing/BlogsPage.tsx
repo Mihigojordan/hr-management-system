@@ -69,7 +69,7 @@ const HRBlogsPage: React.FC = () => {
       </div>
 
       <HeaderBanner
-        title="Aquaculture Insights"
+        title="Fine Fish Blogs"
         subtitle="Home / Aquaculture Blogs"
         backgroundStyle="image"
         icon={<BookOpen className="w-10 h-10" />}
