@@ -10,6 +10,8 @@ import img4 from '../../assets/images/fish4.jpg'
 import img5 from '../../assets/images/fish5.jpg'
 import img6 from '../../assets/images/fish6.jpg'
 
+import farm from '../../assets/farm.jpg'
+
 interface Partner {
   name: string;
   logo: string;

@@ -21,19 +21,20 @@ module.exports = {
   900: '#143a4d',  // very dark
   950: '#0b212e',  // deepest shade
 },
-       secondary: {
-  50:  '#fff0ed',
-  100: '#ffd9d2',
-  200: '#ffb3a6',
-  300: '#ff8c7a',
-  400: '#ff664d',
-  500: '#ff4021', // main secondary
-  600: '#e6391e',
-  700: '#cc321a',
-  800: '#b32b16',
-  900: '#801f0f',
-  950: '#4d1209',
+secondary: {
+  50:  '#e6f9f7',
+  100: '#bff0ea',
+  200: '#80e0d3',
+  300: '#4dd1bf',
+  400: '#1ac2aa',
+  500: '#00b39a', // main secondary
+  600: '#009c86',
+  700: '#008673',
+  800: '#006f60',
+  900: '#004b3f',
+  950: '#002620',
 },
+
 
       },
       fontFamily: {
