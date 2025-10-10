@@ -1,4 +1,12 @@
 // --- Type Definitions ---
+import img1 from '../assets/images/fish1.jpg';
+import img2 from '../assets/images/fish2.jpg';
+import img3 from '../assets/images/fish3.jpg';
+import img4 from '../assets/images/fish4.jpg';
+import img5 from '../assets/images/fish5.jpg';
+import img6 from '../assets/images/fish6.jpg';
+import img7 from '../assets/images/fish7.jpg';
+import img8 from '../assets/images/fish8.jpg';
 export interface BlogPost {
   id: number;
   title: string;
@@ -15,138 +23,139 @@ export interface BlogPost {
   tags: string[];
 }
 
-// --- Blog Data ---
-export const blogs: BlogPost[] = [
-  {
-    id: 1,
-    title: "10 Essential HR Metrics Every Leader Should Track in 2025",
-    excerpt: "Discover the key performance indicators that will help you measure and improve your HR effectiveness, from employee satisfaction to retention rates.",
-    author: "Sarah Johnson",
-    authorRole: "HR Analytics Expert",
-    publishDate: "2025-08-10",
-    readTime: "8 min read",
-    category: "HR Best Practices",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop",
-    views: 2450,
-    likes: 89,
-    featured: true,
-    tags: ["Analytics", "KPIs", "Performance", "Data-Driven HR"]
-  },
-  {
-    id: 2,
-    title: "Building a Remote-First Culture: HR Strategies That Work",
-    excerpt: "Learn how to create an engaging remote work environment that maintains productivity and fosters strong team connections in distributed teams.",
-    author: "Michael Chen",
-    authorRole: "Remote Work Specialist",
-    publishDate: "2025-08-08",
-    readTime: "12 min read",
-    category: "Workplace Culture",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=400&fit=crop",
-    views: 1890,
-    likes: 67,
-    featured: true,
-    tags: ["Remote Work", "Culture", "Team Building", "Productivity"]
-  },
-  {
-    id: 3,
-    title: "Navigating Rwanda's New Employment Laws: A Complete Guide",
-    excerpt: "Stay compliant with the latest updates to Rwanda's employment legislation and understand how these changes affect your HR policies and procedures.",
-    author: "Grace Uwimana",
-    authorRole: "Legal Compliance Officer",
-    publishDate: "2025-08-06",
-    readTime: "15 min read",
-    category: "Compliance & Legal",
-    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop",
-    views: 3200,
-    likes: 124,
-    featured: false,
-    tags: ["Legal", "Compliance", "Rwanda", "Employment Law"]
-  },
-  {
-    id: 4,
-    title: "Employee Engagement in the Digital Age: Tools and Techniques",
-    excerpt: "Explore modern approaches to keeping your workforce engaged using digital tools, feedback systems, and innovative recognition programs.",
-    author: "David Mutabazi",
-    authorRole: "Employee Experience Manager",
-    publishDate: "2025-08-04",
-    readTime: "10 min read",
-    category: "Employee Engagement",
-    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop",
-    views: 1560,
-    likes: 78,
-    featured: false,
-    tags: ["Engagement", "Digital Tools", "Recognition", "Feedback"]
-  },
-  {
-    id: 5,
-    title: "Payroll Automation: Reducing Errors and Saving Time",
-    excerpt: "Discover how automated payroll systems can eliminate human errors, ensure compliance, and free up your HR team for strategic initiatives.",
-    author: "Anne Mukamana",
-    authorRole: "Payroll Systems Expert",
-    publishDate: "2025-08-02",
-    readTime: "7 min read",
-    category: "Payroll & Benefits",
-    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=400&fit=crop",
-    views: 2100,
-    likes: 95,
-    featured: false,
-    tags: ["Payroll", "Automation", "Efficiency", "Compliance"]
-  },
-  {
-    id: 6,
-    title: "The Future of HR: AI and Machine Learning Applications",
-    excerpt: "Explore how artificial intelligence is revolutionizing HR processes, from recruitment screening to predictive analytics for employee retention.",
-    author: "Dr. James Mukama",
-    authorRole: "HR Technology Researcher",
-    publishDate: "2025-07-30",
-    readTime: "14 min read",
-    category: "Technology & Innovation",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
-    views: 4200,
-    likes: 156,
-    featured: true,
-    tags: ["AI", "Machine Learning", "Future of Work", "Innovation"]
-  },
-  {
-    id: 7,
-    title: "Effective Leadership During Organizational Change",
-    excerpt: "Learn essential leadership strategies for guiding your team through transitions while maintaining morale and productivity.",
-    author: "Patricia Nyirahuku",
-    authorRole: "Change Management Consultant",
-    publishDate: "2025-07-28",
-    readTime: "11 min read",
-    category: "Leadership & Management",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
-    views: 1780,
-    likes: 82,
-    featured: false,
-    tags: ["Leadership", "Change Management", "Team Leadership", "Organizational Development"]
-  },
-  {
-    id: 8,
-    title: "Creating Inclusive Workplaces: Beyond Policy to Practice",
-    excerpt: "Move beyond diversity policies to create truly inclusive environments where every employee can thrive and contribute their best work.",
-    author: "Emmanuel Nkurunziza",
-    authorRole: "Diversity & Inclusion Specialist",
-    publishDate: "2025-07-26",
-    readTime: "13 min read",
-    category: "Workplace Culture",
-    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=400&fit=crop",
-    views: 2890,
-    likes: 134,
-    featured: false,
-    tags: ["Diversity", "Inclusion", "Workplace Culture", "Equity"]
-  }
-];
 
 // --- Blog Categories ---
 export const blogsCategories: string[] = [
   'All',
-  'HR Best Practices',
-  'Employee Engagement',
-  'Payroll & Benefits',
-  'Compliance & Legal',
-  'Technology & Innovation',
-  'Leadership & Management',
-  'Workplace Culture'
+  'Sustainable Farming',
+  'Fingerling Production',
+  'Community Empowerment',
+  'Technical Support',
+  'Environmental Sustainability',
+  'Aquaculture Innovation',
+  'Farmer Training'
+];
+
+// --- Blog Data ---
+export const blogs: BlogPost[] = [
+  {
+    id: 1,
+    title: "Sustainable Tilapia Farming on Lake Kivu",
+    excerpt: "Discover how Fine Fish Ltd pioneers eco-friendly cage farming to produce premium tilapia while preserving Lake Kivu’s ecosystem.",
+    author: "Themistocle Munyangeyo",
+    authorRole: "Founder & CEO",
+    publishDate: "2025-08-10",
+    readTime: "8 min read",
+    category: "Sustainable Farming",
+    image: "https://images.unsplash.com/photo-1568727349458-1bb59fb3fb63?w=800&h=400&fit=crop",
+    views: 2450,
+    likes: 89,
+    featured: true,
+    tags: ["Tilapia Farming", "Lake Kivu", "Sustainability", "Cage Farming"]
+  },
+  {
+    id: 2,
+    title: "Scaling Fingerling Production at Rwamagana Hatchery",
+    excerpt: "Learn how Fine Fish Ltd’s Rwamagana hatchery supplies millions of healthy fingerlings to farmers across Rwanda, boosting aquaculture growth.",
+    author: "Jane Mukamana",
+    authorRole: "Hatchery Manager",
+    publishDate: "2025-08-08",
+    readTime: "12 min read",
+    category: "Fingerling Production",
+    image: img5,
+    views: 1890,
+    likes: 67,
+    featured: true,
+    tags: ["Fingerlings", "Hatchery", "Aquaculture", "Rwamagana"]
+  },
+  {
+    id: 3,
+    title: "Partnering for Progress: Fine Fish Ltd and Rwanda Agriculture Board",
+    excerpt: "Explore our collaboration with Rwanda Agriculture Board to advance sustainable aquaculture and support Rwanda’s Vision 2050.",
+    author: "Grace Uwimana",
+    authorRole: "Partnership Coordinator",
+    publishDate: "2025-08-06",
+    readTime: "15 min read",
+    category: "Aquaculture Innovation",
+    image: img4,
+    views: 3200,
+    likes: 124,
+    featured: false,
+    tags: ["Partnerships", "Rwanda Agriculture Board", "Vision 2050", "Innovation"]
+  },
+  {
+    id: 4,
+    title: "Empowering Youth Through Aquaculture Training",
+    excerpt: "Our partnership with Karongi TVET equips young Rwandans with skills for sustainable tilapia farming, fostering community growth.",
+    author: "David Nkurunziza",
+    authorRole: "Training Coordinator",
+    publishDate: "2025-08-04",
+    readTime: "10 min read",
+    category: "Farmer Training",
+    image: img7,
+    views: 1560,
+    likes: 78,
+    featured: false,
+    tags: ["Farmer Training", "Youth Empowerment", "Karongi TVET", "Community"]
+  },
+  {
+    id: 5,
+    title: "Optimizing Cage Farming with Technical Support",
+    excerpt: "Learn how Fine Fish Ltd provides expert technical support to farmers for efficient and sustainable tilapia production on Lake Kivu.",
+    author: "Anne Ingabire",
+    authorRole: "Technical Lead",
+    publishDate: "2025-08-02",
+    readTime: "7 min read",
+    category: "Technical Support",
+    image: "https://images.unsplash.com/photo-1628859742240-269783f56d17?w=800&h=400&fit=crop",
+    views: 2100,
+    likes: 95,
+    featured: false,
+    tags: ["Technical Support", "Cage Farming", "Tilapia Production", "Efficiency"]
+  },
+  {
+    id: 6,
+    title: "Protecting Lake Kivu: Our Commitment to Water Quality",
+    excerpt: "Discover how Fine Fish Ltd monitors water quality to ensure sustainable aquaculture and preserve Rwanda’s lakes for future generations.",
+    author: "Dr. James Tuyishime",
+    authorRole: "Environmental Specialist",
+    publishDate: "2025-07-30",
+    readTime: "14 min read",
+    category: "Environmental Sustainability",
+    image: img8,
+    views: 4200,
+    likes: 156,
+    featured: true,
+    tags: ["Water Quality", "Sustainability", "Lake Kivu", "Environment"]
+  },
+  {
+    id: 7,
+    title: "Building Strong Farmer Cooperatives in Rwanda",
+    excerpt: "Fine Fish Ltd supports farmer cooperatives to enhance community resilience and drive economic growth in aquaculture.",
+    author: "Patricia Nyirahuku",
+    authorRole: "Community Liaison",
+    publishDate: "2025-07-28",
+    readTime: "11 min read",
+    category: "Community Empowerment",
+    image: "https://images.unsplash.com/photo-1574491822372-ad5cef67a454?w=800&h=400&fit=crop",
+    views: 1780,
+    likes: 82,
+    featured: false,
+    tags: ["Farmer Cooperatives", "Community Empowerment", "Economic Growth", "Rwanda"]
+  },
+  {
+    id: 8,
+    title: "Innovations in Tilapia Feed for Sustainable Production",
+    excerpt: "Explore how Fine Fish Ltd develops eco-friendly feed solutions to improve tilapia growth and reduce environmental impact.",
+    author: "Emmanuel Nkurunziza",
+    authorRole: "Feed Development Specialist",
+    publishDate: "2025-07-26",
+    readTime: "13 min read",
+    category: "Aquaculture Innovation",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop",
+    views: 2890,
+    likes: 134,
+    featured: false,
+    tags: ["Tilapia Feed", "Innovation", "Sustainability", "Aquaculture"]
+  }
 ];

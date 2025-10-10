@@ -3,6 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Users, Fish, Globe, Handshake, ArrowUp, Award, Target, Leaf, Droplets } from 'lucide-react';
 import Testimonials from '../../components/landing/home/Testimonials';
 import HeaderBanner from '../../components/landing/HeaderBanner';
+import img1 from '../../assets/images/fish1.jpg'
+import img2 from '../../assets/images/fish2.jpg'
+import img3 from '../../assets/images/fish3.jpg'
+import img4 from '../../assets/images/fish4.jpg'
+import img5 from '../../assets/images/fish5.jpg'
+import img6 from '../../assets/images/fish6.jpg'
+
+import farm from '../../assets/farm.jpg'
 
 interface Partner {
   name: string;
@@ -79,19 +87,19 @@ const AboutPage: React.FC = () => {
       icon: Leaf,
       title: "Sustainability",
       description: "Protecting Lake Kivu through eco-friendly farming and responsible resource use.",
-      image: "https://images.unsplash.com/photo-1511537190424-a864f26a6c1d?w=400&h=300&fit=crop",
+      image: img6,
     },
     {
       icon: Fish,
       title: "Quality Excellence",
       description: "Producing premium tilapia and fingerlings meeting global standards.",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop",
+      image: img3,
     },
     {
       icon: Users,
       title: "Community Impact",
       description: "Creating jobs and training opportunities to uplift Karongi and beyond.",
-      image: "https://images.unsplash.com/photo-1574491822372-ad5cef67a454?w=400&h=300&fit=crop",
+      image: img4,
     },
   ];
 
@@ -128,9 +136,9 @@ const AboutPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-20 bg-gradient-to-br from-primary-50 via-white to-secondary-50"
+        className="py-10 bg-gradient-to-br from-primary-50 via-white to-secondary-50"
       >
-        <div className="w-11/12 mx-auto px-6 lg:px-8">
+        <div className="w-12/12 px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pb-12">
             <div>
               <div className="text-primary-600 text-sm font-semibold tracking-wide uppercase mb-4">
@@ -165,7 +173,7 @@ const AboutPage: React.FC = () => {
                 className="space-y-6 pt-12"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1628859742240-269783f56d17?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZmlzaCUyMGZhcm1pbmd8ZW58MHx8MHx8fDA%3D"
+                  src={img1}
                   alt="Premium tilapia production"
                   className="rounded-2xl shadow-lg w-full h-72 object-cover"
                 />
@@ -199,14 +207,14 @@ const AboutPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-24 bg-white"
+        className="py-10 bg-white"
       >
-        <div className="w-11/12 mx-auto px-6 lg:px-8">
+        <div className="w-12/12 mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
               Our <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Mission & Vision</span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg text-gray-600  mx-auto">
               Advancing sustainable aquaculture for Rwanda’s future.
             </p>
           </div>
@@ -265,9 +273,9 @@ const AboutPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-20 bg-gradient-to-br from-primary-50 to-white"
+        className="py-10 bg-gradient-to-br from-primary-50 to-white"
       >
-        <div className="w-11/12 mx-auto px-6 lg:px-8">
+        <div className="w-12/12 mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
               Our <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Core Values</span>
@@ -310,13 +318,13 @@ const AboutPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-24 bg-white"
+        className="py-10 bg-white"
       >
-        <div className="w-11/12 mx-auto px-6 lg:px-8">
+        <div className="w-12/12 mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div whileHover={{ scale: 1.03 }} className="order-2 lg:order-1">
               <img
-                src="https://images.unsplash.com/photo-1574491822372-ad5cef67a454?w=600&h=500&fit=crop"
+                src={img5}
                 alt="Fish farming community in Karongi"
                 className="rounded-3xl shadow-xl w-full h-96 object-cover hover:shadow-2xl transition-shadow duration-300"
               />
@@ -349,9 +357,9 @@ const AboutPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-20 bg-gradient-to-br from-primary-50 to-white"
+        className="py-10 bg-gradient-to-br from-primary-50 to-white"
       >
-        <div className="w-11/12 mx-auto px-6 lg:px-8">
+        <div className="w-12/12 mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
               Our <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Leadership</span>
@@ -385,10 +393,10 @@ const AboutPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-20 bg-white"
+        className="py-10 bg-white"
       >
-        <div className="w-11/12 mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
+        <div className="w-12/12 mx-auto px-6 lg:px-8">
+          <div className="text-center mb-8">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
               Our <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Partners</span>
             </h2>

@@ -215,7 +215,7 @@ const JobBoard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="w-11/12 mx-auto">
+        <div className="w-12/12 mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -245,11 +245,11 @@ const JobBoard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-primary-50 p-6">
-      <div className="w-11/12 mx-auto">
+      <div className="w-12/12 mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Find Your Dream Job</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600  mx-auto">
             Discover amazing opportunities with top companies. Your next career move starts here.
           </p>
         </div>

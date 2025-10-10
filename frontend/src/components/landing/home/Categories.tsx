@@ -230,7 +230,7 @@ export default function ServicesSection() {
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
               Why Choose Fine Fish Ltd
             </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600  mx-auto">
               Our commitment to quality and sustainability sets us apart
             </p>
           </div>
@@ -271,7 +271,7 @@ export default function ServicesSection() {
             <h3 className="text-3xl sm:text-4xl font-bold mb-4">
               Partner With Rwanda's Leading Fish Farm
             </h3>
-            <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-primary-100 mb-8  mx-auto">
               Whether you need fresh fish, fingerlings, or training services, we're here to support your needs
             </p>
             <div className="flex flex-wrap justify-center gap-4">
