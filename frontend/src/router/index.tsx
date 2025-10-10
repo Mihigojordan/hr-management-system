@@ -422,7 +422,7 @@ const routes = createBrowserRouter([
                 )
               },
               {
-                path: 'store-management',
+                path: 'sto',
                 element: (
                   <SuspenseWrapper>
                     <StoreManagement role='admin' />

@@ -172,24 +172,24 @@ const ServicesPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-20 bg-white"
+        className="py-8 bg-white"
       >
-        <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+        <div className="w-12/12 mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-5">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 ">
               Our <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Services</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600  mx-auto">
               Comprehensive aquaculture solutions driving Rwanda’s secondary economy
             </p>
           </div>
 
           {/* Service Tabs */}
-          <div className="flex justify-center mb-12">
+          <div className="flex justify-center mb-6">
             <div className="bg-primary-50 p-2 rounded-xl flex space-x-2">
               <button
                 onClick={() => setActiveTab("core")}
-                className={`px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2 ${
+                className={`px-8 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2 ${
                   activeTab === "core"
                     ? "bg-primary-600 text-white shadow-lg"
                     : "text-primary-700 hover:bg-primary-100"
@@ -274,14 +274,14 @@ const ServicesPage: React.FC = () => {
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        className="py-20 bg-gradient-to-r from-primary-50 to-secondary-50"
+        className="py-8 bg-gradient-to-r from-primary-50 to-secondary-50"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className=" mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-gray-900 mb-4">
               Why Choose <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Fine Fish Ltd</span>?
             </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 mx-auto">
               Delivering sustainable aquaculture solutions with unmatched expertise
             </p>
           </div>
