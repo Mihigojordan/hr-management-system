@@ -2,175 +2,176 @@ import React, { useState } from 'react';
 import { 
   ChevronRight, 
   Users, 
-  DollarSign, 
+  Fish, 
+  Leaf, 
+  Handshake, 
   Clock, 
-  TrendingUp, 
-  UserPlus, 
-  BookOpen,
-  Home,
-  CheckCircle,
-  Star,
-  Shield,
-  Zap,
-  BarChart3,
-  Calendar,
-  FileText,
-  Settings,
-  Database,
-  Globe,
-  Smartphone,
-  Lock,
-  Cloud,
-  ArrowRight,
-  Play,
-  Award,
-  Target,
-  MessageSquare,
-  Bell,
-  Filter
+  BookOpen, 
+  Target, 
+  Award, 
+  Star, 
+  CheckCircle, 
+  Cloud, 
+  Smartphone, 
+  Lock, 
+  Globe, 
+  Settings, 
+  Database 
 } from 'lucide-react';
 import HeaderBanner from '../../components/landing/HeaderBanner';
 
+interface Module {
+  id: number;
+  name: string;
+  category: string;
+  icon: React.ReactNode;
+  image: string;
+  features: string[];
+  badge: string;
+  description: string;
+  benefits: string[];
+  pricing: string;
+}
 
-export default function HRFeaturesPage() {
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [selectedModule, setSelectedModule] = useState(null);
+interface KeyFeature {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
 
-  const categories = ['All', 'Core Module', 'Finance Module', 'Time Management', 'Evaluation Module', 'Hiring Module', 'Development Module'];
+interface Partner {
+  name: string;
+  logo: string;
+}
 
-  const modules = [
+const HRFeaturesPage: React.FC = () => {
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
+
+  const categories: string[] = [
+    'All', 
+    'Workforce Management', 
+    'Training & Development', 
+    'Sustainability Tracking', 
+    'Community Engagement'
+  ];
+
+  const modules: Module[] = [
     {
       id: 1,
-      name: "Employee Management",
-      category: "Core Module",
+      name: "Aquaculture Workforce Management",
+      category: "Workforce Management",
       icon: <Users className="w-8 h-8" />,
-      image: "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=400&h=400&fit=crop",
-      features: ["Employee Profiles", "Document Management", "Contact Directory", "Organizational Chart"],
+      image: "https://images.unsplash.com/photo-1574491822372-ad5cef67a454?w=400&h=400&fit=crop",
+      features: ["Farmer Profiles", "Shift Scheduling", "Performance Tracking", "Payroll Integration"],
       badge: "Essential",
-      description: "Complete employee lifecycle management with comprehensive profiles, document storage, and organizational structure visualization.",
-      benefits: ["Centralized employee data", "Streamlined onboarding", "Easy document access", "Visual org structure"],
-      pricing: "Included in all plans"
+      description: "Manage fish farmers and hatchery staff with comprehensive profiles, schedules, and performance tracking tailored to aquaculture operations.",
+      benefits: ["Centralized data", "Efficient scheduling", "Performance insights", "Streamlined payroll"],
+      pricing: "Included in core plan"
     },
     {
       id: 2,
-      name: "Payroll Processing",
-      category: "Finance Module",
-      icon: <DollarSign className="w-8 h-8" />,
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=400&fit=crop",
-      features: ["Automated Calculations", "Tax Management", "Salary Reports", "Benefits Integration"],
-      badge: "Automated",
-      description: "Fully automated payroll system with tax compliance, benefit deductions, and comprehensive reporting capabilities.",
-      benefits: ["99.9% accuracy", "Tax compliance", "Time savings", "Detailed reporting"],
-      pricing: "Starting at $5/employee"
-    },
-    {
-      id: 3,
-      name: "Attendance Tracking",
-      category: "Time Management",
-      icon: <Clock className="w-8 h-8" />,
-      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&h=400&fit=crop",
-      features: ["Clock In/Out", "Leave Management", "Overtime Tracking", "Mobile App Support"],
-      badge: "Real-time",
-      description: "Advanced time tracking with multiple clock-in methods, automated overtime calculations, and comprehensive leave management.",
-      benefits: ["Real-time tracking", "Mobile accessibility", "Automated calculations", "Leave approvals"],
-      pricing: "Starting at $2/employee"
-    },
-    {
-      id: 4,
-      name: "Performance Reviews",
-      category: "Evaluation Module",
-      icon: <TrendingUp className="w-8 h-8" />,
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop",
-      features: ["Goal Setting", "360° Reviews", "Performance Analytics", "Development Plans"],
-      badge: "Advanced",
-      description: "Comprehensive performance management with goal tracking, multi-source feedback, and data-driven insights for employee development.",
-      benefits: ["Objective evaluations", "Goal alignment", "Development focus", "Analytics insights"],
+      name: "Sustainable Farming Training",
+      category: "Training & Development",
+      icon: <BookOpen className="w-8 h-8" />,
+      image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=400&fit=crop",
+      features: ["Eco-Friendly Courses", "Hatchery Training", "Certification Tracking", "Skill Assessments"],
+      badge: "Growth Focused",
+      description: "Deliver training programs for sustainable cage farming and hatchery operations in partnership with Karongi TVET.",
+      benefits: ["Sustainable skills", "Certified farmers", "Skill development", "Community upliftment"],
       pricing: "Starting at $3/employee"
     },
     {
-      id: 5,
-      name: "Recruitment Portal",
-      category: "Hiring Module",
-      icon: <UserPlus className="w-8 h-8" />,
+      id: 3,
+      name: "Environmental Impact Tracking",
+      category: "Sustainability Tracking",
+      icon: <Leaf className="w-8 h-8" />,
+      image: "https://images.unsplash.com/photo-1511537190424-a864f26a6c1d?w=400&h=400&fit=crop",
+      features: ["Compliance Monitoring", "Water Quality Reports", "Eco-Metrics", "Sustainability Audits"],
+      badge: "Eco-Friendly",
+      description: "Track and report environmental impact to ensure Lake Kivu’s ecosystem is preserved through sustainable practices.",
+      benefits: ["Regulatory compliance", "Eco-friendly operations", "Data-driven insights", "Sustainability reporting"],
+      pricing: "Starting at $5/employee"
+    },
+    {
+      id: 4,
+      name: "Community Hiring Portal",
+      category: "Community Engagement",
+      icon: <Handshake className="w-8 h-8" />,
       image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop",
-      features: ["Job Posting", "Candidate Tracking", "Interview Scheduling", "Offer Management"],
-      badge: "Comprehensive",
-      description: "End-to-end recruitment solution with job posting, candidate management, interview coordination, and offer processing.",
-      benefits: ["Streamlined hiring", "Candidate pipeline", "Automated scheduling", "Offer tracking"],
-      pricing: "Starting at $50/month"
+      features: ["Job Postings", "Local Recruitment", "Interview Scheduling", "Community Outreach"],
+      badge: "Impactful",
+      description: "Streamline hiring of local farmers and youth to support Rwanda’s Vision 2050 and community empowerment.",
+      benefits: ["Local employment", "Youth empowerment", "Efficient hiring", "Community integration"],
+      pricing: "Starting at $40/month"
+    },
+    {
+      id: 5,
+      name: "Performance Analytics",
+      category: "Workforce Management",
+      icon: <Target className="w-8 h-8" />,
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop",
+      features: ["Productivity Reports", "Goal Tracking", "Farmer Analytics", "Performance Reviews"],
+      badge: "Intelligent",
+      description: "Data-driven insights to optimize workforce productivity and align with aquaculture goals.",
+      benefits: ["Performance insights", "Goal alignment", "Productivity boost", "Data-driven decisions"],
+      pricing: "Starting at $8/month"
     },
     {
       id: 6,
-      name: "Training Management",
-      category: "Development Module",
-      icon: <BookOpen className="w-8 h-8" />,
-      image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=400&fit=crop",
-      features: ["Course Catalog", "Progress Tracking", "Certification Management", "Skills Assessment"],
-      badge: "Growth Focused",
-      description: "Comprehensive learning management system with course delivery, progress monitoring, and skill development tracking.",
-      benefits: ["Skill development", "Progress monitoring", "Certification tracking", "Custom courses"],
+      name: "Certification Management",
+      category: "Training & Development",
+      icon: <Award className="w-8 h-8" />,
+      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=400&fit=crop",
+      features: ["Certification Tracking", "Compliance Records", "Training Certificates", "Audit Support"],
+      badge: "Certified",
+      description: "Manage certifications for sustainable aquaculture practices to ensure industry leadership and compliance.",
+      benefits: ["Compliance assurance", "Certification tracking", "Industry standards", "Audit readiness"],
       pricing: "Starting at $4/employee"
     },
-    {
-      id: 7,
-      name: "Analytics Dashboard",
-      category: "Core Module",
-      icon: <BarChart3 className="w-8 h-8" />,
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop",
-      features: ["Real-time Reports", "Custom Dashboards", "Data Visualization", "Predictive Analytics"],
-      badge: "Intelligent",
-      description: "Advanced analytics and reporting with customizable dashboards, real-time insights, and predictive workforce analytics.",
-      benefits: ["Data-driven decisions", "Custom reports", "Real-time insights", "Predictive analytics"],
-      pricing: "Starting at $10/month"
-    },
-    {
-      id: 8,
-      name: "Benefits Administration",
-      category: "Finance Module",
-      icon: <Shield className="w-8 h-8" />,
-      image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=400&fit=crop",
-      features: ["Benefits Enrollment", "Claims Processing", "Provider Management", "Cost Analysis"],
-      badge: "Comprehensive",
-      description: "Complete benefits management with enrollment, claims tracking, provider coordination, and cost analysis.",
-      benefits: ["Easy enrollment", "Claims tracking", "Cost management", "Provider integration"],
-      pricing: "Starting at $6/employee"
-    }
   ];
 
-  const keyFeatures = [
+  const keyFeatures: KeyFeature[] = [
     {
       icon: <Cloud className="w-6 h-6" />,
       title: "Cloud-Based",
-      description: "Access anywhere, anytime with secure cloud infrastructure"
+      description: "Access workforce data anywhere, anytime with secure cloud infrastructure."
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: "Mobile Ready",
-      description: "Native mobile apps for iOS and Android devices"
+      description: "Manage farmers and training via native iOS and Android apps."
     },
     {
       icon: <Lock className="w-6 h-6" />,
-      title: "Enterprise Security",
-      description: "Bank-level security with end-to-end encryption"
+      title: "Secure Data",
+      description: "Protect employee and farmer data with enterprise-grade encryption."
     },
     {
       icon: <Globe className="w-6 h-6" />,
       title: "Multi-Language",
-      description: "Support for 15+ languages and currencies"
+      description: "Support for Kinyarwanda, English, and French for local accessibility."
     },
     {
       icon: <Settings className="w-6 h-6" />,
       title: "Customizable",
-      description: "Flexible workflows and custom field configuration"
+      description: "Tailor workflows for aquaculture-specific HR needs."
     },
     {
       icon: <Database className="w-6 h-6" />,
       title: "Data Integration",
-      description: "Seamless integration with existing systems"
+      description: "Integrate with aquaculture management systems for seamless operations."
     }
   ];
 
-  const filteredModules = activeCategory === 'All' 
+  const partners: Partner[] = [
+    { name: "Rwanda Agriculture Board", logo: "https://placehold.co/150x50?text=RAB&bg=1e3a8a&fg=ffffff" },
+    { name: "Karongi TVET", logo: "https://placehold.co/150x50?text=Karongi+TVET&bg=1e3a8a&fg=ffffff" },
+    { name: "Ministry of Agriculture", logo: "https://placehold.co/150x50?text=MinAgri&bg=1e3a8a&fg=ffffff" },
+    { name: "Lake Kivu Fisheries", logo: "https://placehold.co/150x50?text=Kivu+Fisheries&bg=1e3a8a&fg=ffffff" },
+  ];
+
+  const filteredModules: Module[] = activeCategory === 'All' 
     ? modules 
     : modules.filter(module => module.category === activeCategory);
 
@@ -183,11 +184,10 @@ export default function HRFeaturesPage() {
       </div>
       
       <HeaderBanner
-        title="HR Features"
-        subtitle="Home  / Features"
-       backgroundStyle="image"
+        title="Aquaculture HR Features"
+        subtitle="Home / Features"
+        backgroundStyle="image"
         icon={<Star className="w-10 h-10" />}
-       
       />
 
       {/* Overview Stats */}
@@ -195,20 +195,20 @@ export default function HRFeaturesPage() {
         <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-6">
             <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-              <div className="text-3xl font-bold text-primary-600 mb-2">8+</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">6+</div>
               <div className="text-gray-600">Core Modules</div>
             </div>
             <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-              <div className="text-3xl font-bold text-primary-600 mb-2">50+</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">20+</div>
               <div className="text-gray-600">Features</div>
             </div>
             <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-              <div className="text-3xl font-bold text-primary-600 mb-2">99.9%</div>
-              <div className="text-gray-600">Uptime</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">100+</div>
+              <div className="text-gray-600">Farmers Trained</div>
             </div>
             <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-              <div className="text-3xl font-bold text-primary-600 mb-2">24/7</div>
-              <div className="text-gray-600">Support</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">90%+</div>
+              <div className="text-gray-600">Sustainability Compliance</div>
             </div>
           </div>
         </div>
@@ -218,9 +218,11 @@ export default function HRFeaturesPage() {
       <section className="py-20">
         <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Our HR System?</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Our <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Aquaculture HR System</span>?
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Built with modern technology and designed for scalability, security, and user experience
+              Built to support sustainable aquaculture, community empowerment, and Rwanda’s Vision 2050.
             </p>
           </div>
           
@@ -242,9 +244,11 @@ export default function HRFeaturesPage() {
       <section className="py-20 bg-white">
         <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Core HR Modules</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Core <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Aquaculture HR Modules</span>
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive HR solutions designed to streamline your workforce management and enhance organizational efficiency
+              Tailored solutions to manage fish farmers, ensure sustainability, and empower communities.
             </p>
           </div>
 
@@ -331,33 +335,35 @@ export default function HRFeaturesPage() {
         </div>
       </section>
 
-      {/* Integration Section */}
+      {/* Partners Section */}
       <section className="py-20 bg-gradient-to-br from-primary-50 to-white">
         <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Seamless Integrations</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Our <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Partners</span>
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Connect with your existing tools and systems for a unified workflow
+              Collaborating to advance Rwanda’s aquaculture workforce and sustainability goals.
             </p>
           </div>
           
           <div className="grid md:grid-cols-4 gap-6">
-            {['Slack', 'Microsoft Teams', 'Google Workspace', 'QuickBooks'].map((integration, index) => (
+            {partners.map((partner, index) => (
               <div key={index} className="bg-white rounded-xl p-6 shadow-lg text-center hover:shadow-xl transition-all duration-300">
-                <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-gray-600 font-semibold">{integration.charAt(0)}</span>
-                </div>
-                <h3 className="font-semibold text-gray-900">{integration}</h3>
-                <p className="text-sm text-gray-600 mt-2">Easy integration</p>
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="w-full h-16 object-contain mx-auto mb-4"
+                />
+                <h3 className="font-semibold text-gray-900">{partner.name}</h3>
+                <p className="text-sm text-gray-600 mt-2">Key Partner</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-{/*       
-
-     
+      {/* Modal */}
       {selectedModule && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-screen overflow-y-auto">
@@ -438,8 +444,8 @@ export default function HRFeaturesPage() {
           </div>
         </div>
       )}
-
-       */}
     </div>
   );
-}
+};
+
+export default HRFeaturesPage;

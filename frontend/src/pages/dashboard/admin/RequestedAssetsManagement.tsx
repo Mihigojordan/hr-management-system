@@ -577,7 +577,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded shadow p-3">
+          {/* <div className="bg-white rounded shadow p-3">
             <div className="flex items-center space-x-2">
               <CheckSquare className="w-4 h-4 text-green-600" />
               <div>
@@ -585,7 +585,7 @@ const RequestAssetsManagement: React.FC<{ role: string }> = ({ role }) => {
                 <p className="text-lg font-semibold text-green-700">{stats.approved}</p>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="bg-white rounded shadow p-3">
             <div className="flex items-center space-x-2">
               <XSquare className="w-4 h-4 text-red-600" />

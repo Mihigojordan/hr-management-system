@@ -23,6 +23,37 @@ export class AssetRequestController {
     }
   }
 
+  @Get('/procurement')
+  async getItemsForProcurement() {
+    try {
+      return await this.assetRequestService.getItemsForProcurement();
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
+  @Get('/procurement/:id')
+  async getItemForProcurementById( @Param('id') id: string) {
+    try {
+      return await this.assetRequestService.getItemForProcurementById(id);
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
+  
+  @Patch('/procurement/update')
+  async updateProcurement(
+    @Body() body: { assetId: string; orderedQuantity: number },
+  ) {
+    try {
+      return await this.assetRequestService.updateProcurementStatus(
+        body.assetId,
+        body.orderedQuantity,
+      );
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {

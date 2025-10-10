@@ -63,7 +63,7 @@ const SiteManagement = lazy(() => import('../pages/dashboard/SiteManagement'));
 const SiteAssignmentManagement = lazy(()=> import('../pages/dashboard/SiteAssignmentManagement'));
 const AssetRequestManagement = lazy(() => import('../pages/dashboard/AssetRequestManagement'));
 const RequestAssetsManagement = lazy(() => import('../pages/dashboard/admin/RequestedAssetsManagement'));
-
+const ProcurementManagement = lazy(() => import('../pages/dashboard/ProcurementManagement'));
 /**
  * Loading spinner component for Suspense fallback
  */
@@ -373,6 +373,14 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+              {
+                path: 'procurement-management',
+                element: (
+                  <SuspenseWrapper>
+                    <ProcurementManagement role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },              
               {
                 path: 'asset-management/create',
                 element: (

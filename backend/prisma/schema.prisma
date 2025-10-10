@@ -616,6 +616,7 @@ enum ProcurementStatus {
   NOT_REQUIRED
   REQUIRED
   ORDERED
+  PARTIALLY_ORDERED
   COMPLETED
 }
 enum MovementType {

@@ -3,14 +3,14 @@ import { type AxiosInstance, type AxiosResponse } from 'axios';
 
 // ---------- Interfaces ----------
 
-// Request statuses
+// Request statuses (aligned with backend Prisma schema)
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'ISSUED' | 'PARTIALLY_ISSUED' | 'CLOSED';
 
-// Requested item statuses
+// Requested item statuses (aligned with backend Prisma schema)
 export type RequestedItemStatus = 'PENDING' | 'ISSUED' | 'PARTIALLY_ISSUED' | 'PENDING_PROCUREMENT';
 
-// Procurement statuses
-export type ProcurementStatus = 'NOT_REQUIRED' | 'REQUIRED' | 'ORDERED' | 'COMPLETED';
+// Procurement statuses (aligned with backend Prisma schema)
+export type ProcurementStatus = 'NOT_REQUIRED' | 'REQUIRED' | 'ORDERED' | 'PARTIALLY_ORDERED' | 'COMPLETED';
 
 // Asset Request Item interface
 export interface AssetRequestItemData {
@@ -29,6 +29,13 @@ export interface AssetRequestItem extends AssetRequestItemData {
   asset?: {
     id: string;
     name: string;
+    quantity?: string;
+    [key: string]: any;
+  };
+  request?: {
+    id: string;
+    employeeId: string;
+    status: RequestStatus;
     [key: string]: any;
   };
 }
@@ -69,6 +76,26 @@ export interface IssuedItem {
   issuedQuantity: number;
 }
 
+// Procurement update data
+export interface ProcurementUpdateData {
+  assetId: string;
+  orderedQuantity: number;
+}
+
+// Procurement update response
+export interface ProcurementUpdateResponse {
+  message: string;
+  asset: {
+    id: string;
+    name: string;
+    quantity: string;
+    [key: string]: any;
+  };
+  orderedQuantity: number;
+  totalNeeded: number;
+  newQuantity: number;
+}
+
 // Validation result
 export interface ValidationResult {
   isValid: boolean;
@@ -92,14 +119,11 @@ class AssetRequestService {
    */
   async createRequest(requestData: AssetRequestData): Promise<AssetRequest> {
     try {
-      const response: AxiosResponse<AssetRequest> = await this.api.post(
-        '/asset-requests',
-        requestData
-      );
+      const response: AxiosResponse<AssetRequest> = await this.api.post('/asset-requests', requestData);
       return response.data;
     } catch (error: any) {
       console.error('Error creating asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to create asset request');
+      throw new Error(error.response?.data?.error || 'Failed to create asset request');
     }
   }
 
@@ -112,7 +136,7 @@ class AssetRequestService {
       return response.data;
     } catch (error: any) {
       console.error('Error fetching asset requests:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch asset requests');
+      throw new Error(error.response?.data?.error || 'Failed to fetch asset requests');
     }
   }
 
@@ -121,33 +145,25 @@ class AssetRequestService {
    */
   async getRequestById(id: string): Promise<AssetRequest | null> {
     try {
-      const response: AxiosResponse<AssetRequest> = await this.api.get(
-        `/asset-requests/${id}`
-      );
+      const response: AxiosResponse<AssetRequest> = await this.api.get(`/asset-requests/${id}`);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) return null;
       console.error('Error fetching asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch asset request');
+      throw new Error(error.response?.data?.error || 'Failed to fetch asset request');
     }
   }
 
   /**
    * Update an asset request (only PENDING requests can be updated)
    */
-  async updateRequest(
-    id: string,
-    updateData: AssetRequestUpdateData
-  ): Promise<AssetRequest> {
+  async updateRequest(id: string, updateData: AssetRequestUpdateData): Promise<AssetRequest> {
     try {
-      const response: AxiosResponse<AssetRequest> = await this.api.patch(
-        `/asset-requests/${id}`,
-        updateData
-      );
+      const response: AxiosResponse<AssetRequest> = await this.api.patch(`/asset-requests/${id}`, updateData);
       return response.data;
     } catch (error: any) {
       console.error('Error updating asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to update asset request');
+      throw new Error(error.response?.data?.error || 'Failed to update asset request');
     }
   }
 
@@ -156,32 +172,24 @@ class AssetRequestService {
    */
   async deleteRequest(id: string): Promise<DeleteResponse> {
     try {
-      const response: AxiosResponse<DeleteResponse> = await this.api.delete(
-        `/asset-requests/${id}`
-      );
+      const response: AxiosResponse<DeleteResponse> = await this.api.delete(`/asset-requests/${id}`);
       return response.data;
     } catch (error: any) {
       console.error('Error deleting asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to delete asset request');
+      throw new Error(error.response?.data?.error || 'Failed to delete asset request');
     }
   }
 
   /**
    * Approve and issue an asset request (only PENDING requests)
    */
-  async approveAndIssueRequest(
-    id: string,
-    issuedItems: IssuedItem[]
-  ): Promise<AssetRequest> {
+  async approveAndIssueRequest(id: string, issuedItems: IssuedItem[]): Promise<AssetRequest> {
     try {
-      const response: AxiosResponse<AssetRequest> = await this.api.patch(
-        `/asset-requests/${id}/approve`,
-        { issuedItems }
-      );
+      const response: AxiosResponse<AssetRequest> = await this.api.patch(`/asset-requests/${id}/approve`, { issuedItems });
       return response.data;
     } catch (error: any) {
       console.error('Error approving and issuing asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to approve and issue asset request');
+      throw new Error(error.response?.data?.error || 'Failed to approve and issue asset request');
     }
   }
 
@@ -190,13 +198,53 @@ class AssetRequestService {
    */
   async rejectRequest(id: string): Promise<AssetRequest> {
     try {
-      const response: AxiosResponse<AssetRequest> = await this.api.patch(
-        `/asset-requests/${id}/reject`
-      );
+      const response: AxiosResponse<AssetRequest> = await this.api.patch(`/asset-requests/${id}/reject`);
       return response.data;
     } catch (error: any) {
       console.error('Error rejecting asset request:', error);
-      throw new Error(error.response?.data?.message || 'Failed to reject asset request');
+      throw new Error(error.response?.data?.error || 'Failed to reject asset request');
+    }
+  }
+
+  /**
+   * Get all items that need procurement
+   */
+  async getItemsForProcurement(): Promise<AssetRequestItem[]> {
+    try {
+      const response: AxiosResponse<AssetRequestItem[]> = await this.api.get('/asset-requests/procurement');
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching items for procurement:', error);
+      throw new Error(error.response?.data?.error || 'Failed to fetch items for procurement');
+    }
+  }
+
+  /**
+   * Get procurement items by ID
+   */
+  async getItemForProcurementById(id: string): Promise<AssetRequestItem[]> {
+    try {
+      const response: AxiosResponse<AssetRequestItem[]> = await this.api.get(`/asset-requests/procurement/${id}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching procurement item by ID:', error);
+      throw new Error(error.response?.data?.error || 'Failed to fetch procurement item');
+    }
+  }
+
+  /**
+   * Update procurement status for an asset
+   */
+  async updateProcurementStatus(assetId: string, orderedQuantity: number): Promise<ProcurementUpdateResponse> {
+    try {
+      const response: AxiosResponse<ProcurementUpdateResponse> = await this.api.patch('/asset-requests/procurement/update', {
+        assetId,
+        orderedQuantity,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error updating procurement status:', error);
+      throw new Error(error.response?.data?.error || 'Failed to update procurement status');
     }
   }
 
@@ -292,6 +340,9 @@ export const {
   deleteRequest,
   approveAndIssueRequest,
   rejectRequest,
+  getItemsForProcurement,
+  getItemForProcurementById,
+  updateProcurementStatus,
   getRequestsByStatus,
   getRequestsByEmployee,
   validateRequestData,

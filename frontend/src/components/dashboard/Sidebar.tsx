@@ -25,6 +25,8 @@ import {
   ChevronRight,
   Layers,
   MapPinned,
+  Truck,
+  TruckIcon,
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
@@ -109,6 +111,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         icon: Inbox,
         path: `${basePath}/requestedAssets-management`,
         allowedRoles: ["admin"],
+      },
+      {
+        id: "procurement",
+        label: "procurement Management",
+        icon: TruckIcon,
+        path: `${basePath}/procurement-management`,
+         allowedRoles: ["admin"],
       },
       {
         id: "clients",
