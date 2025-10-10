@@ -19,7 +19,12 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
   const navigate = useNavigate();
-
+  const handleNavigate = (path?: string) => {
+    setIsOpen(false);
+    if (!path) return;
+    navigate(path);
+  };
+  
   const links: NavLink[] = [
     { name: 'Home', path: "/" },
     { name: 'About', path: "/about" },
@@ -30,11 +35,6 @@ const Navbar: React.FC = () => {
   ];
 
   // Handle navigation
-  const handleNavigate = (path?: string) => {
-    setIsOpen(false);
-    if (!path) return;
-    navigate(path);
-  };
 
   // Scroll effect
   useEffect(() => {

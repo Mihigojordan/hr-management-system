@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Fish, Waves, Droplets, Award, Users, TrendingUp, Mail, Globe, MapPin, ChevronDown } from 'lucide-react';
 import image1 from '../../../assets/image1.jpg'
 import image2 from '../../../assets/image2.jpg'
+import { useNavigate } from 'react-router-dom';
 
 const FineFishHero: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsVisible(true);
@@ -122,10 +124,14 @@ const FineFishHero: React.FC = () => {
                   <div className={`flex flex-wrap gap-4 transition-all duration-1000 delay-600 ${
                     currentSlide === index && isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
                   }`}>
-                    <button className="px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transform hover:scale-105 transition-all duration-300 shadow-lg shadow-primary-600/30">
+                    <button 
+                    onClick={()=> navigate('/solutions')}                    
+                    className="px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transform hover:scale-105 transition-all duration-300 shadow-lg shadow-primary-600/30">
                       Explore Our Services
                     </button>
-                    <button className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transform hover:scale-105 transition-all duration-300">
+                    <button 
+                     onClick={()=> navigate('/contact')}  
+                    className="px-8 py-4 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transform hover:scale-105 transition-all duration-300">
                       Contact Us
                     </button>
                   </div>

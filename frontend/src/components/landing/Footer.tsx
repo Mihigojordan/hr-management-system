@@ -23,10 +23,11 @@ const Footer: React.FC = () => {
       { label: 'Market Access Support', path: '/services/market-access' }
     ],
     company: [
+      { label: 'Home', path: '/' },
       { label: 'About Fine Fish', path: '/about' },
-      { label: 'Our Mission', path: '/about/mission' },
-      { label: 'Careers', path: '/careers' },
-      { label: 'News & Updates', path: '/news' },
+      { label: 'Our Mission', path: '/about' },
+      { label: 'Careers', path: '/jobs' },
+      { label: 'Services', path: '/solutions' },
       { label: 'Blog', path: '/blog' },
       { label: 'Contact Us', path: '/contact' }
     ],

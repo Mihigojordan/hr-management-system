@@ -17,12 +17,14 @@ import image1 from '../../../assets/image2.jpg'
 import image4 from '../../../assets/image4.jpg'
 import image5 from '../../../assets/image5.jpg'
 import image6 from '../../../assets/farm.jpg'
+import { useNavigate } from "react-router-dom";
 
 
 
 
 export default function ServicesSection() {
   const [activeService, setActiveService] = useState(0);
+  const navigate = useNavigate();
 
   const services = [
     {
@@ -225,7 +227,9 @@ export default function ServicesSection() {
                 ))}
               </div>
 
-              <button className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center space-x-2">
+              <button 
+               onClick={()=> navigate('/solutions')}  
+              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center space-x-2">
                 <span>Learn More</span>
                 <Zap className="w-5 h-5" />
               </button>
@@ -283,11 +287,15 @@ export default function ServicesSection() {
               Whether you need fresh fish, fingerlings, or training services, we're here to support your needs
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <button className="bg-white text-primary-600 px-8 py-4 rounded-xl font-semibold hover:bg-primary-50 transition-all duration-300 hover:scale-105 shadow-lg">
+              <button 
+               onClick={()=> navigate('/contact')}  
+              className="bg-white text-primary-600 px-8 py-4 rounded-xl font-semibold hover:bg-primary-50 transition-all duration-300 hover:scale-105 shadow-lg">
                 Contact Us Today
               </button>
-              <button className="bg-white/20 backdrop-blur-sm text-white border-2 border-white/50 px-8 py-4 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300">
-                View Our Products
+              <button 
+               onClick={()=> navigate('/about')}  
+              className="bg-white/20 backdrop-blur-sm text-white border-2 border-white/50 px-8 py-4 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300">
+                More About Us
               </button>
             </div>
           </div>
