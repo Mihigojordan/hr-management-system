@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { blogs } from '../../../store/Blogs';
 import { useNavigate } from 'react-router-dom';
+import image2 from '../../../assets/image2.jpg'
 
 // Type definitions
 interface BlogPost {
@@ -82,13 +83,13 @@ export default function Blog() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-primary-50 to-indigo-100 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50  to-white relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-r from-primary-400 to-orange-500 rounded-full opacity-10 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-32 left-16 w-56 h-56 bg-gradient-to-r from-amber-400 to-rose-400 rounded-full opacity-15 blur-2xl"></div>
-        <div className="absolute top-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-orange-400 to-amber-400 rounded-full opacity-20 blur-xl"></div>
-        <div className="absolute bottom-1/4 right-1/2 w-24 h-24 bg-gradient-to-r from-pink-400 to-primary-500 rounded-full opacity-25"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-r from-primary-400 to-secondary-500 rounded-full opacity-10 blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-32 left-16 w-56 h-56 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full opacity-15 blur-2xl"></div>
+        <div className="absolute top-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-secondary-400 to-primary-400 rounded-full opacity-20 blur-xl"></div>
+        <div className="absolute bottom-1/4 right-1/2 w-24 h-24 bg-gradient-to-r from-secondary-400 to-primary-500 rounded-full opacity-25"></div>
       </div>
 
       {/* Hero Section */}
@@ -99,7 +100,7 @@ export default function Blog() {
               <BookOpen className="w-5 h-5 text-primary-600" />
               <span className="text-sm font-semibold text-gray-800">Insights & Knowledge</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-primary-800 to-orange-800 bg-clip-text text-transparent mb-6">
+            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary-400 via-primary-600 to-secondary-500 bg-clip-text text-transparent mb-6">
               Latest Blog Posts
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
@@ -115,7 +116,7 @@ export default function Blog() {
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">All Articles</h2>
-              <div className="w-16 h-1 bg-gradient-to-r from-primary-500 to-orange-500 rounded-full"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full"></div>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg border border-white/20">
               <span className="text-sm text-gray-600">
@@ -156,7 +157,7 @@ export default function Blog() {
 
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-orange-500 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
                           <User className="w-4 h-4 text-white" />
                         </div>
                         <div>
@@ -183,14 +184,14 @@ export default function Blog() {
                           <Eye className="w-3 h-3" />
                           {post.views.toLocaleString()}
                         </span>
-                        <span className="flex items-center gap-1 hover:text-red-500 transition-colors cursor-pointer">
+                        <span className="flex items-center gap-1 hover:text-secondary-500 transition-colors cursor-pointer">
                           <Heart className="w-3 h-3" />
                           {post.likes}
                         </span>
                       </div>
                       <button 
                         onClick={() => handleViewMore(post.id)}
-                        className="bg-gradient-to-r from-primary-600 to-orange-600 hover:from-primary-700 hover:to-orange-700 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                        className="bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 transition-all duration-300 transform hover:scale-105 shadow-lg"
                       >
                         Read <ArrowRight className="w-3 h-3" />
                       </button>

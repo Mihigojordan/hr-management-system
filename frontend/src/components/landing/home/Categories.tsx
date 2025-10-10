@@ -12,7 +12,11 @@ import {
   Heart,
   Award,
 } from "lucide-react";
-
+import image3 from '../../../assets/image1.jpg'
+import image1 from '../../../assets/image2.jpg'
+import image4 from '../../../assets/image4.jpg'
+import image5 from '../../../assets/image5.jpg'
+import image6 from '../../../assets/farm.jpg'
 export default function ServicesSection() {
   const [activeService, setActiveService] = useState(0);
 
@@ -30,7 +34,7 @@ export default function ServicesSection() {
         "Consistent year-round supply to markets",
         "Quality-controlled harvesting processes",
       ],
-      image: "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&h=800&fit=crop",
+      image:image1,
       highlight: "90+ Tonnes Monthly",
       stats: [
         { value: "200+", label: "Active Cages" },
@@ -51,7 +55,7 @@ export default function ServicesSection() {
         "Quality genetics for optimal growth",
         "Technical support for fingerling buyers",
       ],
-      image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=1200&h=800&fit=crop",
+      image: image3,
       highlight: "RAB Certified",
       stats: [
         { value: "5M+", label: "Fingerlings/Year" },
@@ -72,7 +76,7 @@ export default function ServicesSection() {
         "Bulk orders for institutions and hotels",
         "Flexible delivery scheduling",
       ],
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=800&fit=crop",
+      image: image4,
       highlight: "Nationwide Coverage",
       stats: [
         { value: "50+", label: "Distribution Points" },
@@ -93,7 +97,7 @@ export default function ServicesSection() {
         "Best practices in sustainable fishing",
         "Employment opportunities for graduates",
       ],
-      image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200&h=800&fit=crop",
+      image: image5,
       highlight: "Community First",
       stats: [
         { value: "500+", label: "Trained Farmers" },
@@ -133,7 +137,7 @@ export default function ServicesSection() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary-100 rounded-full filter blur-3xl opacity-20"></div>
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary-100 rounded-full filter blur-3xl opacity-20"></div>
 
-      <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-6">
             <Waves className="w-8 h-8 text-primary-600" />
@@ -141,7 +145,7 @@ export default function ServicesSection() {
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
             Our <span className="text-primary-600">Services</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 w-full mx-auto leading-relaxed">
             Comprehensive aquaculture solutions from breeding to distribution, supporting Rwanda's food security
           </p>
         </div>
@@ -259,7 +263,7 @@ export default function ServicesSection() {
         <div className="relative rounded-3xl overflow-hidden shadow-2xl">
           <div className="absolute inset-0">
             <img
-              src="https://images.unsplash.com/photo-1565098772267-60af42b81ef2?w=1400&h=500&fit=crop"
+              src={image5}
               alt="Lake view"
               className="w-full h-full object-cover"
             />

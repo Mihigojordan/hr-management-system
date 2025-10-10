@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
     <>
       {/* Top bar */}
       <div className="bg-gray-900 text-white py-2 px-4 text-sm hidden lg:block">
-        <div className="w-11/12 mx-auto flex justify-between items-center">
+        <div className="w-full mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
               <Phone size={14} />
@@ -69,7 +69,7 @@ const Navbar: React.FC = () => {
           scrolled ? 'shadow-xl bg-white/95 backdrop-blur-sm' : 'shadow-lg'
         }`}
       >
-        <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavigate('/')}>

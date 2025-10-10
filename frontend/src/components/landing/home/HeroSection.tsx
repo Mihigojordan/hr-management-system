@@ -1,39 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Fish, Waves, Droplets, Award, Users, TrendingUp, Mail, Globe, MapPin, ChevronDown } from 'lucide-react';
+import image1 from '../../../assets/image1.jpg'
+import image2 from '../../../assets/image2.jpg'
 
 const FineFishHero: React.FC = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(1);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % 3);
-    }, 5000);
-    return () => clearInterval(interval);
+    // const interval = setInterval(() => {
+    //   setCurrentSlide((prev) => (prev + 1) % 3);
+    // }, 5000);
+    // return () => clearInterval(interval);
   }, []);
 
   const slides = [
-    {
-      title: "Pioneering Sustainable Aquaculture",
-      subtitle: "Premium Nile Tilapia from Lake Kivu's Crystal Waters",
-      stat: "90+ Tonnes",
-      statLabel: "Monthly Production",
-      image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=1200&q=80"
-    },
     {
       title: "Certified Hatchery Excellence",
       subtitle: "Supplying Millions of Healthy Fingerlings Nationwide",
       stat: "200+ Cages",
       statLabel: "Advanced Infrastructure",
-      image: "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&q=80"
+      image: image1
+    },
+    {
+      title: "Pioneering Sustainable Aquaculture",
+      subtitle: "Premium Nile Tilapia from Lake Kivu's Crystal Waters",
+      stat: "90+ Tonnes",
+      statLabel: "Monthly Production",
+      image: "https://images.unsplash.com/photo-1541441056316-443fff347c40?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
       title: "Empowering Communities",
       subtitle: "Building Rwanda's Blue Economy Together",
       stat: "Vision 2050",
       statLabel: "Sustainable Future",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&q=80"
+      image: image2
     }
   ];
 
@@ -75,7 +77,7 @@ const FineFishHero: React.FC = () => {
 
             {/* Content */}
             <div className="relative h-full flex items-center">
-              <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
+              <div className=" mx-auto px-6 lg:px-8 w-full">
                 <div className="max-w-3xl">
                   {/* Logo/Brand */}
                   <div className={`flex items-center gap-3 mb-8 transition-all duration-1000 delay-200 ${
@@ -98,7 +100,7 @@ const FineFishHero: React.FC = () => {
                   </h2>
 
                   {/* Subtitle */}
-                  <p className={`text-xl lg:text-2xl text-primary-300 mb-8 transition-all duration-1000 delay-400 ${
+                  <p className={`text-lg lg:text-xl text-primary-300 mb-8 transition-all duration-1000 delay-400 ${
                     currentSlide === index && isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
                   }`}>
                     {slide.subtitle}
