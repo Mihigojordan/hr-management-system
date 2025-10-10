@@ -8,6 +8,7 @@ import {
   Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/tran.png'
 
 type NavLink = {
   name: string;
@@ -74,15 +75,8 @@ const Navbar: React.FC = () => {
             {/* Logo */}
             <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavigate('/')}>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-lg">
-                  <Users className="text-white" size={20} />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-                    Fine Fish
-                  </h1>
-                  <p className="text-xs text-gray-500 -mt-1">Pioneering Sustainable Aquaculture in Rwanda</p>
-                </div>
+                <img src={logo} className='h-28 w-28 ' alt="" />
+               
               </div>
             </div>
 
