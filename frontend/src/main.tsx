@@ -9,7 +9,6 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AdminAuthContextProvider>
       <EmployeeAuthProvider>
-
     <App />
       </EmployeeAuthProvider>
     </AdminAuthContextProvider>

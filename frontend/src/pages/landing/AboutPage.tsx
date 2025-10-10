@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, Users, Fish, Globe, Handshake, ArrowUp, Awar
 import Testimonials from '../../components/landing/home/Testimonials';
 import HeaderBanner from '../../components/landing/HeaderBanner';
 
+import farm from '../../assets/farm.jpg'
+
 interface Partner {
   name: string;
   logo: string;
@@ -79,7 +81,7 @@ const AboutPage: React.FC = () => {
       icon: Leaf,
       title: "Sustainability",
       description: "Protecting Lake Kivu through eco-friendly farming and responsible resource use.",
-      image: "https://images.unsplash.com/photo-1511537190424-a864f26a6c1d?w=400&h=300&fit=crop",
+      image: farm,
     },
     {
       icon: Fish,
