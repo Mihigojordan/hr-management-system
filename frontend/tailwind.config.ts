@@ -8,19 +8,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#fff3e6', 
-          100: '#ffe0bf',
-          200: '#ffc680',
-          300: '#ffa94d',
-          400: '#ff8c1a',
-          500: '#ff7300',
-          600: '#e66300',
-          700: '#cc5500',
-          800: '#b34700',
-          900: '#802f00',
-          950: '#4d1b00',
-        },
+         primary: {
+  50:  '#e9f5fb',  // very light blue
+  100: '#cfeaf7',  // lighter tint
+  200: '#a5d5ee',  // light
+  300: '#7abfe5',  // mid-light
+  400: '#52a8d7',  // light-medium
+  500: '#388fba',  // base color
+  600: '#2f7ca3',  // slightly darker
+  700: '#256789',  // medium-dark
+  800: '#1c526e',  // dark
+  900: '#143a4d',  // very dark
+  950: '#0b212e',  // deepest shade
+},
        secondary: {
   50:  '#fff0ed',
   100: '#ffd9d2',
