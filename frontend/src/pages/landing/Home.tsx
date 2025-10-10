@@ -13,8 +13,8 @@ const Home = () => {
         <HeroSection />
         <AboutSection />
         <Categories />
-        <Testimonials />
         <Blog />
+        <Testimonials />
       </main>
   )
 }

@@ -14,6 +14,12 @@ import {
   Leaf,
 } from "lucide-react";
 
+import image2 from '../../../assets/image2.jpg'
+import image3 from '../../../assets/image1.jpg'
+import image1 from '../../../assets/image2.jpg'
+import image4 from '../../../assets/image4.jpg'
+import image5 from '../../../assets/image5.jpg'
+
 // Types
 interface CountUpState {
   cages: number;
@@ -163,7 +169,7 @@ export default function AboutSection() {
         </svg>
       </div>
       
-      <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Header */}
         <div className="text-center mb-16">
@@ -173,7 +179,7 @@ export default function AboutSection() {
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
             Pioneering Sustainable <span className="text-primary-600">Aquaculture</span> in Rwanda
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 w-full mx-auto leading-relaxed">
             From the shores of Lake Kivu to tables across Rwanda, Fine Fish Ltd delivers premium Nile tilapia through eco-friendly farming practices
           </p>
         </div>
@@ -183,9 +189,9 @@ export default function AboutSection() {
           <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl">
             {/* Real fish farming image from Unsplash */}
             <img 
-              src="https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&h=600&fit=crop" 
+              src={image2} 
               alt="Fish farming cages on water"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-bottom"
             />
             
             {/* Gradient overlay */}
@@ -236,7 +242,7 @@ export default function AboutSection() {
         </div>
 
         {/* Main Content - Single Column Layout */}
-        <div className="w-10/12 mx-auto mb-20">
+        <div className=" mx-auto mb-20">
           
           {/* Company Story Section with Image */}
           <div className="mb-16">
@@ -244,7 +250,7 @@ export default function AboutSection() {
               {/* Image */}
               <div className="rounded-3xl overflow-hidden shadow-xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=800&h=600&fit=crop" 
+                  src={image3} 
                   alt="Tilapia fish"
                   className="w-full h-96 object-cover"
                 />
@@ -343,21 +349,21 @@ export default function AboutSection() {
             <div className="grid md:grid-cols-3 gap-6">
               <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <img 
-                  src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop" 
+                  src={image3} 
                   alt="Fresh fish"
                   className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <img 
-                  src="https://images.unsplash.com/photo-1565098772267-60af42b81ef2?w=600&h=400&fit=crop" 
+                  src={image4}
                   alt="Lake and nature"
                   className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <img 
-                  src="https://images.unsplash.com/photo-1560114928-40f1f1eb26a0?w=600&h=400&fit=crop" 
+                  src={image5}
                   alt="Aquaculture operations"
                   className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"
                 />
@@ -391,7 +397,7 @@ export default function AboutSection() {
           <div className="mt-16 relative rounded-3xl overflow-hidden shadow-2xl">
             <div className="absolute inset-0">
               <img 
-                src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=600&fit=crop" 
+                src="https://images.unsplash.com/photo-1541441056316-443fff347c40?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                 alt="Vision background"
                 className="w-full h-full object-cover"
               />
@@ -401,7 +407,7 @@ export default function AboutSection() {
             <div className="relative z-10 text-center p-12 text-white">
               <Globe className="w-16 h-16 mx-auto mb-6 text-primary-300" />
               <h3 className="text-3xl font-bold mb-4">Our Vision</h3>
-              <p className="text-xl leading-relaxed max-w-3xl mx-auto mb-8 text-primary-100">
+              <p className="text-xl leading-relaxed w-full mx-auto mb-8 text-primary-100">
                 To lead East Africa in sustainable aquaculture, delivering affordable, high-quality fish 
                 while protecting natural ecosystems and uplifting communities across Rwanda and beyond.
               </p>
