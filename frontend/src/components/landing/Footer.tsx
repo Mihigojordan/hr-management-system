@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Fish
 } from 'lucide-react';
+import logo from '../../assets/tran.png'
 
 const Footer: React.FC = () => {
   const footerLinks = {
@@ -101,9 +102,8 @@ const Footer: React.FC = () => {
               viewport={{ once: true }}
             >
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-lg">
-                  <Fish className="text-white" size={20} />
-                </div>
+   <img src={logo} className='h-20 scale-125 ' alt="" />
+               
                 <h2 className="text-2xl font-bold text-primary-400">Fine Fish Ltd</h2>
               </div>
               <p className="text-gray-400 mb-6 leading-relaxed">
