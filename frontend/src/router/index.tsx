@@ -603,7 +603,7 @@ const routes = createBrowserRouter([
                 path: 'stock-history',
                 element: (
                   <SuspenseWrapper>
-                    <StockHistory  role='employee' />
+                    <StockHistory  role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -611,7 +611,7 @@ const routes = createBrowserRouter([
                 path: 'ParentFish-Feeding',
                 element: (
                   <SuspenseWrapper>
-                    <ParentFishFeedingManagement  role='employee' />
+                    <ParentFishFeedingManagement  role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -620,6 +620,22 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <StockHistory  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'Laboratory-Box-management',
+                element: (
+                  <SuspenseWrapper>
+                    <LaboratoryBoxManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'parent-egg-migration',
+                element: (
+                  <SuspenseWrapper>
+                    <ParentEggMigrationManagement  role='admin' />
                   </SuspenseWrapper>
                 ),
               },

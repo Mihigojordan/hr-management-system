@@ -125,6 +125,7 @@ enum MaritalStatus {
 parentFishPools ParentFishPool[]
 parentWaterChanging ParentWaterChanging[]
 parentEggMigration  ParentEggMigration[]
+eggFishFeeding   EggFishFeeding[]
   
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
@@ -717,7 +718,7 @@ model FeedStock {
   category      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
+eggFishFeeding   EggFishFeeding[]
   ParentFishFeeding ParentFishFeeding[]
 }
 
@@ -792,6 +793,21 @@ model ParentEggMigration {
   date             DateTime        @default(now())
   description      String?
 
+  eggFishFeeding   EggFishFeeding[]
+
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+}
+
+
+model EggFishFeeding {
+  id             String         @id @default(uuid())
+  parentEggMigrationId  String
+  parentEggMigration ParentEggMigration @relation(fields: [parentEggMigrationId], references: [id])
+  feed           FeedStock      @relation(fields: [feedId], references: [id])
+  feedId         String
+  employee       Employee       @relation(fields: [employeeId], references: [id])
+  employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
 }
