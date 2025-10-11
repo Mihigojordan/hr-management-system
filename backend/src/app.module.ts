@@ -19,11 +19,11 @@ import { MedicationModule } from './modules/medication-management/medication.mod
 import { FeedModule } from './modules/feed/feed.module';
 import { AssetRequestModule } from './modules/asset-requisition-managment/request.module';
 import { StockModule } from './modules/stockin-management/stock.module';
+import { ParentFishPoolModule } from './modules/parent-fish-pool/parent-fish-pool.module';
 import { FeedstockModule } from './modules/feedstock-management/feedstock.module';
 import { MedicineModule } from './modules/medecine-stock-management/medecine.module';
 
-
-@Module({ 
+@Module({
   imports: [
     AdminModule,
     PrismaModule,
@@ -43,8 +43,9 @@ import { MedicineModule } from './modules/medecine-stock-management/medecine.mod
     FeedModule,
     AssetRequestModule,
     StockModule,
-FeedstockModule,
-MedicineModule
+    FeedstockModule,
+    MedicineModule,
+    ParentFishPoolModule,
   ],
   controllers: [AppController],
 })
