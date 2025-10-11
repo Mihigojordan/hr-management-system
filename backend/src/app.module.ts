@@ -26,6 +26,7 @@ import { MedicineModule } from './modules/medecine-stock-management/medecine.mod
 import { ParentWaterChangingModule } from './modules/parent-water-changing/parent-water-changing.module';
 import { ParentFishMedicationModule } from './modules/parent-fish-medication-management/parent-fish-medication.module';
 import { LaboratoryBoxModule } from './modules/Laboratory-Box-Management/laboratory-box.module';
+import { ParentEggMigrationModule } from './modules/parent-egg-migration/parent-egg-migration.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { LaboratoryBoxModule } from './modules/Laboratory-Box-Management/laborat
     ParentWaterChangingModule,
     ParentFishMedicationModule,
     LaboratoryBoxModule,
+    ParentEggMigrationModule,
 
   ],
   controllers: [AppController],

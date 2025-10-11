@@ -124,6 +124,7 @@ enum MaritalStatus {
   stockHistoriesCreated StockHistory[] 
 parentFishPools ParentFishPool[]
 parentWaterChanging ParentWaterChanging[]
+parentEggMigration  ParentEggMigration[]
   
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
@@ -671,10 +672,11 @@ model ParentFishPool {
   employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
 parentWaterChanging ParentWaterChanging[]
   ParentFishFeeding ParentFishFeeding[]
-
   ParentFishMedication ParentFishMedication[]
+parentEggMigration  ParentEggMigration[]
 }
 
 
@@ -753,6 +755,7 @@ model ParentFishMedication {
   employeeId     String
   quantity       Int            @default(0)
   createdAt      DateTime       @default(now())
+  
 }
 
 
@@ -762,4 +765,33 @@ model LaboratoryBox{
   code      String @unique
   description String?
   createdAt   DateTime @default(now())
+  parentEggMigration  ParentEggMigration[]
+}
+
+
+enum ParentEggMigrationStatus {
+  ACTIVE
+  COMPLETED
+  DISCARDED
+}
+
+model ParentEggMigration {
+  id               String          @id @default(uuid())
+  
+  parentPoolId     String
+  parentPool       ParentFishPool  @relation(fields: [parentPoolId], references: [id], onDelete: Cascade)
+
+  laboratoryBoxId  String
+  laboratoryBox    LaboratoryBox   @relation(fields: [laboratoryBoxId], references: [id], onDelete: Cascade)
+
+  employeeId       String
+  employee         Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  status           ParentEggMigrationStatus @default(ACTIVE)  // ✅ Default is ACTIVE
+
+  date             DateTime        @default(now())
+  description      String?
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
