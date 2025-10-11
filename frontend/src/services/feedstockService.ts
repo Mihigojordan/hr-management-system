@@ -8,7 +8,7 @@ interface FeedstockCategoryData {
 }
 
 // Interface for feedstock category (includes additional fields like id and timestamps)
-interface FeedstockCategory extends FeedstockCategoryData {
+export interface FeedstockCategory extends FeedstockCategoryData {
   id: string;
   createdAt?: string; // ISO string
   updatedAt?: string; // ISO string

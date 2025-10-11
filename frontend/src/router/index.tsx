@@ -13,6 +13,7 @@ import ParentFishFeedingManagement from "../pages/dashboard/ParentFishFeedingMan
 import ParentWaterChangingManagement from "../pages/dashboard/ParentWaterChangingManagement";
 import ParentFishMedicationManagement from "../pages/dashboard/ParentFishMedicationManagement";
 import ParentEggMigrationManagement from "../pages/dashboard/ParentEggMigrationManagement";
+import EggFishFeedingManagement from "../pages/dashboard/EggFishFeedingManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -640,6 +641,14 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+               {
+                path: 'egg-feed-management',
+                element: (
+                  <SuspenseWrapper>
+                    <EggFishFeedingManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
             ],
           },
         ],
@@ -868,6 +877,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <EggFishMedicationManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'egg-feed-management',
+                element: (
+                  <SuspenseWrapper>
+                    <EggFishFeedingManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },
