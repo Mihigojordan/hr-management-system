@@ -129,6 +129,8 @@ enum MaritalStatus {
     
   
     AssetRequest AssetRequest[]
+
+    ParentFishFeeding ParentFishFeeding[]
 }
 
 model Contract {
@@ -661,6 +663,8 @@ model ParentFishPool {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  ParentFishFeeding ParentFishFeeding[]
 }
 
 
@@ -673,5 +677,18 @@ model FeedStock {
   category      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  ParentFishFeeding ParentFishFeeding[]
 }
 
+model ParentFishFeeding {
+  id             String         @id @default(uuid())
+  parentFishPool ParentFishPool @relation(fields: [parentFishPoolId], references: [id])
+  parentFishPoolId String
+  feed           FeedStock      @relation(fields: [feedId], references: [id])
+  feedId         String
+  employee       Employee       @relation(fields: [employeeId], references: [id])
+  employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
+}

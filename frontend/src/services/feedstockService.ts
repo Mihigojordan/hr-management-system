@@ -58,7 +58,7 @@ class FeedstockCategoryService {
   }
 
   /**
-   * Get all feedstock categories
+   * Get all feedstock categaories
    * @returns Array of feedstock category objects
    */
   async getAllFeedstockCategories(): Promise<FeedstockCategory[]> {

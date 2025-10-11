@@ -21,6 +21,7 @@ import { AssetRequestModule } from './modules/asset-requisition-managment/reques
 import { StockModule } from './modules/stockin-management/stock.module';
 import { ParentFishPoolModule } from './modules/parent-fish-pool/parent-fish-pool.module';
 import { FeedstockModule } from './modules/feedstock-management/feedstock.module';
+import { ParentFishFeedingModule } from './modules/parent-fish-feeding-management/parent-fish-feeding.module';
 
 
 @Module({ 
@@ -44,7 +45,8 @@ import { FeedstockModule } from './modules/feedstock-management/feedstock.module
     AssetRequestModule,
     StockModule,
     ParentFishPoolModule,
-FeedstockModule
+FeedstockModule,
+ParentFishFeedingModule
   
   ],
   controllers: [AppController],
