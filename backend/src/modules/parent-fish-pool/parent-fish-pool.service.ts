@@ -6,7 +6,7 @@ export class ParentFishPoolService {
   constructor(private prisma: PrismaService) {}
 
   // ✅ Create
-  async create(data: any) {
+  async     create(data: any) {
     // Basic validation
     if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
       throw new BadRequestException('Name is required and must be a non-empty string.');
@@ -16,20 +16,36 @@ export class ParentFishPoolService {
       throw new BadRequestException('Description must be a string.');
     }
 
+    if (!data.employeeId || typeof data.employeeId !== 'string') {
+      throw new BadRequestException('employeeId is required and must be a string.');
+    }
+
+    // Check if employee exists
+    const employee = await this.prisma.employee.findUnique({
+      where: { id: data.employeeId },
+    });
+    if (!employee) {
+      throw new BadRequestException('Invalid employeeId: Employee not found.');
+    }
+
     // Check if name already exists
     const existing = await this.prisma.parentFishPool.findUnique({
       where: { name: data.name.trim() },
     });
 
     if (existing) {
-      throw new BadRequestException(`ParentFishPool with name "${data.name}" already exists.`);
+      throw new BadRequestException(
+        `ParentFishPool with name "${data.name}" already exists.`,
+      );
     }
 
     return this.prisma.parentFishPool.create({
       data: {
         name: data.name.trim(),
         description: data.description?.trim() || null,
+        employeeId: data.employeeId,
       },
+      include: { employee: true },
     });
   }
 
@@ -37,12 +53,17 @@ export class ParentFishPoolService {
   async findAll() {
     return this.prisma.parentFishPool.findMany({
       orderBy: { createdAt: 'desc' },
+      include: { employee: true },
     });
   }
 
   // ✅ Find one
   async findOne(id: string) {
-    const pool = await this.prisma.parentFishPool.findUnique({ where: { id } });
+    const pool = await this.prisma.parentFishPool.findUnique({
+      where: { id },
+      include: { employee: true },
+    });
+
     if (!pool) throw new NotFoundException('ParentFishPool not found.');
     return pool;
   }
@@ -66,7 +87,9 @@ export class ParentFishPoolService {
       });
 
       if (nameExists) {
-        throw new BadRequestException(`ParentFishPool with name "${data.name}" already exists.`);
+        throw new BadRequestException(
+          `ParentFishPool with name "${data.name}" already exists.`,
+        );
       }
     }
 
@@ -74,12 +97,23 @@ export class ParentFishPoolService {
       throw new BadRequestException('Description must be a string.');
     }
 
+    if (data.employeeId) {
+      const employee = await this.prisma.employee.findUnique({
+        where: { id: data.employeeId },
+      });
+      if (!employee) {
+        throw new BadRequestException('Invalid employeeId: Employee not found.');
+      }
+    }
+
     return this.prisma.parentFishPool.update({
       where: { id },
       data: {
         name: data.name?.trim() ?? pool.name,
         description: data.description?.trim() ?? pool.description,
+        employeeId: data.employeeId ?? pool.employeeId,
       },
+      include: { employee: true },
     });
   }
 
