@@ -23,6 +23,7 @@ import { ParentFishPoolModule } from './modules/parent-fish-pool/parent-fish-poo
 import { FeedstockModule } from './modules/feedstock-management/feedstock.module';
 import { ParentFishFeedingModule } from './modules/parent-fish-feeding-management/parent-fish-feeding.module';
 import { MedicineModule } from './modules/medecine-stock-management/medecine.module';
+import { ParentFishMedicationModule } from './modules/parent-fish-medication-management/parent-fish-medication.module';
 
 @Module({
   imports: [
@@ -48,7 +49,8 @@ import { MedicineModule } from './modules/medecine-stock-management/medecine.mod
     MedicineModule,
     ParentFishPoolModule,
 FeedstockModule,
-ParentFishFeedingModule
+ParentFishFeedingModule,
+ParentFishMedicationModule
   
   ],
   controllers: [AppController],
