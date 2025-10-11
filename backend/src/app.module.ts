@@ -22,9 +22,9 @@ import { StockModule } from './modules/stockin-management/stock.module';
 import { ParentFishPoolModule } from './modules/parent-fish-pool/parent-fish-pool.module';
 import { FeedstockModule } from './modules/feedstock-management/feedstock.module';
 import { ParentFishFeedingModule } from './modules/parent-fish-feeding-management/parent-fish-feeding.module';
+import { MedicineModule } from './modules/medecine-stock-management/medecine.module';
 
-
-@Module({ 
+@Module({
   imports: [
     AdminModule,
     PrismaModule,
@@ -44,6 +44,8 @@ import { ParentFishFeedingModule } from './modules/parent-fish-feeding-managemen
     FeedModule,
     AssetRequestModule,
     StockModule,
+    FeedstockModule,
+    MedicineModule,
     ParentFishPoolModule,
 FeedstockModule,
 ParentFishFeedingModule

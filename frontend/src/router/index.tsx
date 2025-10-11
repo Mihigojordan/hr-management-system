@@ -69,6 +69,7 @@ const SiteAssignmentManagement = lazy(()=> import('../pages/dashboard/SiteAssign
 const AssetRequestManagement = lazy(() => import('../pages/dashboard/AssetRequestManagement'));
 const RequestAssetsManagement = lazy(() => import('../pages/dashboard/admin/RequestedAssetsManagement'));
 const ProcurementManagement = lazy(() => import('../pages/dashboard/ProcurementManagement'));
+const MedicineManagement = lazy(() => import('../pages/dashboard/MedecineManagment'));
 /**
  * Loading spinner component for Suspense fallback
  */
@@ -790,6 +791,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <StockHistory  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'medicine-management',
+                element: (
+                  <SuspenseWrapper>
+                    <MedicineManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

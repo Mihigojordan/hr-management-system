@@ -131,6 +131,7 @@ enum MaritalStatus {
     AssetRequest AssetRequest[]
 
     ParentFishFeeding ParentFishFeeding[]
+    medicines Medicine[]
 }
 
 model Contract {
@@ -668,6 +669,32 @@ model ParentFishPool {
 }
 
 
+model Medicine {
+  id             String    @id @default(uuid())
+  name           String                     // e.g. "Oxytetracycline"
+  description    String?                    // Details about the medicine
+  dosageForm     DosageForm                 // e.g. LIQUID, POWDER, TABLET
+  quantity       Float                      // Total amount in stock
+  unit           String                     // e.g. "ml", "g", "kg", "bottle"
+  purchaseDate   DateTime?
+  expiryDate     DateTime?
+  pricePerUnit   Float?
+  totalCost      Float?
+
+  addedById      String?
+  employee       Employee?   @relation(fields: [addedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+enum DosageForm {
+  LIQUID
+  POWDER
+  TABLET
+  CAPSULE
+  OTHER
+}
 
 model FeedStock {
   id            String   @id @default(uuid())

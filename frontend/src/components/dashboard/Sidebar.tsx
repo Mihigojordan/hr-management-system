@@ -203,6 +203,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/cage-management`,
          allowedRoles: ["admin"],
       },
+      {
+        id: "medecine managment",
+        label: "medicine stock Management",
+        icon: Inbox,
+        path: `${basePath}/medicine-management`,
+         allowedRoles: ["employee"],
+      },
     ];
   };
 
