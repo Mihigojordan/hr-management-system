@@ -12,6 +12,7 @@ import ParentFishPoolManagement from "../pages/dashboard/ParentFishPoolManagemen
 import ParentFishFeedingManagement from "../pages/dashboard/ParentFishFeedingManagement";
 import ParentWaterChangingManagement from "../pages/dashboard/ParentWaterChangingManagement";
 import ParentFishMedicationManagement from "../pages/dashboard/ParentFishMedicationManagement";
+import ParentEggMigrationManagement from "../pages/dashboard/ParentEggMigrationManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -834,6 +835,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <LaboratoryBoxManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'parent-egg-migration',
+                element: (
+                  <SuspenseWrapper>
+                    <ParentEggMigrationManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

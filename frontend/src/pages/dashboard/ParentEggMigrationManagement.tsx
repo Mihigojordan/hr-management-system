@@ -7,7 +7,7 @@ import {
     Download,
     Grid3X3,
     List,
-    Droplet,
+    Egg,
     CheckCircle,
     XCircle,
     AlertCircle,
@@ -22,12 +22,11 @@ import {
     MoreHorizontal
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
-import parentWaterChangingService, { type CreateParentWaterChangingInput, type UpdateParentWaterChangingInput, type ParentWaterChanging } from '../../services/parentWaterChangingService';
-import DeleteParentWaterChangingModal from '../../components/dashboard/parentWaterChanging/DeleteParentWaterChangingModal';
-import CreateUpdateParentWaterChangingModal from '../../components/dashboard/parentWaterChanging/CreateUpdateParentWaterChangingModal';
+import parentEggMigrationService, { ParentEggMigrationStatus, type CreateParentEggMigrationInput, type UpdateParentEggMigrationInput, type ParentEggMigration } from '../../services/parentEggMigrationService';
+import DeleteParentEggMigrationModal from '../../components/dashboard/parentEggMigration/DeleteParentEggMigrationModal';
+import CreateUpdateParentEggMigrationModal from '../../components/dashboard/parentEggMigration/CreateUpdateParentEggMigrationModal';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-
 
 interface OperationStatus {
     type: 'success' | 'error' | 'info';
@@ -37,13 +36,13 @@ interface OperationStatus {
 type ViewMode = 'table' | 'grid' | 'list';
 type ModalMode = 'create' | 'update';
 
-const ParentWaterChangingManagement = ({ role }: { role: string }) => {
-    const [records, setRecords] = useState<ParentWaterChanging[]>([]);
-    const [allRecords, setAllRecords] = useState<ParentWaterChanging[]>([]);
+const ParentEggMigrationManagement = ({ role }: { role: string }) => {
+    const [records, setRecords] = useState<ParentEggMigration[]>([]);
+    const [allRecords, setAllRecords] = useState<ParentEggMigration[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState<keyof ParentWaterChanging>('date');
+    const [sortBy, setSortBy] = useState<keyof ParentEggMigration>('date');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [rowsPerPage] = useState(8);
     const [currentPage, setCurrentPage] = useState(1);
@@ -51,7 +50,7 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isCreateUpdateModalOpen, setIsCreateUpdateModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<ModalMode>('create');
-    const [selectedRecord, setSelectedRecord] = useState<ParentWaterChanging | null>(null);
+    const [selectedRecord, setSelectedRecord] = useState<ParentEggMigration | null>(null);
     const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
     const [operationLoading, setOperationLoading] = useState<boolean>(false);
     const [showFilters, setShowFilters] = useState<boolean>(false);
@@ -63,12 +62,12 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
         const fetchRecords = async () => {
             try {
                 setLoading(true);
-                const data = await parentWaterChangingService.getAll();
+                const data = await parentEggMigrationService.getAllParentEggMigrations();
                 setAllRecords(data || []);
                 setError(null);
             } catch (err: any) {
-                const errorMessage = err.message || 'Failed to load water change records';
-                console.error('Error fetching water change records:', err);
+                const errorMessage = err.message || 'Failed to load egg migration records';
+                console.error('Error fetching egg migration records:', err);
                 setError(errorMessage);
                 showOperationStatus('error', errorMessage);
             } finally {
@@ -107,9 +106,8 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
             filtered = filtered.filter(
                 (record) =>
                     record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    record.parentPool?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    record.employee?.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    record.employee?.last_name.toLowerCase().includes(searchTerm.toLowerCase()) 
+                    record.parentPool?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    record.laboratoryBox?.name?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -123,7 +121,7 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
             } else {
                 const strA = aValue.toString().toLowerCase();
                 const strB = bValue.toString().toLowerCase();
-                return sortOrder === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
+                return sortOrder === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strB);
             }
         });
 
@@ -131,29 +129,29 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
         setCurrentPage(1);
     };
 
-    const handleSaveRecord = async (data: CreateParentWaterChangingInput | UpdateParentWaterChangingInput) => {
+    const handleSaveRecord = async (data: CreateParentEggMigrationInput | UpdateParentEggMigrationInput) => {
         try {
             setOperationLoading(true);
             if (modalMode === 'create') {
-                const newRecord = await parentWaterChangingService.create(data as CreateParentWaterChangingInput);
+                const newRecord = await parentEggMigrationService.createParentEggMigration(data as CreateParentEggMigrationInput);
                 if (!newRecord) {
-                    throw new Error('No water change record data returned from create');
+                    throw new Error('No egg migration record data returned from create');
                 }
                 setAllRecords((prev) => [...prev, newRecord]);
-                showOperationStatus('success', 'Water change record created successfully');
+                showOperationStatus('success', 'Egg migration record created successfully');
                 setIsCreateUpdateModalOpen(false);
             } else {
                 if (!selectedRecord) {
-                    throw new Error('No water change record selected for update');
+                    throw new Error('No egg migration record selected for update');
                 }
-                const updatedRecord = await parentWaterChangingService.update(selectedRecord.id, data as UpdateParentWaterChangingInput);
+                const updatedRecord = await parentEggMigrationService.updateParentEggMigration(selectedRecord.id, data as UpdateParentEggMigrationInput);
                 setAllRecords((prev) => prev.map((r) => (r.id === updatedRecord.id ? updatedRecord : r)));
-                showOperationStatus('success', 'Water change record updated successfully');
+                showOperationStatus('success', 'Egg migration record updated successfully');
                 setIsCreateUpdateModalOpen(false);
             }
         } catch (err: any) {
             console.error('Error in handleSaveRecord:', err);
-            showOperationStatus('error', err.message || 'Failed to save water change record');
+            showOperationStatus('error', err.message || 'Failed to save egg migration record');
         } finally {
             setOperationLoading(false);
         }
@@ -163,16 +161,15 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
         try {
             setOperationLoading(true);
             const date = new Date().toLocaleDateString('en-CA').replace(/\//g, '');
-            const filename = `water_changes_export_${date}.pdf`;
+            const filename = `egg_migrations_export_${date}.pdf`;
 
             const tableRows = records.map((record, index) => {
                 return `
                     <tr>
                         <td style="font-size:10px;">${index + 1}</td>
                         <td style="font-size:10px;">${record.parentPool?.name || 'N/A'}</td>
-                        <td style="font-size:10px;">${record.employee?.first_name || 'N/A'} ${record.employee?.last_name } ${!record.employee?.first_name && !record.employee?.last_name && 'N/A'}</td>
-                       
-                        <td style="font-size:10px;">${record.litersChanged}</td>
+                        <td style="font-size:10px;">${record.laboratoryBox?.name || 'N/A'}</td>
+                        <td style="font-size:10px;">${record.status}</td>
                         <td style="font-size:10px;">${new Date(record.date).toLocaleDateString('en-GB')}</td>
                         <td style="font-size:10px;">${record.description || 'N/A'}</td>
                     </tr>
@@ -193,15 +190,15 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                     </style>
                 </head>
                 <body>
-                    <h1>Water Change Records</h1>
+                    <h1>Egg Migration Records</h1>
                     <p>Exported on: ${new Date().toLocaleString('en-US', { timeZone: 'Africa/Johannesburg' })}</p>
                     <table>
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Pool Name</th>
-                                <th>Employee</th>
-                                <th>Liters Changed</th>
+                                <th>Parent Pool</th>
+                                <th>Laboratory Box</th>
+                                <th>Status</th>
                                 <th>Date</th>
                                 <th>Description</th>
                             </tr>
@@ -238,32 +235,32 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
         setIsCreateUpdateModalOpen(true);
     };
 
-    const handleEditRecord = (record: ParentWaterChanging) => {
+    const handleEditRecord = (record: ParentEggMigration) => {
         if (!record.id) return Swal.fire({ icon: 'error', title: 'Error', text: 'Invalid record ID' });
         setModalMode('update');
         setSelectedRecord(record);
         setIsCreateUpdateModalOpen(true);
     };
 
-    const handleViewRecord = (record: ParentWaterChanging) => {
+    const handleViewRecord = (record: ParentEggMigration) => {
         if (!record.id) return Swal.fire({ icon: 'error', title: 'Error', text: 'Invalid record ID' });
         navigate(`${record.id}`);
     };
 
-    const handleDeleteRecord = (record: ParentWaterChanging) => {
+    const handleDeleteRecord = (record: ParentEggMigration) => {
         setSelectedRecord(record);
         setIsDeleteModalOpen(true);
     };
 
-    const handleDelete = async (record: ParentWaterChanging) => {
+    const handleDelete = async (record: ParentEggMigration) => {
         try {
             setOperationLoading(true);
-            await parentWaterChangingService.delete(record.id);
+            await parentEggMigrationService.deleteParentEggMigration(record.id);
             setAllRecords((prev) => prev.filter((r) => r.id !== record.id));
-            showOperationStatus('success', `Water change record deleted successfully`);
+            showOperationStatus('success', `Egg migration record deleted successfully`);
         } catch (err: any) {
-            console.error('Error deleting water change record:', err);
-            showOperationStatus('error', err.message || 'Failed to delete water change record');
+            console.error('Error deleting egg migration record:', err);
+            showOperationStatus('error', err.message || 'Failed to delete egg migration record');
         } finally {
             setOperationLoading(false);
             setIsDeleteModalOpen(false);
@@ -288,11 +285,11 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
 
     // Summary statistics
     const totalRecords = allRecords.length;
-    const totalLitersChanged = allRecords.reduce((sum, r) => sum + r.litersChanged, 0);
+    const activeRecords = allRecords.filter(r => r.status === ParentEggMigrationStatus.ACTIVE).length;
     const uniquePools = new Set(allRecords.map(r => r.parentPoolId)).size;
-    const uniqueEmployees = new Set(allRecords.map(r => r.employeeId)).size;
+    const uniqueLabBoxes = new Set(allRecords.map(r => r.laboratoryBoxId)).size;
 
-    const WaterChangeCard = ({ record }: { record: ParentWaterChanging }) => {
+    const EggMigrationCard = ({ record }: { record: ParentEggMigration }) => {
         const [isDropdownOpen, setIsDropdownOpen] = useState(false);
         const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -367,15 +364,17 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                 </div>
                 <div className="space-y-1 mb-2">
                     <div className="flex items-center space-x-1 text-xs text-gray-600">
-                        <Droplet className="w-3 h-3" />
-                        <span>Liters: {record.litersChanged}</span>
+                        <Egg className="w-3 h-3" />
+                        <span>Box: {record.laboratoryBox?.name || 'N/A'}</span>
                     </div>
                     <div className="flex items-center space-x-1 text-xs text-gray-600">
                         <Calendar className="w-3 h-3" />
                         <span>{formatDate(record.date)}</span>
                     </div>
-                    <div className="flex items-center space-x-1 text-xs text-gray-600">
-                        <span>By: {record.employee?.first_name }  {record.employee?.last_name } {!record.employee?.first_name && !record.employee?.last_name && 'Unknown'}</span>
+                    <div className="flex items-center space-x-1 text-xs">
+                        <span className={`font-medium ${record.status === ParentEggMigrationStatus.ACTIVE ? 'text-green-600' : record.status === ParentEggMigrationStatus.COMPLETED ? 'text-blue-600' : 'text-red-600'}`}>
+                            Status: {record.status}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -397,12 +396,34 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                                 }}
                             >
                                 <div className="flex items-center space-x-1">
-                                    <span>Pool Name</span>
+                                    <span>Parent Pool</span>
                                     <ChevronDown className={`w-3 h-3 ${sortBy === 'parentPoolId' ? 'text-blue-600' : 'text-gray-400'}`} />
                                 </div>
                             </th>
-                            <th className="text-left py-2 px-2 text-gray-600 font-medium">Employee</th>
-                            <th className="text-left py-2 px-2 text-gray-600 font-medium">Liters Changed</th>
+                            <th
+                                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
+                                onClick={() => {
+                                    setSortBy('laboratoryBoxId');
+                                    setSortOrder(sortBy === 'laboratoryBoxId' && sortOrder === 'asc' ? 'desc' : 'asc');
+                                }}
+                            >
+                                <div className="flex items-center space-x-1">
+                                    <span>Laboratory Box</span>
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'laboratoryBoxId' ? 'text-blue-600' : 'text-gray-400'}`} />
+                                </div>
+                            </th>
+                            <th
+                                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
+                                onClick={() => {
+                                    setSortBy('status');
+                                    setSortOrder(sortBy === 'status' && sortOrder === 'asc' ? 'desc' : 'asc');
+                                }}
+                            >
+                                <div className="flex items-center space-x-1">
+                                    <span>Status</span>
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'status' ? 'text-blue-600' : 'text-gray-400'}`} />
+                                </div>
+                            </th>
                             <th
                                 className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
                                 onClick={() => {
@@ -433,8 +454,12 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                                         </span>
                                     </div>
                                 </td>
-                                <td className="py-2 px-2 text-gray-700">{record.employee?.first_name } {record.employee?.last_name } {!record.employee?.first_name && !record.employee?.last_name && 'N/A'}</td>
-                                <td className="py-2 px-2 text-gray-700">{record.litersChanged}</td>
+                                <td className="py-2 px-2 text-gray-700">{record.laboratoryBox?.name || 'N/A'}</td>
+                                <td className="py-2 px-2">
+                                    <span className={`font-medium ${record.status === ParentEggMigrationStatus.ACTIVE ? 'text-green-600' : record.status === ParentEggMigrationStatus.COMPLETED ? 'text-blue-600' : 'text-red-600'}`}>
+                                        {record.status}
+                                    </span>
+                                </td>
                                 <td className="py-2 px-2 text-gray-700">{formatDate(record.date)}</td>
                                 <td className="py-2 px-2 text-gray-700">{record.description || 'N/A'}</td>
                                 <td className="py-2 px-2">
@@ -475,7 +500,7 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
     const renderGridView = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {currentRecords.map((record) => (
-                <WaterChangeCard key={record.id} record={record} />
+                <EggMigrationCard key={record.id} record={record} />
             ))}
         </div>
     );
@@ -496,11 +521,12 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                                 <div className="text-gray-500 text-xs truncate">{record.description || 'No description'}</div>
                             </div>
                         </div>
-                        <div className="hidden md:grid grid-cols-3 gap-4 text-xs text-gray-600 flex-1 max-w-2xl px-4">
-                            <span>Liters: {record.litersChanged}</span>
+                        <div className="hidden md:grid grid-cols-3 gap-4 text-xs text-gray-600 flex-1 max-w-xl px-4">
+                            <span>Box: {record.laboratoryBox?.name || 'N/A'}</span>
                             <span>{formatDate(record.date)}</span>
-                            <span>By: {record.employee?.first_name } {record.employee?.last_name } {!record.employee?.first_name && !record.employee?.last_name && 'N/A'}</span>
-                          
+                            <span className={`font-medium ${record.status === ParentEggMigrationStatus.ACTIVE ? 'text-green-600' : record.status === ParentEggMigrationStatus.COMPLETED ? 'text-blue-600' : 'text-red-600'}`}>
+                                {record.status}
+                            </span>
                         </div>
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <button
@@ -587,13 +613,13 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
 
     return (
         <div className="min-h-screen bg-gray-50 text-xs">
-            <DeleteParentWaterChangingModal
+            <DeleteParentEggMigrationModal
                 isOpen={isDeleteModalOpen}
                 record={selectedRecord}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onDelete={handleDelete}
             />
-            <CreateUpdateParentWaterChangingModal
+            <CreateUpdateParentEggMigrationModal
                 isOpen={isCreateUpdateModalOpen}
                 record={selectedRecord}
                 onClose={() => {
@@ -638,12 +664,12 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                 <div className="px-4 py-3">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-lg font-semibold text-gray-900">Water Change Management</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">Manage your water change records</p>
+                            <h1 className="text-lg font-semibold text-gray-900">Egg Migration Management</h1>
+                            <p className="text-xs text-gray-500 mt-0.5">Manage your egg migration records</p>
                         </div>
                         <div className="flex items-center space-x-2">
                             <button
-                                onClick={() => parentWaterChangingService.getAll().then(data => setAllRecords(data || []))}
+                                onClick={() => parentEggMigrationService.getAllParentEggMigrations().then(data => setAllRecords(data || []))}
                                 disabled={loading}
                                 className="flex items-center space-x-1 px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50"
                                 title="Refresh"
@@ -664,7 +690,7 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                                 onClick={handleAddRecord}
                                 disabled={operationLoading}
                                 className="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
-                                aria-label="Add new water change record"
+                                aria-label="Add new egg migration record"
                             >
                                 <Plus className="w-3 h-3" />
                                 <span>Add Record</span>
@@ -678,7 +704,7 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                     <div className="bg-white rounded shadow p-4">
                         <div className="flex items-center space-x-3">
                             <div className="p-3 bg-blue-100 rounded-full flex items-center justify-center">
-                                <Droplet className="w-5 h-5 text-blue-600" />
+                                <Egg className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
                                 <p className="text-xs text-gray-600">Total Records</p>
@@ -689,18 +715,18 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                     <div className="bg-white rounded shadow p-4">
                         <div className="flex items-center space-x-3">
                             <div className="p-3 bg-green-100 rounded-full flex items-center justify-center">
-                                <Droplet className="w-5 h-5 text-green-600" />
+                                <Egg className="w-5 h-5 text-green-600" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-600">Total Liters Changed</p>
-                                <p className="text-lg font-semibold text-gray-900">{totalLitersChanged}</p>
+                                <p className="text-xs text-gray-600">Active Migrations</p>
+                                <p className="text-lg font-semibold text-gray-900">{activeRecords}</p>
                             </div>
                         </div>
                     </div>
                     <div className="bg-white rounded shadow p-4">
                         <div className="flex items-center space-x-3">
                             <div className="p-3 bg-orange-100 rounded-full flex items-center justify-center">
-                                <Droplet className="w-5 h-5 text-orange-600" />
+                                <Egg className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
                                 <p className="text-xs text-gray-600">Unique Pools</p>
@@ -711,11 +737,11 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                     <div className="bg-white rounded shadow p-4">
                         <div className="flex items-center space-x-3">
                             <div className="p-3 bg-gray-100 rounded-full flex items-center justify-center">
-                                <Droplet className="w-5 h-5 text-gray-600" />
+                                <Egg className="w-5 h-5 text-gray-600" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-600">Unique Employees</p>
-                                <p className="text-lg font-semibold text-gray-900">{uniqueEmployees}</p>
+                                <p className="text-xs text-gray-600">Unique Lab Boxes</p>
+                                <p className="text-lg font-semibold text-gray-900">{uniqueLabBoxes}</p>
                             </div>
                         </div>
                     </div>
@@ -727,11 +753,11 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                                 <Search className="w-3 h-3 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
                                 <input
                                     type="text"
-                                    placeholder="Search water change records..."
+                                    placeholder="Search egg migration records..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-48 pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                                    aria-label="Search water change records"
+                                    aria-label="Search egg migration records"
                                 />
                             </div>
                             <button
@@ -748,19 +774,21 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                             <select
                                 value={`${sortBy}-${sortOrder}`}
                                 onChange={(e) => {
-                                    const [field, order] = e.target.value.split('-') as [keyof ParentWaterChanging, 'asc' | 'desc'];
+                                    const [field, order] = e.target.value.split('-') as [keyof ParentEggMigration, 'asc' | 'desc'];
                                     setSortBy(field);
                                     setSortOrder(order);
                                 }}
                                 className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                aria-label="Sort water change records"
+                                aria-label="Sort egg migration records"
                             >
-                                <option value="parentPoolId-asc">Pool Name (A-Z)</option>
-                                <option value="parentPoolId-desc">Pool Name (Z-A)</option>
+                                <option value="parentPoolId-asc">Parent Pool (A-Z)</option>
+                                <option value="parentPoolId-desc">Parent Pool (Z-A)</option>
+                                <option value="laboratoryBoxId-asc">Lab Box (A-Z)</option>
+                                <option value="laboratoryBoxId-desc">Lab Box (Z-A)</option>
+                                <option value="status-asc">Status (A-Z)</option>
+                                <option value="status-desc">Status (Z-A)</option>
                                 <option value="date-desc">Newest First</option>
                                 <option value="date-asc">Oldest First</option>
-                                <option value="litersChanged-asc">Liters (Low to High)</option>
-                                <option value="litersChanged-desc">Liters (High to Low)</option>
                             </select>
                             <div className="flex items-center border border-gray-200 rounded">
                                 <button
@@ -788,7 +816,7 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                                     }`}
                                     title="List View"
                                 >
-                                    <Droplet className="w-3 h-3" />
+                                    <Egg className="w-3 h-3" />
                                 </button>
                             </div>
                         </div>
@@ -817,13 +845,13 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
                     <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
                         <div className="inline-flex items-center space-x-2">
                             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                            <span className="text-xs">Loading water change records...</span>
+                            <span className="text-xs">Loading egg migration records...</span>
                         </div>
                     </div>
                 ) : currentRecords.length === 0 ? (
                     <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
                         <div className="text-xs">
-                            {searchTerm ? 'No water change records found matching your search' : 'No water change records found'}
+                            {searchTerm ? 'No egg migration records found matching your search' : 'No egg migration records found'}
                         </div>
                     </div>
                 ) : (
@@ -839,4 +867,4 @@ const ParentWaterChangingManagement = ({ role }: { role: string }) => {
     );
 };
 
-export default ParentWaterChangingManagement;
+export default ParentEggMigrationManagement;
