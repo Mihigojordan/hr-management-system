@@ -49,6 +49,34 @@ export class ParentFishPoolService {
     });
   }
 
+
+async addFishes(poolId: string, count: number) {
+  if (typeof count !== 'number' || count <= 0) {
+    throw new BadRequestException('Count must be a positive number.');
+  }
+
+  // Find the pool first
+  const pool = await this.prisma.parentFishPool.findUnique({
+    where: { id: poolId },
+  });
+
+  if (!pool) {
+    throw new NotFoundException('ParentFishPool not found.');
+  }
+
+  // Update the numberOfFishes
+  const updatedPool = await this.prisma.parentFishPool.update({
+    where: { id: poolId },
+    data: {
+      numberOfFishes: (pool.numberOfFishes || 0) + count,
+    },
+    include: { employee: true },
+  });
+
+  return updatedPool;
+}
+
+
   // ✅ Find all
   async findAll() {
     return this.prisma.parentFishPool.findMany({
