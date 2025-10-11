@@ -8,8 +8,7 @@ export interface ParentFishFeeding {
   parentFishPoolId: string;
   feedId: string;
   quantity: number;
-  feedingDate?: string; // ISO string for when the feeding occurred
-  createdAt?: string; // ISO string
+ createdAt?: string; // ISO string
   updatedAt?: string; // ISO string
 }
 

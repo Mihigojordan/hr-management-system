@@ -1,4 +1,3 @@
-// src/components/ParentFishFeedingManagement.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import {
@@ -31,11 +30,10 @@ type ParentFishFeeding = {
   parentFishPoolId: string;
   feedId: string;
   quantity: number;
-  feedingDate: string;
   createdAt: string;
   updatedAt: string;
-  parentFishPoolName?: string; // Added for display
-  feedName?: string; // Added for display
+  parentFishPoolName?: string;
+  feedName?: string;
 };
 
 type ViewMode = 'table' | 'grid' | 'list';
@@ -53,7 +51,7 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [sortBy, setSortBy] = useState<keyof ParentFishFeeding>('feedingDate');
+  const [sortBy, setSortBy] = useState<keyof ParentFishFeeding>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(8);
@@ -94,7 +92,6 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
         feedstockCategoryService.getAllFeedstockCategories(),
       ]);
 
-      // Map feeding data with pool and feed names
       const enrichedFeedings = feedingData.map((feeding) => ({
         ...feeding,
         parentFishPoolName: poolData.find((pool) => pool.id === feeding.parentFishPoolId)?.name || 'Unknown',
@@ -136,7 +133,7 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
       const aValue = a[sortBy];
       const bValue = b[sortBy];
 
-      if (sortBy === 'feedingDate' || sortBy === 'createdAt' || sortBy === 'updatedAt') {
+      if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
         const aDate = new Date(aValue);
         const bDate = new Date(bValue);
         return sortOrder === 'asc' ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
@@ -153,7 +150,7 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
 
   const totalFeedings = allFeedings.length;
   const recentFeedings = allFeedings.filter(
-    (f) => new Date(f.feedingDate).getTime() > Date.now() - 24 * 60 * 60 * 1000
+    (f) => new Date(f.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000
   ).length;
   const uniquePools = [...new Set(allFeedings.map((f) => f.parentFishPoolId))].length;
 
@@ -235,7 +232,6 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
       parentFishPoolId: '',
       feedId: '',
       quantity: 0,
-      feedingDate: new Date().toISOString().slice(0, 16),
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -296,16 +292,6 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Feeding Date</label>
-              <input
-                type="datetime-local"
-                value={formData.feedingDate}
-                onChange={(e) => setFormData({ ...formData, feedingDate: e.target.value })}
-                required
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-              />
-            </div>
             <div className="flex items-center justify-end space-x-2">
               <button
                 type="button"
@@ -332,7 +318,6 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
       parentFishPoolId: feeding.parentFishPoolId,
       feedId: feeding.feedId,
       quantity: feeding.quantity,
-      feedingDate: feeding.feedingDate,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -393,16 +378,6 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Feeding Date</label>
-              <input
-                type="datetime-local"
-                value={formData.feedingDate}
-                onChange={(e) => setFormData({ ...formData, feedingDate: e.target.value })}
-                required
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-              />
-            </div>
             <div className="flex items-center justify-end space-x-2">
               <button
                 type="button"
@@ -446,12 +421,12 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
               <th className="text-left py-2 px-2 text-gray-600 font-medium hidden lg:table-cell">Quantity</th>
               <th
                 className="text-left py-2 px-2 text-gray-600 font-medium hidden sm:table-cell cursor-pointer hover:bg-gray-100"
-                onClick={() => setSortBy('feedingDate')}
+                onClick={() => setSortBy('createdAt')}
               >
                 <div className="flex items-center space-x-1">
-                  <span>Feeding Date</span>
+                  <span>Created At</span>
                   <ChevronDown
-                    className={`w-3 h-3 ${sortBy === 'feedingDate' ? 'text-primary-600' : 'text-gray-400'}`}
+                    className={`w-3 h-3 ${sortBy === 'createdAt' ? 'text-primary-600' : 'text-gray-400'}`}
                   />
                 </div>
               </th>
@@ -465,7 +440,7 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
                 <td className="py-2 px-2 font-medium text-gray-900 text-xs">{feeding.parentFishPoolName}</td>
                 <td className="py-2 px-2 text-gray-700 hidden sm:table-cell">{feeding.feedName}</td>
                 <td className="py-2 px-2 text-gray-700 hidden lg:table-cell">{feeding.quantity}</td>
-                <td className="py-2 px-2 text-gray-700 hidden sm:table-cell">{formatDate(feeding.feedingDate)}</td>
+                <td className="py-2 px-2 text-gray-700 hidden sm:table-cell">{formatDate(feeding.createdAt)}</td>
                 <td className="py-2 px-2">
                   <div className="flex items-center justify-end space-x-1">
                     <button
@@ -520,9 +495,6 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
               <span>Quantity: {feeding.quantity}</span>
             </div>
             <div className="flex items-center space-x-1 text-xs text-gray-600">
-              <span>Feeding Date: {formatDate(feeding.feedingDate)}</span>
-            </div>
-            <div className="flex items-center space-x-1 text-xs text-gray-600">
               <span>Updated: {formatDate(feeding.updatedAt)}</span>
             </div>
           </div>
@@ -572,8 +544,8 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
             </div>
             <div className="hidden md:grid grid-cols-3 gap-4 text-xs text-gray-600 flex-1 max-w-2xl px-4">
               <span>{feeding.quantity}</span>
-              <span>{formatDate(feeding.feedingDate)}</span>
               <span>{formatDate(feeding.createdAt)}</span>
+              <span>{formatDate(feeding.updatedAt)}</span>
             </div>
             <div className="flex items-center space-x-1 flex-shrink-0">
               <button
@@ -775,8 +747,8 @@ const ParentFishFeedingManagement: React.FC<{ role: string }> = ({ role }) => {
                 <option value="feedName-desc">Feed (Z-A)</option>
                 <option value="quantity-desc">Quantity (High-Low)</option>
                 <option value="quantity-asc">Quantity (Low-High)</option>
-                <option value="feedingDate-desc">Newest</option>
-                <option value="feedingDate-asc">Oldest</option>
+                <option value="createdAt-desc">Newest</option>
+                <option value="createdAt-asc">Oldest</option>
               </select>
               <div className="flex items-center border border-gray-200 rounded">
                 <button
