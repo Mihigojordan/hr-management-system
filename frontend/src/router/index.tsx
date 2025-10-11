@@ -10,6 +10,7 @@ import logo from "../assets/images/aby_hr.png";
 import FeedstockDashboard from "../pages/dashboard/FeedstockDashboard";
 import ParentFishPoolManagement from "../pages/dashboard/ParentFishPoolManagement";
 import ParentFishFeedingManagement from "../pages/dashboard/ParentFishFeedingManagement";
+import ParentWaterChangingManagement from "../pages/dashboard/ParentWaterChangingManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -799,6 +800,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                    <ParentFishPoolManagement role="employee" />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'parent-water-changing',
+                element: (
+                  <SuspenseWrapper>
+                   <ParentWaterChangingManagement role="employee" />
                   </SuspenseWrapper>
                 ),
               },

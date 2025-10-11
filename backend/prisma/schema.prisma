@@ -123,6 +123,7 @@ enum MaritalStatus {
   // 🔹 StockHistory
   stockHistoriesCreated StockHistory[] 
 parentFishPools ParentFishPool[]
+parentWaterChanging ParentWaterChanging[]
   
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
@@ -668,7 +669,7 @@ model ParentFishPool {
   employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+parentWaterChanging ParentWaterChanging[]
   ParentFishFeeding ParentFishFeeding[]
 }
 
@@ -722,4 +723,17 @@ model ParentFishFeeding {
   employeeId     String
   quantity       Int            @default(0)
   createdAt      DateTime       @default(now())
+}
+
+model ParentWaterChanging {
+  id            String          @id @default(uuid())
+  parentPoolId  String
+  parentPool    ParentFishPool  @relation(fields: [parentPoolId], references: [id], onDelete: Cascade)
+  employeeId    String
+  employee      Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  date          DateTime        @default(now())  // when the water change happened
+  litersChanged Float           // ✅ liters of water changed
+  description   String?         // optional notes
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
