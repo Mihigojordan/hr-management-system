@@ -23,8 +23,8 @@ import {
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import parentFishPoolService, { type CreateParentFishPoolInput, type UpdateParentFishPoolInput, type ParentFishPool } from '../../services/parentFishPoolService';
-import DeleteParentFishPoolModal from '../../components/dashboard/parentFishPool/DeleteParentFishPoolModal';
-import CreateUpdateParentFishPoolModal from '../../components/dashboard/parentFishPool/CreateUpdateParentFishPoolModal';
+// import DeleteParentFishPoolModal from '../../components/dashboard/parentFishPool/DeleteParentFishPoolModal';
+// import CreateUpdateParentFishPoolModal from '../../components/dashboard/parentFishPool/CreateUpdateParentFishPoolModal';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -564,7 +564,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
 
     return (
         <div className="min-h-screen bg-gray-50 text-xs">
-            <DeleteParentFishPoolModal
+            {/* <DeleteParentFishPoolModal
                 isOpen={isDeleteModalOpen}
                 pool={selectedPool}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -579,7 +579,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                 }}
                 onSave={handleSavePool}
                 mode={modalMode}
-            />
+            /> */}
             {operationStatus && (
                 <div className="fixed top-4 right-4 z-50">
                     <div
