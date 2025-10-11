@@ -122,6 +122,7 @@ enum MaritalStatus {
 
   // 🔹 StockHistory
   stockHistoriesCreated StockHistory[] 
+parentFishPools ParentFishPool[]
   
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
@@ -659,6 +660,8 @@ model ParentFishPool {
   id          String   @id @default(uuid())
   name        String @unique
   description String?
+  employeeId  String?   // ✅ foreign key to Employee
+  employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
