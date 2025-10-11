@@ -19,6 +19,8 @@ import { MedicationModule } from './modules/medication-management/medication.mod
 import { FeedModule } from './modules/feed/feed.module';
 import { AssetRequestModule } from './modules/asset-requisition-managment/request.module';
 import { StockModule } from './modules/stockin-management/stock.module';
+import { FeedstockModule } from './modules/feedstock-management/feedstock.module';
+import { MedicineModule } from './modules/medecine-stock-management/medecine.module';
 
 
 @Module({ 
@@ -41,7 +43,8 @@ import { StockModule } from './modules/stockin-management/stock.module';
     FeedModule,
     AssetRequestModule,
     StockModule,
-  
+FeedstockModule,
+MedicineModule
   ],
   controllers: [AppController],
 })

@@ -8,6 +8,7 @@ import {
   Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/tran.png'
 
 type NavLink = {
   name: string;
@@ -18,7 +19,12 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
   const navigate = useNavigate();
-
+  const handleNavigate = (path?: string) => {
+    setIsOpen(false);
+    if (!path) return;
+    navigate(path);
+  };
+  
   const links: NavLink[] = [
     { name: 'Home', path: "/" },
     { name: 'About', path: "/about" },
@@ -29,11 +35,6 @@ const Navbar: React.FC = () => {
   ];
 
   // Handle navigation
-  const handleNavigate = (path?: string) => {
-    setIsOpen(false);
-    if (!path) return;
-    navigate(path);
-  };
 
   // Scroll effect
   useEffect(() => {
@@ -48,7 +49,7 @@ const Navbar: React.FC = () => {
     <>
       {/* Top bar */}
       <div className="bg-gray-900 text-white py-2 px-4 text-sm hidden lg:block">
-        <div className="w-11/12 mx-auto flex justify-between items-center">
+        <div className="w-full mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
               <Phone size={14} />
@@ -69,20 +70,13 @@ const Navbar: React.FC = () => {
           scrolled ? 'shadow-xl bg-white/95 backdrop-blur-sm' : 'shadow-lg'
         }`}
       >
-        <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavigate('/')}>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-lg">
-                  <Users className="text-white" size={20} />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-                    Fine Fish
-                  </h1>
-                  <p className="text-xs text-gray-500 -mt-1">Pioneering Sustainable Aquaculture in Rwanda</p>
-                </div>
+                <img src={logo} className='h-28 w-28 ' alt="" />
+               
               </div>
             </div>
 

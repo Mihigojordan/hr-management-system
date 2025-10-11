@@ -613,6 +613,7 @@ enum ProcurementStatus {
   NOT_REQUIRED
   REQUIRED
   ORDERED
+  PARTIALLY_ORDERED
   COMPLETED
 }
 enum MovementType {
@@ -655,6 +656,13 @@ createdByEmployee   Employee? @relation(fields: [createdByEmployeeId], reference
   updatedAt      DateTime      @updatedAt
 }
 
+model ParentFishPool {
+  id          String   @id @default(uuid())
+  name        String @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
 
 model Medicine {
@@ -683,3 +691,14 @@ enum DosageForm {
   CAPSULE
   OTHER
 }
+
+model FeedStock {
+  id            String   @id @default(uuid())
+  name          String
+  quantity      Int       @default(0)
+  lowStockLevel Int?      @default(1)
+  category      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+

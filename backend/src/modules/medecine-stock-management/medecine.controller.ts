@@ -1,13 +1,23 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Req, UseGuards, NotFoundException, BadRequestException } from '@nestjs/common';
 import { MedicineService } from './medecine.service';
+import { RequestWithEmployee } from 'src/common/interfaces/employee.interface';
+import { EmployeeJwtAuthGuard } from 'src/guards/employeeGuard.guard';
 
 @Controller('medicine')
 export class MedicineController {
   constructor(private readonly medicineService: MedicineService) {}
 
   @Post()
-  async create(@Body() data: any , ) {
-    return this.medicineService.create(data);
+  @UseGuards(EmployeeJwtAuthGuard)
+  async create(@Body() data: any , @Req() req: RequestWithEmployee) {
+    try {
+      const employeeId = req.employee?.id;
+    if (!employeeId) throw new NotFoundException('Employee ID not found in token');
+    return this.medicineService.create(data, employeeId)
+    } catch (error) {
+      console.log('error', error);
+      throw new BadRequestException(error.message || 'Failed to create medicine');
+    };
   }
 
   @Get()

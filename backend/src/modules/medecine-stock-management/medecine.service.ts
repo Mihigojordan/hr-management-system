@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MedicineGateway } from './medecine.gateway';
+import { connect } from 'http2';
 
 @Injectable()
 export class MedicineService {
@@ -11,9 +12,6 @@ export class MedicineService {
 
   async create(data: any, employeeId: string) {
     try {
-      if (!data.addedById) {
-        throw new BadRequestException('Employee (addedById) is required');
-      }
 
       // Calculate total cost if not provided
       const totalCost =
@@ -22,8 +20,8 @@ export class MedicineService {
           : data.totalCost;
 
       const medicine = await this.prisma.medicine.create({
-        data: { ...data, totalCost },
-        include: { addedBy: true }, // Include employee details
+        data: { ...data, totalCost , employee:{ connect: { id: employeeId } } },
+        include: { employee: true }, // Include employee details
       });
 
       this.gateway.emitMedicineCreated(medicine); // Real-time emit
@@ -36,7 +34,7 @@ export class MedicineService {
   async findAll() {
     try {
       return await this.prisma.medicine.findMany({
-        include: { addedBy: true },
+        include: { employee: true },
         orderBy: { createdAt: 'desc' },
       });
     } catch (error) {
@@ -48,7 +46,7 @@ export class MedicineService {
     try {
       const medicine = await this.prisma.medicine.findUnique({
         where: { id },
-        include: { addedBy: true },
+        include: { employee: true },
       });
 
       if (!medicine) throw new BadRequestException('Medicine not found');
@@ -73,7 +71,7 @@ export class MedicineService {
       const updated = await this.prisma.medicine.update({
         where: { id },
         data: { ...data, totalCost },
-        include: { addedBy: true },
+        include: { employee: true },
       });
 
       this.gateway.emitMedicineUpdated(updated); // Real-time emit

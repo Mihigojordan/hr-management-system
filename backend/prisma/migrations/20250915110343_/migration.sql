@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `client` ADD COLUMN `status` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
