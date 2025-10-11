@@ -754,3 +754,12 @@ model ParentFishMedication {
   quantity       Int            @default(0)
   createdAt      DateTime       @default(now())
 }
+
+
+model LaboratoryBox{
+  id       String   @id @default(uuid())
+  name      String @unique
+  code      String @unique
+  description String?
+  createdAt   DateTime @default(now())
+}
