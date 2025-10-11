@@ -795,6 +795,14 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+               {
+                path: 'parent-fish-management',
+                element: (
+                  <SuspenseWrapper>
+                   <ParentFishPoolManagement role="employee" />
+                  </SuspenseWrapper>
+                ),
+              },
               {
                 path: 'medicine-management',
                 element: (

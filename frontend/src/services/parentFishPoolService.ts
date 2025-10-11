@@ -1,17 +1,29 @@
 import { type AxiosInstance, type AxiosResponse } from 'axios';
 import api from '../api/api'; // adjust path to your Axios instance
 
+// ✅ Type for Employee
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+}
+
 // ✅ Type for ParentFishPool
 export interface ParentFishPool {
   id: string;
   name: string;
   description?: string | null;
+  employeeId: string;     // ✅ new field
+  employee?: Employee;    // ✅ optional embedded employee data
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 // ✅ Input types
-export type CreateParentFishPoolInput = Omit<ParentFishPool, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateParentFishPoolInput = Omit<
+  ParentFishPool,
+  'id' | 'createdAt' | 'updatedAt' | 'employee'
+>;
 export type UpdateParentFishPoolInput = Partial<CreateParentFishPoolInput>;
 
 // ✅ Response for delete
@@ -144,6 +156,7 @@ class ParentFishPoolService {
     if (data.description && typeof data.description !== 'string') {
       errors.push('Description must be a string.');
     }
+
 
     return { isValid: errors.length === 0, errors };
   }

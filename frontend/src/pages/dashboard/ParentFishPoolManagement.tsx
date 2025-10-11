@@ -637,7 +637,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                 <Download className="w-3 h-3" />
                                 <span>Export</span>
                             </button>
-                            <button
+                            { role == 'employee' && <button
                                 onClick={handleAddPool}
                                 disabled={operationLoading}
                                 className="flex items-center space-x-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
@@ -645,7 +645,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                             >
                                 <Plus className="w-3 h-3" />
                                 <span>Add Pool</span>
-                            </button>
+                            </button>}
                         </div>
                     </div>
                 </div>
