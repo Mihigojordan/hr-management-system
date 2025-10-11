@@ -383,7 +383,7 @@ const routes = createBrowserRouter([
                 path: 'parent-fish-management',
                 element: (
                   <SuspenseWrapper>
-                   <ParentFishPoolManagement />
+                   <ParentFishPoolManagement role="admin" />
                   </SuspenseWrapper>
                 ),
               },
