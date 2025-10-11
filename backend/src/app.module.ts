@@ -24,6 +24,7 @@ import { FeedstockModule } from './modules/feedstock-management/feedstock.module
 import { ParentFishFeedingModule } from './modules/parent-fish-feeding-management/parent-fish-feeding.module';
 import { MedicineModule } from './modules/medecine-stock-management/medecine.module';
 import { ParentWaterChangingModule } from './modules/parent-water-changing/parent-water-changing.module';
+import { ParentFishMedicationModule } from './modules/parent-fish-medication-management/parent-fish-medication.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { ParentWaterChangingModule } from './modules/parent-water-changing/paren
 FeedstockModule,
 ParentFishFeedingModule,
 ParentWaterChangingModule,
+ParentFishMedicationModule
   
   ],
   controllers: [AppController],

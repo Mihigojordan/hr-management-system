@@ -134,6 +134,8 @@ parentWaterChanging ParentWaterChanging[]
 
     ParentFishFeeding ParentFishFeeding[]
     medicines Medicine[]
+
+    ParentFishMedication ParentFishMedication[]
 }
 
 model Contract {
@@ -671,6 +673,8 @@ model ParentFishPool {
   updatedAt   DateTime @updatedAt
 parentWaterChanging ParentWaterChanging[]
   ParentFishFeeding ParentFishFeeding[]
+
+  ParentFishMedication ParentFishMedication[]
 }
 
 
@@ -691,6 +695,8 @@ model Medicine {
 
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+
+  ParentFishMedication ParentFishMedication[]
 }
 
 enum DosageForm {
@@ -736,4 +742,15 @@ model ParentWaterChanging {
   description   String?         // optional notes
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+}
+model ParentFishMedication {
+  id             String         @id @default(uuid())
+  parentFishPool ParentFishPool @relation(fields: [parentFishPoolId], references: [id])
+  parentFishPoolId String
+  medication     Medicine       @relation(fields: [medicationId], references: [id])
+  medicationId   String
+  employee       Employee       @relation(fields: [employeeId], references: [id])
+  employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
 }
