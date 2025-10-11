@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ParentFishPoolService } from './parent-fish-pool.service';
 import { EmployeeJwtAuthGuard } from 'src/guards/employeeGuard.guard';
 import { RequestWithEmployee } from 'src/common/interfaces/employee.interface';
@@ -9,9 +19,9 @@ export class ParentFishPoolController {
 
   @Post()
   @UseGuards(EmployeeJwtAuthGuard)
-  create(@Body() body: any,@Req() req: RequestWithEmployee) {
-   const employeeId = req.employee.id
-   body['employeeId'] = employeeId
+  create(@Body() body: any, @Req() req: RequestWithEmployee) {
+    const employeeId = req.employee.id;
+    body['employeeId'] = employeeId;
     return this.parentFishPoolService.create(body);
   }
 
@@ -28,6 +38,11 @@ export class ParentFishPoolController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: any) {
     return this.parentFishPoolService.update(id, body);
+  }
+
+  @Post(':id/add-fishes')
+  async addFishes(@Param('id') id: string, @Body('count') count: number) {
+    return this.parentFishPoolService.addFishes(id, count);
   }
 
   @Delete(':id')
