@@ -655,3 +655,13 @@ createdByEmployee   Employee? @relation(fields: [createdByEmployeeId], reference
 }
 
 
+model FeedStock {
+  id            String   @id @default(uuid())
+  name          String
+  quantity      Int       @default(0)
+  lowStockLevel Int?      @default(1)
+  category      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
