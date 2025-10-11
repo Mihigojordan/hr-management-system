@@ -72,6 +72,7 @@ const AssetRequestManagement = lazy(() => import('../pages/dashboard/AssetReques
 const RequestAssetsManagement = lazy(() => import('../pages/dashboard/admin/RequestedAssetsManagement'));
 const ProcurementManagement = lazy(() => import('../pages/dashboard/ProcurementManagement'));
 const MedicineManagement = lazy(() => import('../pages/dashboard/MedecineManagment'));
+const LaboratoryBoxManagement = lazy(()=> import('../pages/dashboard/LaboratoryBoxManagement'))
 /**
  * Loading spinner component for Suspense fallback
  */
@@ -820,11 +821,19 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
-                 {
+              {
                 path: 'Parent-Fish-medication-management',
                 element: (
                   <SuspenseWrapper>
                     <ParentFishMedicationManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'Laboratory-Box-management',
+                element: (
+                  <SuspenseWrapper>
+                    <LaboratoryBoxManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },
