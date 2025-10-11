@@ -363,7 +363,7 @@ CREATE TABLE `AssetRequestItem` (
     `quantity` INTEGER NOT NULL DEFAULT 1,
     `quantityIssued` INTEGER NULL DEFAULT 0,
     `status` ENUM('PENDING', 'ISSUED', 'PARTIALLY_ISSUED', 'PENDING_PROCUREMENT') NOT NULL DEFAULT 'PENDING',
-    `procurementStatus` ENUM('NOT_REQUIRED', 'REQUIRED', 'ORDERED', 'COMPLETED') NOT NULL DEFAULT 'NOT_REQUIRED',
+    `procurementStatus` ENUM('NOT_REQUIRED', 'REQUIRED', 'ORDERED', 'PARTIALLY_ORDERED', 'COMPLETED') NOT NULL DEFAULT 'NOT_REQUIRED',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -384,6 +384,31 @@ CREATE TABLE `StockHistory` (
     `notes` TEXT NULL,
     `createdByAdminId` VARCHAR(191) NULL,
     `createdByEmployeeId` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ParentFishPool` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `ParentFishPool_name_key`(`name`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `FeedStock` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `quantity` INTEGER NOT NULL DEFAULT 0,
+    `lowStockLevel` INTEGER NULL DEFAULT 1,
+    `category` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 

@@ -130,6 +130,9 @@ parentFishPools ParentFishPool[]
     
   
     AssetRequest AssetRequest[]
+
+    ParentFishFeeding ParentFishFeeding[]
+    medicines Medicine[]
 }
 
 model Contract {
@@ -664,9 +667,37 @@ model ParentFishPool {
   employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  ParentFishFeeding ParentFishFeeding[]
 }
 
 
+model Medicine {
+  id             String    @id @default(uuid())
+  name           String                     // e.g. "Oxytetracycline"
+  description    String?                    // Details about the medicine
+  dosageForm     DosageForm                 // e.g. LIQUID, POWDER, TABLET
+  quantity       Float                      // Total amount in stock
+  unit           String                     // e.g. "ml", "g", "kg", "bottle"
+  purchaseDate   DateTime?
+  expiryDate     DateTime?
+  pricePerUnit   Float?
+  totalCost      Float?
+
+  addedById      String?
+  employee       Employee?   @relation(fields: [addedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+enum DosageForm {
+  LIQUID
+  POWDER
+  TABLET
+  CAPSULE
+  OTHER
+}
 
 model FeedStock {
   id            String   @id @default(uuid())
@@ -676,5 +707,18 @@ model FeedStock {
   category      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  ParentFishFeeding ParentFishFeeding[]
 }
 
+model ParentFishFeeding {
+  id             String         @id @default(uuid())
+  parentFishPool ParentFishPool @relation(fields: [parentFishPoolId], references: [id])
+  parentFishPoolId String
+  feed           FeedStock      @relation(fields: [feedId], references: [id])
+  feedId         String
+  employee       Employee       @relation(fields: [employeeId], references: [id])
+  employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
+}

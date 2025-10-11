@@ -9,6 +9,7 @@ import ProtectPrivateEmployeeRoute from "../components/protectors/ProtectPrivate
 import logo from "../assets/images/aby_hr.png";
 import FeedstockDashboard from "../pages/dashboard/FeedstockDashboard";
 import ParentFishPoolManagement from "../pages/dashboard/ParentFishPoolManagement";
+import ParentFishFeedingManagement from "../pages/dashboard/ParentFishFeedingManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -68,6 +69,7 @@ const SiteAssignmentManagement = lazy(()=> import('../pages/dashboard/SiteAssign
 const AssetRequestManagement = lazy(() => import('../pages/dashboard/AssetRequestManagement'));
 const RequestAssetsManagement = lazy(() => import('../pages/dashboard/admin/RequestedAssetsManagement'));
 const ProcurementManagement = lazy(() => import('../pages/dashboard/ProcurementManagement'));
+const MedicineManagement = lazy(() => import('../pages/dashboard/MedecineManagment'));
 /**
  * Loading spinner component for Suspense fallback
  */
@@ -373,9 +375,7 @@ const routes = createBrowserRouter([
                 path: 'FeedStock-management',
                 element: (
                   <SuspenseWrapper>
-                    <FeedstockDashboard isOpen={false} onClose={function (): void {
-                      throw new Error("Function not implemented.");
-                    } } role={"admin"}  />
+                    <FeedstockDashboard  role="admin"  />
                   </SuspenseWrapper>
                 ),
               },
@@ -603,6 +603,14 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+               {
+                path: 'ParentFish-Feeding',
+                element: (
+                  <SuspenseWrapper>
+                    <ParentFishFeedingManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
               {
                 path: 'stock-history/:id',
                 element: (
@@ -663,6 +671,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <AssetManagement role='employee'/>
+                  </SuspenseWrapper>
+                ),
+              },
+                {
+                path: 'ParentFish-Feeding',
+                element: (
+                  <SuspenseWrapper>
+                    <ParentFishFeedingManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },
@@ -778,11 +794,19 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
-              {
+               {
                 path: 'parent-fish-management',
                 element: (
                   <SuspenseWrapper>
                    <ParentFishPoolManagement role="employee" />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'medicine-management',
+                element: (
+                  <SuspenseWrapper>
+                    <MedicineManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },
