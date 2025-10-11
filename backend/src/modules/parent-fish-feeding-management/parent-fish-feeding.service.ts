@@ -38,6 +38,7 @@ export class ParentFishFeedingService {
   // Update a feeding record
   async update(id: string, data: any) {
     return this.prisma.parentFishFeeding.update({
+        
       where: { id },
       data,
     });
