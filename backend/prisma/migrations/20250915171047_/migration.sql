@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `admin` ADD COLUMN `google_id` VARCHAR(191) NULL,
-    ADD COLUMN `is2FA` BOOLEAN NULL DEFAULT false;

@@ -304,13 +304,14 @@ export class AssetRequestService {
     // 🧩 Determine status
     const isFullyOrdered = orderedQuantity >= totalNeeded;
 
-    // 🏷️ Update procurement statuses for all request items
-    await this.prisma.assetRequestItem.updateMany({
-      where: { assetId },
-      data: {
-        procurementStatus: isFullyOrdered ? 'ORDERED' : 'PARTIALLY_ORDERED',
-      },
-    });
+const status = isFullyOrdered
+  ? ProcurementStatus.ORDERED
+  : ProcurementStatus.PARTIALLY_ORDERED;
+
+await this.prisma.assetRequestItem.updateMany({
+  where: { assetId },
+  data: { procurementStatus: status },
+});
 
     // 📦 Update asset quantity
     const newQty = Number(asset.quantity) + orderedQuantity;

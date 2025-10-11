@@ -7,6 +7,7 @@ import DashboardLayout from "../layout/DashboardLayout";
 import ProtectPrivateAdminRoute from "../components/protectors/ProtectPrivateAdminRoute";
 import ProtectPrivateEmployeeRoute from "../components/protectors/ProtectPrivateEmployeeRoute";
 import logo from "../assets/images/aby_hr.png";
+import FeedstockDashboard from "../pages/dashboard/FeedstockDashboard";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -364,6 +365,16 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <AssetManagement role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+                 {
+                path: 'FeedStock-management',
+                element: (
+                  <SuspenseWrapper>
+                    <FeedstockDashboard isOpen={false} onClose={function (): void {
+                      throw new Error("Function not implemented.");
+                    } } role={"admin"}  />
                   </SuspenseWrapper>
                 ),
               },
