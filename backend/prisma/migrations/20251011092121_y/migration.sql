@@ -1,3 +1,6 @@
+-- AlterTable
+ALTER TABLE `parentfishpool` ADD COLUMN `employeeId` VARCHAR(191) NULL;
+
 -- CreateTable
 CREATE TABLE `Medicine` (
     `id` VARCHAR(191) NOT NULL,
@@ -16,6 +19,9 @@ CREATE TABLE `Medicine` (
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `ParentFishPool` ADD CONSTRAINT `ParentFishPool_employeeId_fkey` FOREIGN KEY (`employeeId`) REFERENCES `Employee`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Medicine` ADD CONSTRAINT `Medicine_addedById_fkey` FOREIGN KEY (`addedById`) REFERENCES `Employee`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
