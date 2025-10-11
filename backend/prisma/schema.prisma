@@ -137,6 +137,7 @@ parentEggMigration  ParentEggMigration[]
     medicines Medicine[]
 
     ParentFishMedication ParentFishMedication[]
+    EggFishMedication  EggFishMedication[]
 }
 
 model Contract {
@@ -699,6 +700,8 @@ model Medicine {
   updatedAt      DateTime   @updatedAt
 
   ParentFishMedication ParentFishMedication[]
+  EggFishMedication EggFishMedication[]
+
 }
 
 enum DosageForm {
@@ -792,6 +795,21 @@ model ParentEggMigration {
   date             DateTime        @default(now())
   description      String?
 
+  EggFishMedication   EggFishMedication[]
+
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+}
+
+
+model EggFishMedication {
+  id             String         @id @default(uuid())
+  ParentEggMigration ParentEggMigration @relation(fields: [parentEggMigrationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parentEggMigrationId String
+  medication     Medicine       @relation(fields: [medicationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  medicationId   String
+  employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
 }
