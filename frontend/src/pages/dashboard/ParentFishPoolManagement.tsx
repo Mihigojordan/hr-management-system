@@ -23,8 +23,8 @@ import {
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import parentFishPoolService, { type CreateParentFishPoolInput, type UpdateParentFishPoolInput, type ParentFishPool } from '../../services/parentFishPoolService';
-// import DeleteParentFishPoolModal from '../../components/dashboard/parentFishPool/DeleteParentFishPoolModal';
-// import CreateUpdateParentFishPoolModal from '../../components/dashboard/parentFishPool/CreateUpdateParentFishPoolModal';
+import DeleteParentFishPoolModal from '../../components/dashboard/parentFishPool/DeleteParentFishPoolModal';
+import CreateUpdateParentFishPoolModal from '../../components/dashboard/parentFishPool/CreateUpdateParentFishPoolModal';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -46,7 +46,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [rowsPerPage] = useState(8);
     const [currentPage, setCurrentPage] = useState(1);
-    const [viewMode, setViewMode] = useState<ViewMode>('table');
+    const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isCreateUpdateModalOpen, setIsCreateUpdateModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<ModalMode>('create');
@@ -83,7 +83,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
 
     const getAvatarColor = (name: string) => {
         const colors = [
-            'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500',
+            'bg-primary-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500',
             'bg-yellow-500', 'bg-indigo-500', 'bg-red-500', 'bg-teal-500'
         ];
         const index = name.charCodeAt(0) % colors.length;
@@ -382,7 +382,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                             >
                                 <div className="flex items-center space-x-1">
                                     <span>Name</span>
-                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'name' ? 'text-blue-600' : 'text-gray-400'}`} />
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'name' ? 'text-primary-600' : 'text-gray-400'}`} />
                                 </div>
                             </th>
                             <th className="text-left py-2 px-2 text-gray-600 font-medium">Description</th>
@@ -395,7 +395,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                             >
                                 <div className="flex items-center space-x-1">
                                     <span>Created</span>
-                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'createdAt' ? 'text-blue-600' : 'text-gray-400'}`} />
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'createdAt' ? 'text-primary-600' : 'text-gray-400'}`} />
                                 </div>
                             </th>
                             <th className="text-right py-2 px-2 text-gray-600 font-medium">Actions</th>
@@ -421,7 +421,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                     <div className="flex items-center justify-end space-x-1">
                                         <button
                                             onClick={() => handleViewPool(pool)}
-                                            className="text-gray-400 hover:text-blue-600 p-1"
+                                            className="text-gray-400 hover:text-primary-600 p-1"
                                             title="View"
                                         >
                                             <Eye className="w-3 h-3" />
@@ -429,7 +429,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                         <button
                                             onClick={() => handleEditPool(pool)}
                                             disabled={operationLoading}
-                                            className="text-gray-400 hover:text-blue-600 p-1 disabled:opacity-50"
+                                            className="text-gray-400 hover:text-primary-600 p-1 disabled:opacity-50"
                                             title="Edit"
                                         >
                                             <Edit className="w-3 h-3" />
@@ -482,7 +482,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <button
                                 onClick={() => handleViewPool(pool)}
-                                className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors"
+                                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors"
                                 title="View Pool"
                             >
                                 <Eye className="w-4 h-4" />
@@ -490,7 +490,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                             <button
                                 onClick={() => handleEditPool(pool)}
                                 disabled={operationLoading}
-                                className="text-gray-400 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors disabled:opacity-50"
+                                className="text-gray-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-primary-50 transition-colors disabled:opacity-50"
                                 title="Edit Pool"
                             >
                                 <Edit className="w-4 h-4" />
@@ -543,7 +543,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                             onClick={() => setCurrentPage(page)}
                             className={`px-2 py-1 text-xs rounded ${
                                 currentPage === page
-                                    ? 'bg-blue-500 text-white'
+                                    ? 'bg-primary-500 text-white'
                                     : 'text-gray-700 bg-white border border-gray-200 hover:bg-gray-50'
                             }`}
                         >
@@ -564,7 +564,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
 
     return (
         <div className="min-h-screen bg-gray-50 text-xs">
-            {/* <DeleteParentFishPoolModal
+            <DeleteParentFishPoolModal
                 isOpen={isDeleteModalOpen}
                 pool={selectedPool}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -579,7 +579,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                 }}
                 onSave={handleSavePool}
                 mode={modalMode}
-            /> */}
+            />
             {operationStatus && (
                 <div className="fixed top-4 right-4 z-50">
                     <div
@@ -588,12 +588,12 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                 ? 'bg-green-50 border border-green-200 text-green-800'
                                 : operationStatus.type === 'error'
                                 ? 'bg-red-50 border border-red-200 text-red-800'
-                                : 'bg-blue-50 border border-blue-200 text-blue-800'
+                                : 'bg-primary-50 border border-primary-200 text-primary-800'
                         }`}
                     >
                         {operationStatus.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600" />}
                         {operationStatus.type === 'error' && <XCircle className="w-4 h-4 text-red-600" />}
-                        {operationStatus.type === 'info' && <AlertCircle className="w-4 h-4 text-blue-600" />}
+                        {operationStatus.type === 'info' && <AlertCircle className="w-4 h-4 text-primary-600" />}
                         <span className="font-medium">{operationStatus.message}</span>
                         <button onClick={() => setOperationStatus(null)} className="hover:opacity-70">
                             <X className="w-3 h-3" />
@@ -605,7 +605,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                 <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40">
                     <div className="bg-white rounded p-4 shadow-xl">
                         <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
                             <span className="text-gray-700 text-xs font-medium">Processing...</span>
                         </div>
                     </div>
@@ -640,7 +640,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                             <button
                                 onClick={handleAddPool}
                                 disabled={operationLoading}
-                                className="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
+                                className="flex items-center space-x-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
                                 aria-label="Add new parent fish pool"
                             >
                                 <Plus className="w-3 h-3" />
@@ -654,8 +654,8 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className="bg-white rounded shadow p-4">
                         <div className="flex items-center space-x-3">
-                            <div className="p-3 bg-blue-100 rounded-full flex items-center justify-center">
-                                <Package className="w-5 h-5 text-blue-600" />
+                            <div className="p-3 bg-primary-100 rounded-full flex items-center justify-center">
+                                <Package className="w-5 h-5 text-primary-600" />
                             </div>
                             <div>
                                 <p className="text-xs text-gray-600">Total Pools</p>
@@ -674,14 +674,14 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                     placeholder="Search parent fish pools..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-48 pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-48 pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                                     aria-label="Search parent fish pools"
                                 />
                             </div>
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
                                 className={`flex items-center space-x-1 px-2 py-1.5 text-xs border rounded transition-colors ${
-                                    showFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                                    showFilters ? 'bg-primary-50 border-primary-200 text-primary-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                                 }`}
                             >
                                 <Filter className="w-3 h-3" />
@@ -696,7 +696,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                     setSortBy(field);
                                     setSortOrder(order);
                                 }}
-                                className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary-500"
                                 aria-label="Sort parent fish pools"
                             >
                                 <option value="name-asc">Name (A-Z)</option>
@@ -708,7 +708,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                 <button
                                     onClick={() => setViewMode('table')}
                                     className={`p-1.5 text-xs transition-colors ${
-                                        viewMode === 'table' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                                        viewMode === 'table' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
                                     }`}
                                     title="Table View"
                                 >
@@ -717,7 +717,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-1.5 text-xs transition-colors ${
-                                        viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                                        viewMode === 'grid' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
                                     }`}
                                     title="Grid View"
                                 >
@@ -726,7 +726,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-1.5 text-xs transition-colors ${
-                                        viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                                        viewMode === 'list' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'
                                     }`}
                                     title="List View"
                                 >
@@ -758,7 +758,7 @@ const ParentFishPoolManagement = ({role}:{role:string}) => {
                 {loading ? (
                     <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
                         <div className="inline-flex items-center space-x-2">
-                            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
                             <span className="text-xs">Loading parent fish pools...</span>
                         </div>
                     </div>
