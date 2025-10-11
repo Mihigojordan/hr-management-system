@@ -8,6 +8,7 @@ import ProtectPrivateAdminRoute from "../components/protectors/ProtectPrivateAdm
 import ProtectPrivateEmployeeRoute from "../components/protectors/ProtectPrivateEmployeeRoute";
 import logo from "../assets/images/aby_hr.png";
 import FeedstockDashboard from "../pages/dashboard/FeedstockDashboard";
+import ParentFishPoolManagement from "../pages/dashboard/ParentFishPoolManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -375,6 +376,14 @@ const routes = createBrowserRouter([
                     <FeedstockDashboard isOpen={false} onClose={function (): void {
                       throw new Error("Function not implemented.");
                     } } role={"admin"}  />
+                  </SuspenseWrapper>
+                ),
+              },
+                 {
+                path: 'parent-fish-management',
+                element: (
+                  <SuspenseWrapper>
+                   <ParentFishPoolManagement />
                   </SuspenseWrapper>
                 ),
               },
