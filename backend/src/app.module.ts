@@ -21,9 +21,9 @@ import { AssetRequestModule } from './modules/asset-requisition-managment/reques
 import { StockModule } from './modules/stockin-management/stock.module';
 import { ParentFishPoolModule } from './modules/parent-fish-pool/parent-fish-pool.module';
 import { FeedstockModule } from './modules/feedstock-management/feedstock.module';
+import { MedicineModule } from './modules/medecine-stock-management/medecine.module';
 
-
-@Module({ 
+@Module({
   imports: [
     AdminModule,
     PrismaModule,
@@ -43,9 +43,9 @@ import { FeedstockModule } from './modules/feedstock-management/feedstock.module
     FeedModule,
     AssetRequestModule,
     StockModule,
+    FeedstockModule,
+    MedicineModule,
     ParentFishPoolModule,
-FeedstockModule
-  
   ],
   controllers: [AppController],
 })
