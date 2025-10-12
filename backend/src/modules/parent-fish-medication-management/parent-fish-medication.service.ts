@@ -5,7 +5,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class ParentFishMedicationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // Create a medication record for parent fish
   async create(data: any) {
     if (!data.parentFishPoolId || !data.medicationId || !data.employeeId) {
       throw new Error('parentFishPoolId, medicationId, and employeeId are required.');
@@ -26,7 +25,6 @@ export class ParentFishMedicationService {
     });
   }
 
-  // Get all medication records
   async findAll() {
     return this.prisma.parentFishMedication.findMany({
       include: {
@@ -37,7 +35,6 @@ export class ParentFishMedicationService {
     });
   }
 
-  // Get a single medication record by ID
   async findOne(id: string) {
     return this.prisma.parentFishMedication.findUnique({
       where: { id },
@@ -49,7 +46,6 @@ export class ParentFishMedicationService {
     });
   }
 
-  // Update a medication record
   async update(id: string, data: any) {
     return this.prisma.parentFishMedication.update({
       where: { id },
@@ -67,7 +63,6 @@ export class ParentFishMedicationService {
     });
   }
 
-  // Delete a medication record
   async remove(id: string) {
     return this.prisma.parentFishMedication.delete({
       where: { id },

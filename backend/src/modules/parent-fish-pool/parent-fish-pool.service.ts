@@ -39,14 +39,15 @@ export class ParentFishPoolService {
       );
     }
 
-    return this.prisma.parentFishPool.create({
-      data: {
-        name: data.name.trim(),
-        description: data.description?.trim() || null,
-        employeeId: data.employeeId,
-      },
-      include: { employee: true },
-    });
+   return this.prisma.parentFishPool.create({
+  data: {
+    name: data.name.trim(),
+    description: data.description?.trim() || null,
+    employee: { connect: { id: data.employeeId } }, // ✅ nested relation
+  },
+  include: { employee: true },
+});
+
   }
 
 
