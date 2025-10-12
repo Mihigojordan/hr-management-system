@@ -49,4 +49,18 @@ export class ParentFishPoolController {
   remove(@Param('id') id: string) {
     return this.parentFishPoolService.remove(id);
   }
+
+  // ✅ Create a water change for a specific pool
+  @Post(':id/water-change')
+  @UseGuards(EmployeeJwtAuthGuard)
+  createWaterChange(
+    @Param('id') poolId: string,
+    @Body() body: any,
+    @Req() req: RequestWithEmployee,
+  ) {
+    const employeeId = req.employee.id;
+    body.parentPoolId = poolId;
+    body.employeeId = employeeId;
+    return this.parentFishPoolService.createWaterChange(body);
+  }
 }

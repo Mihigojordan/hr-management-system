@@ -23,8 +23,12 @@ import { ParentFishPoolModule } from './modules/parent-fish-pool/parent-fish-poo
 import { FeedstockModule } from './modules/feedstock-management/feedstock.module';
 import { ParentFishFeedingModule } from './modules/parent-fish-feeding-management/parent-fish-feeding.module';
 import { MedicineModule } from './modules/medecine-stock-management/medecine.module';
+import { ParentWaterChangingModule } from './modules/parent-water-changing/parent-water-changing.module';
 import { ParentFishMedicationModule } from './modules/parent-fish-medication-management/parent-fish-medication.module';
 import { LaboratoryBoxModule } from './modules/Laboratory-Box-Management/laboratory-box.module';
+import { ParentEggMigrationModule } from './modules/parent-egg-migration/parent-egg-migration.module';
+import { EggFishMedicationModule } from './modules/egg-fish-medication-management/egg-fish-medication.module';
+import { EggFishFeedingModule } from './modules/egg-fish-feeding/egg-fish-feeding.module';
 
 @Module({
   imports: [
@@ -49,12 +53,14 @@ import { LaboratoryBoxModule } from './modules/Laboratory-Box-Management/laborat
     FeedstockModule,
     MedicineModule,
     ParentFishPoolModule,
-FeedstockModule,
-ParentFishFeedingModule,
-ParentFishMedicationModule,
-LaboratoryBoxModule,
-  
+    ParentFishFeedingModule,
+    ParentWaterChangingModule,
+    ParentFishMedicationModule,
+    LaboratoryBoxModule,
+    ParentEggMigrationModule,
+    EggFishMedicationModule,
+    EggFishFeedingModule,
   ],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }

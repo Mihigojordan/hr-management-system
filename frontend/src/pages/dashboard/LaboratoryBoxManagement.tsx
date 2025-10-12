@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Package,
 } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 import laboratoryBoxService, { type LaboratoryBox, type LaboratoryBoxData } from '../../services/laboratoryBoxService';
 import { useSocketEvent } from '../../context/SocketContext';
 import useEmployeeAuth from '../../context/EmployeeAuthContext';
@@ -26,6 +27,17 @@ interface OperationStatus {
   type: 'success' | 'error' | 'info';
   message: string;
 }
+
+const generateBoxCode = (name: string): string => {
+  // Remove special characters, get first letters of words, and append UUID suffix
+  const words = name.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/);
+  const initials = words
+    .filter(word => word.length > 0)
+    .map(word => word[0].toUpperCase())
+    .join('');
+  const uuidSuffix = uuidv4().slice(0, 5);
+  return `${initials}_${uuidSuffix}`;
+};
 
 const LaboratoryBoxModal: React.FC<{
   isOpen: boolean;
@@ -61,14 +73,18 @@ const LaboratoryBoxModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validation = laboratoryBoxService.validateLaboratoryBoxData(formData);
+    const dataToSave = { ...formData };
+    if (mode === 'create') {
+      dataToSave.code = generateBoxCode(formData.name);
+    }
+    const validation = laboratoryBoxService.validateLaboratoryBoxData(dataToSave);
     if (!validation.isValid) {
       setValidationErrors(validation.errors);
       return;
     }
     setLoading(true);
     try {
-      await onSave(formData);
+      await onSave(dataToSave);
       onClose();
     } catch (error) {
       console.error('Error saving laboratory box:', error);
@@ -113,18 +129,6 @@ const LaboratoryBoxModal: React.FC<{
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Code *
-            </label>
-            <input
-              type="text"
-              value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
             />

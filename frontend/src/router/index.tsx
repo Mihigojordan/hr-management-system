@@ -10,7 +10,10 @@ import logo from "../assets/images/aby_hr.png";
 import FeedstockDashboard from "../pages/dashboard/FeedstockDashboard";
 import ParentFishPoolManagement from "../pages/dashboard/ParentFishPoolManagement";
 import ParentFishFeedingManagement from "../pages/dashboard/ParentFishFeedingManagement";
+import ParentWaterChangingManagement from "../pages/dashboard/ParentWaterChangingManagement";
 import ParentFishMedicationManagement from "../pages/dashboard/ParentFishMedicationManagement";
+import ParentEggMigrationManagement from "../pages/dashboard/ParentEggMigrationManagement";
+import EggFishFeedingManagement from "../pages/dashboard/EggFishFeedingManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -72,6 +75,7 @@ const RequestAssetsManagement = lazy(() => import('../pages/dashboard/admin/Requ
 const ProcurementManagement = lazy(() => import('../pages/dashboard/ProcurementManagement'));
 const MedicineManagement = lazy(() => import('../pages/dashboard/MedecineManagment'));
 const LaboratoryBoxManagement = lazy(()=> import('../pages/dashboard/LaboratoryBoxManagement'))
+const EggFishMedicationManagement = lazy(()=> import('../pages/dashboard/EggFishMedicationManagement'))
 /**
  * Loading spinner component for Suspense fallback
  */
@@ -601,7 +605,7 @@ const routes = createBrowserRouter([
                 path: 'stock-history',
                 element: (
                   <SuspenseWrapper>
-                    <StockHistory  role='employee' />
+                    <StockHistory  role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -609,7 +613,7 @@ const routes = createBrowserRouter([
                 path: 'ParentFish-Feeding',
                 element: (
                   <SuspenseWrapper>
-                    <ParentFishFeedingManagement  role='employee' />
+                    <ParentFishFeedingManagement  role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -618,6 +622,30 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <StockHistory  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'Laboratory-Box-management',
+                element: (
+                  <SuspenseWrapper>
+                    <LaboratoryBoxManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'parent-egg-migration',
+                element: (
+                  <SuspenseWrapper>
+                    <ParentEggMigrationManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'egg-feed-management',
+                element: (
+                  <SuspenseWrapper>
+                    <EggFishFeedingManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },
@@ -804,6 +832,14 @@ const routes = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
+               {
+                path: 'parent-water-changing',
+                element: (
+                  <SuspenseWrapper>
+                   <ParentWaterChangingManagement role="employee" />
+                  </SuspenseWrapper>
+                ),
+              },
               {
                 path: 'medicine-management',
                 element: (
@@ -825,6 +861,30 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <LaboratoryBoxManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'parent-egg-migration',
+                element: (
+                  <SuspenseWrapper>
+                    <ParentEggMigrationManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'egg-medication-management',
+                element: (
+                  <SuspenseWrapper>
+                    <EggFishMedicationManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'egg-feed-management',
+                element: (
+                  <SuspenseWrapper>
+                    <EggFishFeedingManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

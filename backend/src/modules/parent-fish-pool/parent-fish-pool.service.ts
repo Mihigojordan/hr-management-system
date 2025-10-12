@@ -146,6 +146,54 @@ async addFishes(poolId: string, count: number) {
     });
   }
 
+  // ✅ Create a new water change for a pool
+async createWaterChange(data: any) {
+  // Validate parentPoolId
+  if (!data.parentPoolId || typeof data.parentPoolId !== 'string') {
+    throw new BadRequestException('parentPoolId is required and must be a string.');
+  }
+
+  const pool = await this.prisma.parentFishPool.findUnique({
+    where: { id: data.parentPoolId },
+  });
+  if (!pool) {
+    throw new BadRequestException('Invalid parentPoolId: ParentFishPool not found.');
+  }
+
+  // Validate employeeId
+  if (!data.employeeId || typeof data.employeeId !== 'string') {
+    throw new BadRequestException('employeeId is required and must be a string.');
+  }
+
+  const employee = await this.prisma.employee.findUnique({
+    where: { id: data.employeeId },
+  });
+  if (!employee) {
+    throw new BadRequestException('Invalid employeeId: Employee not found.');
+  }
+
+  // Validate litersChanged
+  if (
+    data.litersChanged === undefined ||
+    typeof data.litersChanged !== 'number' ||
+    data.litersChanged <= 0
+  ) {
+    throw new BadRequestException('litersChanged is required and must be a positive number.');
+  }
+
+  return this.prisma.parentWaterChanging.create({
+    data: {
+      parentPoolId: data.parentPoolId,
+      employeeId: data.employeeId,
+      litersChanged: data.litersChanged,
+      description: data.description?.trim() || null,
+      date: data.date ? new Date(data.date) : undefined,
+    },
+    include: { parentPool: true, employee: true },
+  });
+}
+
+
   // ✅ Delete
   async remove(id: string) {
     const pool = await this.prisma.parentFishPool.findUnique({ where: { id } });

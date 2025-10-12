@@ -123,6 +123,9 @@ enum MaritalStatus {
   // 🔹 StockHistory
   stockHistoriesCreated StockHistory[] 
 parentFishPools ParentFishPool[]
+parentWaterChanging ParentWaterChanging[]
+parentEggMigration  ParentEggMigration[]
+eggFishFeeding   EggFishFeeding[]
   
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
@@ -135,6 +138,7 @@ parentFishPools ParentFishPool[]
     medicines Medicine[]
 
     ParentFishMedication ParentFishMedication[]
+    EggFishMedication  EggFishMedication[]
 }
 
 model Contract {
@@ -671,9 +675,10 @@ model ParentFishPool {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+parentWaterChanging ParentWaterChanging[]
   ParentFishFeeding ParentFishFeeding[]
-
   ParentFishMedication ParentFishMedication[]
+parentEggMigration  ParentEggMigration[]
 }
 
 
@@ -696,6 +701,8 @@ model Medicine {
   updatedAt      DateTime   @updatedAt
 
   ParentFishMedication ParentFishMedication[]
+  EggFishMedication EggFishMedication[]
+
 }
 
 enum DosageForm {
@@ -714,7 +721,7 @@ model FeedStock {
   category      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
+eggFishFeeding   EggFishFeeding[]
   ParentFishFeeding ParentFishFeeding[]
 }
 
@@ -730,6 +737,18 @@ model ParentFishFeeding {
   createdAt      DateTime       @default(now())
 }
 
+model ParentWaterChanging {
+  id            String          @id @default(uuid())
+  parentPoolId  String
+  parentPool    ParentFishPool  @relation(fields: [parentPoolId], references: [id], onDelete: Cascade)
+  employeeId    String
+  employee      Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  date          DateTime        @default(now())  // when the water change happened
+  litersChanged Float           // ✅ liters of water changed
+  description   String?         // optional notes
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
 model ParentFishMedication {
   id             String         @id @default(uuid())
   parentFishPool ParentFishPool @relation(fields: [parentFishPoolId], references: [id])
@@ -740,6 +759,7 @@ model ParentFishMedication {
   employeeId     String
   quantity       Int            @default(0)
   createdAt      DateTime       @default(now())
+  
 }
 
 
@@ -749,4 +769,60 @@ model LaboratoryBox{
   code      String @unique
   description String?
   createdAt   DateTime @default(now())
+  parentEggMigration  ParentEggMigration[]
+}
+
+
+enum ParentEggMigrationStatus {
+  ACTIVE
+  COMPLETED
+  DISCARDED
+}
+
+model ParentEggMigration {
+  id               String          @id @default(uuid())
+  
+  parentPoolId     String
+  parentPool       ParentFishPool  @relation(fields: [parentPoolId], references: [id], onDelete: Cascade)
+
+  laboratoryBoxId  String
+  laboratoryBox    LaboratoryBox   @relation(fields: [laboratoryBoxId], references: [id], onDelete: Cascade)
+
+  employeeId       String
+  employee         Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  status           ParentEggMigrationStatus @default(ACTIVE)  // ✅ Default is ACTIVE
+
+  date             DateTime        @default(now())
+  description      String?
+
+  eggFishFeeding   EggFishFeeding[]
+  EggFishMedication   EggFishMedication[]
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+
+model EggFishFeeding {
+  id             String         @id @default(uuid())
+  parentEggMigrationId  String
+  parentEggMigration ParentEggMigration @relation(fields: [parentEggMigrationId], references: [id])
+  feed           FeedStock      @relation(fields: [feedId], references: [id])
+  feedId         String
+  employee       Employee       @relation(fields: [employeeId], references: [id])
+    employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
+}
+model EggFishMedication {
+  id             String         @id @default(uuid())
+  ParentEggMigration ParentEggMigration @relation(fields: [parentEggMigrationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parentEggMigrationId String
+  medication     Medicine       @relation(fields: [medicationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  medicationId   String
+  employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
 }
