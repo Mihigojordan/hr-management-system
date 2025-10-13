@@ -16,7 +16,7 @@ import { SiteModule } from './modules/site-management/site.module';
 import { CageModule } from './modules/cage-management/cage.module';
 import { StoreModule } from './modules/store-management/store.module';
 import { MedicationModule } from './modules/medication-management/medication.module';
-import { FeedModule } from './modules/feed/feed.module';
+
 import { AssetRequestModule } from './modules/asset-requisition-managment/request.module';
 import { StockModule } from './modules/stockin-management/stock.module';
 import { ParentFishPoolModule } from './modules/parent-fish-pool/parent-fish-pool.module';
@@ -32,6 +32,8 @@ import { LaboratoryBoxWaterChangingModule } from './modules/box-water-changing-m
 import { EggFishFeedingModule } from './modules/egg-fish-feeding/egg-fish-feeding.module';
 import { GrownEggPondModule } from './modules/grown-egg-pond/grown-egg-pond.module';
 import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to-pond-migration.module';
+import { GrownEggPondFeedingModule } from './modules/grown-egg-pond-feeding/grown-egg-pond-feeding.module';
+import { FeedCageModule } from './modules/feed/feed-cage.module';
 
 @Module({
   imports: [
@@ -50,7 +52,7 @@ import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to
     CageModule,
     StoreModule,
     MedicationModule,
-    FeedModule,
+    FeedCageModule,
     AssetRequestModule,
     StockModule,
     FeedstockModule,
@@ -66,6 +68,7 @@ import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to
     EggFishFeedingModule,
     GrownEggPondModule,
     EggToPondMigrationModule,
+    GrownEggPondFeedingModule,
   ],
   controllers: [AppController],
 })

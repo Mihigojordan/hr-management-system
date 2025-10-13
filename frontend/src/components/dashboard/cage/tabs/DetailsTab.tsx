@@ -6,45 +6,30 @@ import {
   Activity, 
   Settings, 
   Calendar, 
-  Package, 
   CheckCircle, 
   AlertCircle, 
   Wrench, 
   Clock, 
-  Cookie, 
-  Bath, 
-  Droplets as DropletsIcon, 
-  Syringe, 
   Wheat,
   TrendingUp,
-  AlertTriangle,
   Info,
   ArrowRight
 } from 'lucide-react';
 import { type Cage } from '../../../../services/cageService';
-import type { Medication } from '../../../../services/medicationService';
-import type { Feed } from '../../../../services/feedService';
+import type { FeedCage } from '../../../../services/feedService';
 
 interface DetailsTabProps {
   cage: Cage;
-  medications: Medication[];
-  feeds: Feed[];
+  feeds: FeedCage[];
   role: string;
   handleTabChange: (tab: string) => void;
 }
 
-const DetailsTab: React.FC<DetailsTabProps> = ({ cage, medications, feeds, role, handleTabChange }) => {
+const DetailsTab: React.FC<DetailsTabProps> = ({ cage, feeds, role, handleTabChange }) => {
   // Memoized calculations for better performance
   const calculations = useMemo(() => {
-    const now = new Date('2025-09-27T11:33:00+02:00');
+    const now = new Date();
     
-    // Calculate active medications
-    const activeMedications = medications.filter(med => {
-      const start = med.startDate ? new Date(med.startDate) : null;
-      const end = med.endDate ? new Date(med.endDate) : null;
-      return start && now >= start && (!end || now <= end);
-    });
-
     // Calculate days since stocking
     const daysSinceStocking = cage.stockingDate
       ? Math.floor((now - new Date(cage.stockingDate)) / (1000 * 60 * 60 * 24))
@@ -52,9 +37,9 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ cage, medications, feeds, role,
 
     // Calculate total feed given in last 7 days
     const recentFeeds = feeds.filter(feed => {
-      if (!feed.date) return false;
-      const feedDate = new Date(feed.date);
-      const daysDiff = (now - feedDate) / (1000 * 60 * 60 * 24);
+      if (!feed.createdAt) return false;
+      const feedDate = new Date(feed.createdAt);
+      const daysDiff = (now.getTime() - feedDate.getTime()) / (1000 * 60 * 60 * 24);
       return daysDiff <= 7;
     });
 
@@ -66,13 +51,12 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ cage, medications, feeds, role,
       : null;
 
     return {
-      activeMedications,
       daysSinceStocking,
       totalFeedLast7Days,
       utilizationPercentage,
       recentFeeds
     };
-  }, [cage, medications, feeds]);
+  }, [cage, feeds]);
 
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return 'N/A';
@@ -142,39 +126,19 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ cage, medications, feeds, role,
     }
   };
 
-  const getMethodIcon = (method: string | undefined) => {
-    const iconMap = {
-      'FEED': <Cookie className="w-4 h-4 text-orange-600" />,
-      'BATH': <Bath className="w-4 h-4 text-blue-600" />,
-      'WATER': <DropletsIcon className="w-4 h-4 text-cyan-600" />,
-      'INJECTION': <Syringe className="w-4 h-4 text-red-600" />,
-    };
-    return iconMap[method as keyof typeof iconMap] || <Package className="w-4 h-4 text-gray-600" />;
-  };
-
-  const getMedicationStatus = (startDate: string | undefined, endDate: string | null | undefined) => {
-    const now = new Date();
-   
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(endDate) : null;
-
-    if (!start) return { status: 'Unknown', color: 'bg-gray-100 text-gray-800' };
-    if (now < start) return { status: 'Scheduled', color: 'bg-blue-100 text-blue-800' };
-    if (!end || now <= end) return { status: 'Active', color: 'bg-green-100 text-green-800' };
-    return { status: 'Completed', color: 'bg-gray-100 text-gray-800' };
-  };
-
   const getHealthScore = () => {
     let score = 100;
     
     // Deduct points for inactive status
     if (cage.cageStatus !== 'ACTIVE') score -= 30;
     
-    // Deduct points for active medications
-    score -= calculations.activeMedications.length * 10;
-    
     // Deduct points for old stocking (over 180 days)
     if (calculations.daysSinceStocking && calculations.daysSinceStocking > 180) {
+      score -= 20;
+    }
+
+    // Deduct points if no recent feeding
+    if (calculations.totalFeedLast7Days === 0 && cage.cageStatus === 'ACTIVE') {
       score -= 20;
     }
     
@@ -213,7 +177,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ cage, medications, feeds, role,
       </div>
 
       {/* Enhanced Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
             <div className="p-2 bg-blue-50 rounded-lg">
@@ -268,32 +232,10 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ cage, medications, feeds, role,
           </div>
           <div>
             <p className="text-sm font-medium text-gray-600 mb-1">Feed (7 days)</p>
-            <p className="text-2xl font-bold text-gray-900">{calculations.totalFeedLast7Days} kg</p>
+            <p className="text-2xl font-bold text-gray-900">{calculations.totalFeedLast7Days.toFixed(1)} kg</p>
             <p className="text-xs text-gray-500 flex items-center mt-1">
               <TrendingUp className="w-3 h-3 mr-1" />
               {calculations.recentFeeds.length} feed sessions
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-red-50 rounded-lg">
-              <Package className="w-6 h-6 text-red-600" />
-            </div>
-            {calculations.activeMedications.length > 0 && (
-              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium flex items-center">
-                <AlertTriangle className="w-3 h-3 mr-1" />
-                Alert
-              </span>
-            )}
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">Active Treatments</p>
-            <p className="text-2xl font-bold text-gray-900">{calculations.activeMedications.length}</p>
-            <p className="text-xs text-gray-500 flex items-center mt-1">
-              <Activity className="w-3 h-3 mr-1" />
-              {medications.length} total medications
             </p>
           </div>
         </div>
@@ -397,110 +339,59 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ cage, medications, feeds, role,
         </div>
       </div>
 
-      {/* Enhanced Recent Activities */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Recent Medications */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Package className="w-5 h-5 mr-2 text-red-600" />
-              Recent Medications
-              {calculations.activeMedications.length > 0 && (
-                <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                  {calculations.activeMedications.length} active
-                </span>
-              )}
-            </h3>
-            <button
-              onClick={() => handleTabChange('medications')}
-              className="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center group"
-            >
-              View All
-              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-          <div className="p-6">
-            {medications?.slice(0, 3).map((medication, index) => {
-              const medStatus = getMedicationStatus(medication.startDate, medication.endDate);
-              return (
-                <div key={medication.id} className={`flex items-center justify-between py-4 ${index < 2 ? 'border-b border-gray-100' : ''}`}>
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gray-50 rounded-lg">
-                      {getMethodIcon(medication.method)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{medication.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{medication.reason || 'No reason provided'}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 flex-shrink-0">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${medStatus.color}`}>
-                      {medStatus.status}
-                    </span>
-                    <span className="text-xs text-gray-500">{formatDate(medication.startDate)}</span>
-                  </div>
-                </div>
-              );
-            })}
-            {medications.length === 0 && (
-              <div className="text-center py-8">
-                <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No medications recorded for this cage.</p>
-              </div>
+      {/* Recent Feeds */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <Wheat className="w-5 h-5 mr-2 text-green-600" />
+            Recent Feeds
+            {calculations.totalFeedLast7Days > 0 && (
+              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                {calculations.totalFeedLast7Days.toFixed(1)}kg this week
+              </span>
             )}
-          </div>
+          </h3>
+          <button
+            onClick={() => handleTabChange('feed')}
+            className="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center group"
+          >
+            View All
+            <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
-
-        {/* Recent Feeds */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Wheat className="w-5 h-5 mr-2 text-green-600" />
-              Recent Feeds
-              {calculations.totalFeedLast7Days > 0 && (
-                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                  {calculations.totalFeedLast7Days}kg this week
-                </span>
-              )}
-            </h3>
-            <button
-              onClick={() => handleTabChange('feed')}
-              className="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center group"
-            >
-              View All
-              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-          <div className="p-6">
-            {feeds?.slice(0, 3).map((feed, index) => (
-              <div key={feed.id} className={`flex items-center justify-between py-4 ${index < 2 ? 'border-b border-gray-100' : ''}`}>
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-50 rounded-lg">
-                    <Wheat className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{feed.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{feed.type} ({feed.proteinContent}% protein)</p>
-                  </div>
+        <div className="p-6">
+          {feeds?.slice(0, 3).map((feed, index) => (
+            <div key={feed.id} className={`flex items-center justify-between py-4 ${index < 2 ? 'border-b border-gray-100' : ''}`}>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-50 rounded-lg">
+                  <Wheat className="w-4 h-4 text-green-600" />
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-medium text-gray-900">{feed.quantityGiven} kg</p>
-                  <p className="text-xs text-gray-500">{formatDate(feed.date)}</p>
-                  <p className="text-xs text-gray-500">
-                    {feed.employee
-                      ? `${feed.employee.first_name} ${feed.employee.last_name}`
-                      : feed.admin?.adminName || 'Unknown'}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {feed.feed?.name || 'Unknown Feed'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {feed.notes || 'No notes provided'}
                   </p>
                 </div>
               </div>
-            ))}
-            {feeds.length === 0 && (
-              <div className="text-center py-8">
-                <Wheat className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No feeds recorded for this cage.</p>
+              <div className="text-right flex-shrink-0">
+                <p className="text-sm font-medium text-gray-900">{feed.quantityGiven} kg</p>
+                <p className="text-xs text-gray-500">{formatDate(feed.createdAt)}</p>
+                <p className="text-xs text-gray-500">
+                  {feed.employee
+                    ? `${feed.employee.first_name} ${feed.employee.last_name}`
+                    : 'Unknown'}
+                </p>
               </div>
-            )}
-          </div>
+            </div>
+          ))}
+          {feeds.length === 0 && (
+            <div className="text-center py-8">
+              <Wheat className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">No feeds recorded for this cage.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

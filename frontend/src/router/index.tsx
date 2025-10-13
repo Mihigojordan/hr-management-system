@@ -16,6 +16,7 @@ import ParentEggMigrationManagement from "../pages/dashboard/ParentEggMigrationM
 import EggFishFeedingManagement from "../pages/dashboard/EggFishFeedingManagement";
 import GrownEggPondManagement from "../pages/dashboard/GrownEggPondManagement";
 import EggToPondMigrationManagement from "../pages/dashboard/EggToPondMigrationManagement";
+import GrownEggPondFeedingManagement from "../pages/dashboard/GrownEggPondFeedingManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -756,6 +757,63 @@ const routes = createBrowserRouter([
                 ),
               },
               {
+                path: 'cage-management/create',
+                element: (
+                  <SuspenseWrapper>
+                    <CageForm role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <CageForm role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/view/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <CageViewPage  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/m/create',
+                element: (
+                  <SuspenseWrapper>
+                    <MedicationForm  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/m/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <MedicationForm  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/f/create',
+                element: (
+                  <SuspenseWrapper>
+                    <DailyFeedRecordForm  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'cage-management/f/update/:id',
+                element: (
+                  <SuspenseWrapper>
+                    <DailyFeedRecordForm  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+      
+              {
                 path: 'asset-request-management',
                 element: (
                   <SuspenseWrapper>
@@ -920,6 +978,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <EggToPondMigrationManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'grown-egg-pond-feeding',
+                element: (
+                  <SuspenseWrapper>
+                    <GrownEggPondFeedingManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

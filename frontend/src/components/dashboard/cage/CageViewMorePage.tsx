@@ -1,30 +1,27 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { Fish, ArrowLeft, Eye, Package, Wheat } from 'lucide-react';
+import { Fish, ArrowLeft, Eye, Wheat } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import cageService, { type Cage } from '../../../services/cageService';
-import medicationService, { type Medication } from '../../../services/medicationService';
-import feedService, { type Feed } from '../../../services/feedService';
+import feedCageService, { type FeedCage } from '../../../services/feedService';
 import DetailsTab from './tabs/DetailsTab';
-import MedicationsTab from './tabs/MedicationsTab';
 import FeedTab from './tabs/FeedTab';
 
 const CageViewPage: React.FC<{ role: string }> = ({ role }) => {
   const [activeTab, setActiveTab] = useState('details');
   const [cage, setCage] = useState<Cage | null>(null);
-  const [medications, setMedications] = useState<Medication[]>([]);
-  const [feeds, setFeeds] = useState<Feed[]>([]);
+  const [feeds, setFeeds] = useState<FeedCage[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const { id: cageId } = useParams<{ id: string }>();
 
   // Function to fetch feeds
   const fetchFeeds = async () => {
+    if (!cageId) return;
     try {
-      const feedData = await feedService.getAllFeeds();
-      setFeeds(feedData.filter(feed => feed.cageId === cageId) || []);
+      const feedData = await feedCageService.getFeedCagesByCageId(cageId);
+      setFeeds(feedData || []);
     } catch (error: any) {
       console.error('Error fetching feeds:', error);
       Swal.fire({
@@ -42,7 +39,7 @@ const CageViewPage: React.FC<{ role: string }> = ({ role }) => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab');
-    if (tab && ['details', 'medications', 'feed'].includes(tab)) {
+    if (tab && ['details', 'feed'].includes(tab)) {
       setActiveTab(tab);
     }
 
@@ -69,16 +66,13 @@ const CageViewPage: React.FC<{ role: string }> = ({ role }) => {
         }
         setCage(cageData);
 
-        const medicationData = await medicationService.getMedicationsByCageId(cageId);
-        setMedications(medicationData);
-
         await fetchFeeds(); // Initial fetch of feeds
       } catch (error: any) {
         console.error('Error fetching data:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.message || 'Failed to load cage, medication, or feed data',
+          text: error.message || 'Failed to load cage or feed data',
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
@@ -176,19 +170,6 @@ const CageViewPage: React.FC<{ role: string }> = ({ role }) => {
               </div>
             </button>
             <button
-              onClick={() => handleTabChange('medications')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'medications'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <Package className="w-4 h-4" />
-                <span>Medications</span>
-              </div>
-            </button>
-            <button
               onClick={() => handleTabChange('feed')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'feed'
@@ -210,18 +191,9 @@ const CageViewPage: React.FC<{ role: string }> = ({ role }) => {
         {activeTab === 'details' && (
           <DetailsTab
             cage={cage}
-            medications={medications}
             feeds={feeds}
             role={role}
             handleTabChange={handleTabChange}
-          />
-        )}
-        {activeTab === 'medications' && (
-          <MedicationsTab
-            cage={cage}
-            medications={medications}
-            setMedications={setMedications}
-            role={role}
           />
         )}
         {activeTab === 'feed' && (

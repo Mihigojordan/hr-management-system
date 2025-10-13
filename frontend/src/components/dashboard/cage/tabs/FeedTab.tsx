@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useMemo } from 'react';
 import {
@@ -8,27 +7,16 @@ import {
   Calendar,
   Wheat,
   BarChart3,
-  Target,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import feedService, { type Feed } from '../../../../services/feedService';
-
-// Define FeedType enum (assumed to be in feedService)
-enum FeedType {
-  PELLET = 'PELLET',
-  SEED = 'SEED',
-  FRUIT = 'FRUIT',
-  VEGETABLE = 'VEGETABLE',
-  INSECT = 'INSECT',
-  OTHER = 'OTHER',
-}
+import feedCageService, { type FeedCage } from '../../../../services/feedService';
 
 interface FeedingSectionProps {
   cageId: string;
-  feeds: Feed[];
+  feeds: FeedCage[];
   role: string;
   onFeedDeleted?: () => void;
 }
@@ -41,7 +29,6 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
   const [minQuantity, setMinQuantity] = useState('');
   const [maxQuantity, setMaxQuantity] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedType, setSelectedType] = useState('');
 
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,39 +56,35 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
     });
   };
 
-  // Format FeedType for display
-  const formatFeedType = (type: string): string => {
-    if (!type) return 'N/A';
-    return type.charAt(0) + type.slice(1).toLowerCase();
-  };
-
-  // Filter feeds based on search, quantity, date, and type
+  // Filter feeds based on search, quantity, and date
   const filteredFeeds = useMemo(() => {
     return feeds.filter(feed => {
-      const matchesSearch = feed.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const feedName = feed.feed?.name || '';
+      const matchesSearch = feedName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesMinQuantity = minQuantity === '' || feed.quantityGiven >= parseFloat(minQuantity);
       const matchesMaxQuantity = maxQuantity === '' || feed.quantityGiven <= parseFloat(maxQuantity);
       const matchesDate = selectedDate === '' || 
-        new Date(feed.date).toISOString().split('T')[0] === selectedDate;
-      const matchesType = selectedType === '' || feed.type === selectedType;
+        new Date(feed.createdAt || '').toISOString().split('T')[0] === selectedDate;
       
-      return matchesSearch && matchesMinQuantity && matchesMaxQuantity && matchesDate && matchesType;
+      return matchesSearch && matchesMinQuantity && matchesMaxQuantity && matchesDate;
     });
-  }, [feeds, searchQuery, minQuantity, maxQuantity, selectedDate, selectedType]);
+  }, [feeds, searchQuery, minQuantity, maxQuantity, selectedDate]);
 
   // Calculate feeding statistics based on filtered feeds
-  const today = new Date('2025-09-27T13:08:00+02:00'); // 01:08 PM CAT, September 27, 2025
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const weekAgo = new Date(today);
-  weekAgo.setDate(today.getDate() - 7); // Start of the week: Sep 20, 2025
+  weekAgo.setDate(today.getDate() - 7);
 
   const todayFeedRecords = filteredFeeds.filter(record => {
-    const recordDate = new Date(record.date).toDateString();
-    return recordDate === today.toDateString();
+    const recordDate = new Date(record.createdAt || '');
+    recordDate.setHours(0, 0, 0, 0);
+    return recordDate.getTime() === today.getTime();
   });
 
   const weekFeedRecords = filteredFeeds.filter(record => {
-    const recordDate = new Date(record.date);
-    return recordDate >= weekAgo && recordDate <= today;
+    const recordDate = new Date(record.createdAt || '');
+    return recordDate >= weekAgo && recordDate <= new Date();
   });
 
   const totalFeedToday = todayFeedRecords.reduce((sum, record) => sum + record.quantityGiven, 0);
@@ -120,43 +103,44 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
     navigate(`/${role}/dashboard/cage-management/f/create?cageId=${cageId}`);
   };
 
-  const handleEditFeed = (feed: Feed) => {
+  const handleEditFeed = (feed: FeedCage) => {
     navigate(`/${role}/dashboard/cage-management/f/update/${feed.id}`);
   };
 
-  const handleDeleteFeed = async (feed: Feed) => {
+  const handleDeleteFeed = async (feed: FeedCage) => {
+    const feedName = feed.feed?.name || 'this feed';
     const result = await Swal.fire({
-      title: 'Delete Feed',
-      text: `Are you sure you want to delete the feed "${feed.name}" on ${formatDate(feed.date)}? This action cannot be undone.`,
+      title: 'Delete Feed Record',
+      text: `Are you sure you want to delete the feed record for "${feedName}"? This action cannot be undone.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444', // Red-500
-      cancelButtonColor: '#d1d5db', // Gray-300
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#d1d5db',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
     });
 
     if (result.isConfirmed) {
       try {
-        await feedService.deleteFeed(feed.id);
+        await feedCageService.deleteFeedCage(feed.id);
         Swal.fire({
           icon: 'success',
           title: 'Success',
-          text: `Feed ${feed.name} deleted successfully`,
+          text: `Feed record deleted successfully`,
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
           timer: 3000,
         });
         if (onFeedDeleted) {
-          onFeedDeleted(); // Notify parent to refresh feeds
+          onFeedDeleted();
         }
       } catch (error: any) {
         console.error('Error deleting feed:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.message || 'Failed to delete feed',
+          text: error.message || 'Failed to delete feed record',
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
@@ -184,7 +168,7 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
 
       {/* Feeding Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border" title={`Feed given on ${formatDate(today.toISOString())}`}>
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Today's Feed</p>
@@ -195,7 +179,7 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border" title={`Total feed from ${formatDate(weekAgo.toISOString())} to ${formatDate(today.toISOString())}`}>
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">This Week's Feed</p>
@@ -206,7 +190,7 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border" title="Total number of feedings recorded for this cage">
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Feeds</p>
@@ -220,9 +204,9 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
 
       {/* Filter Bar */}
       <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search by Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search by Feed Name</label>
             <input
               type="text"
               value={searchQuery}
@@ -264,21 +248,6 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Feed Type</label>
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Types</option>
-              {Object.values(FeedType).map((type) => (
-                <option key={type} value={type}>
-                  {formatFeedType(type)}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
       </div>
 
@@ -310,8 +279,6 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feed Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Protein Content</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity Given</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Administered By</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
@@ -323,21 +290,12 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
                     <tr key={feed.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <div>
-                          <div className="font-medium">{formatDate(feed.date)}</div>
-                          <div className="text-gray-500 text-xs">{formatDateTime(feed.date).split(', ')[1]}</div>
+                          <div className="font-medium">{formatDate(feed.createdAt || '')}</div>
+                          <div className="text-gray-500 text-xs">{formatDateTime(feed.createdAt || '').split(', ')[1]}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{feed.name}</td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                          {formatFeedType(feed.type)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div className="flex items-center">
-                          <Target className="w-4 h-4 mr-1 text-green-600" />
-                          {feed.proteinContent}%
-                        </div>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                        {feed.feed?.name || 'Unknown Feed'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <span className="font-semibold text-green-600">{feed.quantityGiven} kg</span>
@@ -345,7 +303,7 @@ const FeedingSection: React.FC<FeedingSectionProps> = ({ cageId, feeds, role, on
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {feed.employee
                           ? `${feed.employee.first_name} ${feed.employee.last_name}`
-                          : feed.admin?.adminName || 'Unknown'}
+                          : 'Unknown'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                         {feed.notes || 'No notes'}

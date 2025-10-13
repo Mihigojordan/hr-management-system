@@ -37,7 +37,7 @@ model Admin {
   rejectedBy       Request[] @relation("rejectedByAdmin")
   // 🔹 StockHistory
   stockHistoriesCreated StockHistory[] 
-   feed  Feed[]
+
    Activity Activity[]
 }
 
@@ -109,7 +109,7 @@ enum MaritalStatus {
     managedSites    Site[] @relation("ManagerRelation")
     supervisedSites Site[] @relation("SupervisorRelation")
     medications      Medication[]
-    feeds  Feed[]
+    feeds  FeedCage[]
 
     eggToPondMigration  EggToPondMigration[]
       // Assigned site (one site only)
@@ -128,6 +128,8 @@ parentFishPools ParentFishPool[]
 parentWaterChanging ParentWaterChanging[]
 parentEggMigration  ParentEggMigration[]
 eggFishFeeding   EggFishFeeding[]
+
+grownEggPondFeeding  GrownEggPondFeeding[]
   
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
@@ -361,7 +363,7 @@ model Cage {
 
   //relations 
   Medication   Medication[]
-  feeds  Feed[]
+  feeds  FeedCage[]
 
   createdAt DateTime @default(now())
 }
@@ -413,30 +415,29 @@ enum MedicationMethod {
 
 
 
-model Feed {
+model FeedCage {
   id                     String    @id @default(uuid())
-  name                   String
-  type                   FeedType   // enum instead of free text
-  proteinContent         Float
-  date                   DateTime
+  
+  
   quantityGiven          Float
   notes                  String?
 
   cageId                 String
   cage                   Cage       @relation(fields: [cageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  administeredByEmployee String?
-  employee               Employee?  @relation(fields: [administeredByEmployee], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  feed           FeedStock      @relation(fields: [feedId], references: [id])
+  feedId         String
 
-  administeredByAdmin    String?
-  admin                  Admin?     @relation(fields: [administeredByAdmin], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId String?
+  employee               Employee?  @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
 
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @updatedAt
 
   @@index([cageId])
-  @@index([administeredByEmployee])
-  @@index([administeredByAdmin])
+  @@index([employeeId])
+
 }
 
 
@@ -726,6 +727,8 @@ model FeedStock {
   updatedAt     DateTime  @updatedAt
 eggFishFeeding   EggFishFeeding[]
   ParentFishFeeding ParentFishFeeding[]
+grownEggPondFeeding  GrownEggPondFeeding[]
+feedCage  FeedCage[]
 }
 
 model ParentFishFeeding {
@@ -863,6 +866,8 @@ model EggToPondMigration {
 
   status             EggToPondStatus     @default(ACTIVE)
 
+  grownEggPondFeeding  GrownEggPondFeeding[]
+
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 }
@@ -886,4 +891,18 @@ model GrownEggPond {
   updatedAt   DateTime @updatedAt
 
   EggToPondMigrations EggToPondMigration[]
+}
+
+
+model GrownEggPondFeeding {
+  id             String         @id @default(uuid())
+  eggToPondMigrationId  String
+  eggToPondMigration EggToPondMigration @relation(fields: [eggToPondMigrationId], references: [id])
+
+  feed           FeedStock      @relation(fields: [feedId], references: [id])
+  feedId         String
+  employee       Employee       @relation(fields: [employeeId], references: [id])
+    employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
 }
