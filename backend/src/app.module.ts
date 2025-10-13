@@ -32,6 +32,8 @@ import { LaboratoryBoxWaterChangingModule } from './modules/box-water-changing-m
 import { EggFishFeedingModule } from './modules/egg-fish-feeding/egg-fish-feeding.module';
 import { GrownEggPondModule } from './modules/grown-egg-pond/grown-egg-pond.module';
 import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to-pond-migration.module';
+import { PondWaterChangingModule } from './modules/pond-water-changing-management/pond-water-changing.module';
+import { PondMedicationModule } from './modules/pond-medication-management/pond-medication.module';
 
 @Module({
   imports: [
@@ -66,6 +68,8 @@ import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to
     EggFishFeedingModule,
     GrownEggPondModule,
     EggToPondMigrationModule,
+    PondWaterChangingModule,
+    PondMedicationModule,
   ],
   controllers: [AppController],
 })
