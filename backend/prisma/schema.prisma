@@ -144,6 +144,8 @@ grownEggPondFeeding  GrownEggPondFeeding[]
     ParentFishMedication ParentFishMedication[]
     EggFishMedication  EggFishMedication[]
     laboratoryBoxWaterChanging LaboratoryBoxWaterChanging[]
+    PondWaterChanging   PondWaterChanging[]
+    PondMedication   PondMedication[]
 }
 
 model Contract {
@@ -706,6 +708,7 @@ model Medicine {
 
   ParentFishMedication ParentFishMedication[]
   EggFishMedication EggFishMedication[]
+  PondMedication PondMedication[]
 
 }
 
@@ -870,6 +873,11 @@ model EggToPondMigration {
 
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+
+  // relations
+
+  PondWaterChanging      PondWaterChanging[]
+  PondMedication         PondMedication[]
 }
 
 enum EggToPondStatus {
@@ -878,8 +886,28 @@ enum EggToPondStatus {
   DISCARDED
 }
 
+model PondWaterChanging {
+  id            String          @id @default(uuid())
+  EggtoPondId  String
+  eggToPondMigration   EggToPondMigration @relation(fields: [EggtoPondId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId    String
+  employee      Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  litersChanged Float           // ✅ liters of water changed
+  description   String?         // optional notes
+  createdAt     DateTime        @default(now())
+}
 
-
+model PondMedication {
+  id             String         @id @default(uuid())
+  eggToPondMigration EggToPondMigration @relation(fields: [eggtoPondId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  eggtoPondId  String
+  medication     Medicine       @relation(fields: [medicationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  medicationId   String
+  employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId     String
+  quantity       Int            @default(0)
+  createdAt      DateTime       @default(now())
+}
 
 model GrownEggPond {
   id          String   @id @default(uuid())

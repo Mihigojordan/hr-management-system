@@ -34,6 +34,8 @@ import { GrownEggPondModule } from './modules/grown-egg-pond/grown-egg-pond.modu
 import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to-pond-migration.module';
 import { GrownEggPondFeedingModule } from './modules/grown-egg-pond-feeding/grown-egg-pond-feeding.module';
 import { FeedCageModule } from './modules/feed/feed-cage.module';
+import { PondWaterChangingModule } from './modules/pond-water-changing-management/pond-water-changing.module';
+import { PondMedicationModule } from './modules/pond-medication-management/pond-medication.module';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { FeedCageModule } from './modules/feed/feed-cage.module';
     GrownEggPondModule,
     EggToPondMigrationModule,
     GrownEggPondFeedingModule,
+    PondWaterChangingModule,
+    PondMedicationModule,
   ],
   controllers: [AppController],
 })
