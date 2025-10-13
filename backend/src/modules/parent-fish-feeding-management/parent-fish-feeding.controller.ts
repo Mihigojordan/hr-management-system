@@ -14,11 +14,11 @@ import { EmployeeJwtAuthGuard } from '../../guards/employeeGuard.guard';
 import { RequestWithEmployee } from '../../common/interfaces/employee.interface';
 
 @Controller('parent-fish-feeding')
-@UseGuards(EmployeeJwtAuthGuard) // apply guard to all routes
 export class ParentFishFeedingController {
   constructor(private readonly feedingService: ParentFishFeedingService) {}
-
+  
   @Post()
+  @UseGuards(EmployeeJwtAuthGuard) // apply guard to all routes
   async create(@Body() data: any, @Req() req: RequestWithEmployee) {
     // take employeeId from logged-in user
     const employeeId = req.employee.id;

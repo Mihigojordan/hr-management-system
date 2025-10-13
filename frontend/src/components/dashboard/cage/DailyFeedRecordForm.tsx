@@ -2,27 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { Check, X, Wheat } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import feedService, { type FeedData, type Feed } from '../../../services/feedService';
+import feedCageService, { type FeedCageData, type FeedCage } from '../../../services/feedService';
+import feedstockCategoryService, { type FeedstockCategory } from '../../../services/feedstockService';
 import cageService, { type Cage } from '../../../services/cageService';
 import Swal from 'sweetalert2';
 import useAdminAuth from '../../../context/AdminAuthContext';
 import useEmployeeAuth from '../../../context/EmployeeAuthContext';
 
-// Define FeedType enum (assumed to be in feedService)
-enum FeedType {
-  PELLET = 'PELLET',
-  SEED = 'SEED',
-  FRUIT = 'FRUIT',
-  VEGETABLE = 'VEGETABLE',
-  INSECT = 'INSECT',
-  OTHER = 'OTHER',
-}
-
-interface FeedFormData {
-  name: string;
-  type: FeedType | '';
-  proteinContent: string;
-  date: string; // YYYY-MM-DDTHH:mm
+interface FeedCageFormData {
+  feedId: string;
   quantityGiven: string;
   notes: string;
 }
@@ -31,25 +19,7 @@ interface Errors {
   [key: string]: string | null;
 }
 
-// Utility function to format ISO date to datetime-local format (YYYY-MM-DDTHH:mm)
-const formatISOToDateTimeLocal = (isoDate: string): string => {
-  if (!isoDate) return '';
-  const date = new Date(isoDate);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
-// Utility function to convert datetime-local to ISO string
-const formatDateTimeLocalToISO = (dateTime: string): string => {
-  if (!dateTime) return '';
-  return new Date(dateTime).toISOString();
-};
-
-const FeedForm: React.FC<{ role: string }> = ({ role }) => {
+const FeedCageForm: React.FC<{ role: string }> = ({ role }) => {
   const { user: adminUser } = useAdminAuth();
   const { user: employeeUser } = useEmployeeAuth();
   const user = role === 'admin' ? adminUser : employeeUser;
@@ -57,44 +27,44 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Errors>({});
   const [prefilledCageId, setPrefilledCageId] = useState<string>('');
-  const [formData, setFormData] = useState<FeedFormData>({
-    name: '',
-    type: '',
-    proteinContent: '',
-    date: '2025-09-27T12:55', // Default to 12:55 PM CAT, September 27, 2025
+  const [feedStocks, setFeedStocks] = useState<FeedstockCategory[]>([]);
+  const [formData, setFormData] = useState<FeedCageFormData>({
+    feedId: '',
     quantityGiven: '',
     notes: '',
   });
   const navigate = useNavigate();
-  const { id: feedId } = useParams<{ id?: string }>();
+  const { id: feedCageId } = useParams<{ id?: string }>();
   const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch cages
-        const cageData = await cageService.getAllCages();
+        // Fetch cages and feed stocks
+        const [cageData, feedStockData] = await Promise.all([
+          cageService.getAllCages(),
+          feedstockCategoryService.getAllFeedstockCategories(),
+        ]);
+
+        setFeedStocks(feedStockData || []);
 
         // Check for query parameters
         const queryParams = new URLSearchParams(location.search);
         const cageIdFromQuery = queryParams.get('cageId');
 
-        if (feedId) {
-          // Fetch existing feed for update mode
-          const feed = await feedService.getFeedById(feedId);
-          if (feed) {
+        if (feedCageId) {
+          // Fetch existing feed cage for update mode
+          const feedCage = await feedCageService.getFeedCageById(feedCageId);
+          if (feedCage) {
             setFormData({
-              name: feed.name,
-              type: feed.type as FeedType,
-              proteinContent: feed.proteinContent.toString(),
-              date: formatISOToDateTimeLocal(feed.date || ''),
-              quantityGiven: feed.quantityGiven.toString(),
-              notes: feed.notes || '',
+              feedId: feedCage.feedId,
+              quantityGiven: feedCage.quantityGiven.toString(),
+              notes: feedCage.notes || '',
             });
-            setPrefilledCageId(feed.cageId || '');
+            setPrefilledCageId(feedCage.cageId || '');
           } else {
-            throw new Error('Feed not found');
+            throw new Error('Feed cage record not found');
           }
         } else if (cageIdFromQuery) {
           // Validate prefilled cageId
@@ -118,7 +88,7 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
           Swal.fire({
             icon: 'error',
             title: 'Missing Cage ID',
-            text: 'A valid cage ID is required to create a feed record',
+            text: 'A valid cage ID is required to create a feed cage record',
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
@@ -131,7 +101,7 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.message || 'Failed to load feed data',
+          text: error.message || 'Failed to load feed cage data',
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
@@ -157,9 +127,9 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
       });
       navigate(`/${role}/login`);
     }
-  }, [feedId, location.search, user, role, navigate]);
+  }, [feedCageId, location.search, user, role, navigate]);
 
-  const handleInputChange = (field: keyof FeedFormData, value: string) => {
+  const handleInputChange = (field: keyof FeedCageFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: null }));
@@ -167,28 +137,21 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
   };
 
   const validateForm = (): boolean => {
-    const data: FeedData = {
-      name: formData.name,
-      type: formData.type as FeedType,
-      proteinContent: Number(formData.proteinContent),
-      date: formatDateTimeLocalToISO(formData.date),
-      quantityGiven: Number(formData.quantityGiven),
-      notes: formData.notes || undefined,
+    const data: FeedCageData = {
       cageId: prefilledCageId,
-      administeredByEmployee: role === 'employee' ? user?.id : undefined,
-      administeredByAdmin: role === 'admin' ? user?.id : undefined,
+      feedId: formData.feedId,
+      quantityGiven: Number(formData.quantityGiven),
+      notes: formData.notes || null,
+      employeeId: role === 'employee' ? user?.id : null,
     };
 
-    const validation = feedService.validateFeedData(data);
+    const validation = feedCageService.validateFeedCageData(data);
     const newErrors: Errors = {};
 
     validation.errors.forEach((error) => {
-      if (error.includes('name')) newErrors.name = error;
-      if (error.includes('type')) newErrors.type = error;
-      if (error.includes('protein')) newErrors.proteinContent = error;
-      if (error.includes('date')) newErrors.date = error;
-      if (error.includes('quantity given')) newErrors.quantityGiven = error;
-      if (error.includes('cageId')) newErrors.cageId = error;
+      if (error.includes('Feed ID')) newErrors.feedId = error;
+      if (error.includes('Quantity')) newErrors.quantityGiven = error;
+      if (error.includes('Cage ID')) newErrors.cageId = error;
     });
 
     setErrors(newErrors);
@@ -196,11 +159,11 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
   };
 
   const handleSubmit = async () => {
-    if (!user?.id) {
+    if (!user?.id && role === 'employee') {
       Swal.fire({
         icon: 'error',
         title: 'Authentication Error',
-        text: 'User not authenticated',
+        text: 'Employee not authenticated',
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
@@ -225,36 +188,32 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
 
     setIsLoading(true);
     try {
-      const feedData: FeedData = {
-        name: formData.name,
-        type: formData.type as FeedType,
-        proteinContent: Number(formData.proteinContent),
-        date: formatDateTimeLocalToISO(formData.date),
-        quantityGiven: Number(formData.quantityGiven),
-        notes: formData.notes || undefined,
+      const feedCageData: FeedCageData = {
         cageId: prefilledCageId,
-        administeredByEmployee: role === 'employee' ? user.id : undefined,
-        administeredByAdmin: role === 'admin' ? user.id : undefined,
+        feedId: formData.feedId,
+        quantityGiven: Number(formData.quantityGiven),
+        notes: formData.notes || null,
+        employeeId: role === 'employee' ? user?.id : null,
       };
 
-      let response: Feed;
-      if (feedId) {
-        response = await feedService.updateFeed(feedId, feedData);
+      let response: FeedCage;
+      if (feedCageId) {
+        response = await feedCageService.updateFeedCage(feedCageId, feedCageData);
         Swal.fire({
           icon: 'success',
           title: 'Success',
-          text: `Feed updated successfully`,
+          text: 'Feed cage record updated successfully',
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
           timer: 3000,
         });
       } else {
-        response = await feedService.createFeed(feedData);
+        response = await feedCageService.createFeedCage(feedCageData);
         Swal.fire({
           icon: 'success',
           title: 'Success',
-          text: `Feed created successfully`,
+          text: 'Feed cage record created successfully',
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
@@ -268,7 +227,7 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.message || 'Failed to save feed',
+        text: error.message || 'Failed to save feed cage record',
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
@@ -289,7 +248,7 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
         <div className="bg-white rounded-xl p-8 shadow-lg text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent mx-auto mb-4"></div>
           <p className="text-gray-600 text-xs">
-            {feedId ? 'Loading feed...' : 'Preparing form...'}
+            {feedCageId ? 'Loading feed cage record...' : 'Preparing form...'}
           </p>
         </div>
       </div>
@@ -302,10 +261,10 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
           <div className="bg-gradient-to-r from-primary-600 to-primary-600 px-6 py-4">
             <h1 className="text-lg font-semibold text-white">
-              {feedId ? 'Update Feed' : 'Add New Feed'}
+              {feedCageId ? 'Update Feed Record' : 'Add New Feed Record'}
             </h1>
             <p className="text-primary-100 text-xs mt-1">
-              Fill in the details to {feedId ? 'update' : 'create'} your feed
+              Fill in the details to {feedCageId ? 'update' : 'create'} a feed cage record
             </p>
           </div>
         </div>
@@ -316,98 +275,37 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
               <div className="p-2 bg-primary-50 rounded-lg">
                 <Wheat className="h-5 w-5 text-primary-600" />
               </div>
-              <h2 className="text-sm font-semibold text-gray-900">Feed Information</h2>
+              <h2 className="text-sm font-semibold text-gray-900">Feed Cage Information</h2>
             </div>
-            <p className="text-xs text-gray-500">Enter the details for the feed</p>
+            <p className="text-xs text-gray-500">Enter the feeding details for this cage</p>
           </div>
 
           <div className="p-4 space-y-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Feed Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Enter feed name"
-                />
-                {errors.name && (
-                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                    <X className="h-3 w-3" />
-                    {errors.name}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Feed Type <span className="text-red-500">*</span>
+                  Feed Stock <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={formData.type}
-                  onChange={(e) => handleInputChange('type', e.target.value)}
+                  value={formData.feedId}
+                  onChange={(e) => handleInputChange('feedId', e.target.value)}
                   className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
-                  <option value="" disabled>Select feed type</option>
-                  {Object.values(FeedType).map((type) => (
-                    <option key={type} value={type}>
-                      {type.charAt(0) + type.slice(1).toLowerCase()}
+                  <option value="" disabled>Select feed stock</option>
+                  {feedStocks.map((feed) => (
+                    <option key={feed.id} value={feed.id}>
+                      {feed.name}
                     </option>
                   ))}
                 </select>
-                {errors.type && (
+                {errors.feedId && (
                   <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
                     <X className="h-3 w-3" />
-                    {errors.type}
+                    {errors.feedId}
                   </p>
                 )}
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Protein Content (%) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={formData.proteinContent}
-                  onChange={(e) => handleInputChange('proteinContent', e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Enter protein content (%)"
-                  min="0"
-                  step="0.1"
-                />
-                {errors.proteinContent && (
-                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                    <X className="h-3 w-3" />
-                    {errors.proteinContent}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Date and Time <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="datetime-local"
-                  value={formData.date}
-                  onChange={(e) => handleInputChange('date', e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Select date and time"
-                />
-                {errors.date && (
-                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                    <X className="h-3 w-3" />
-                    {errors.date}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Quantity Given (kg) <span className="text-red-500">*</span>
@@ -442,6 +340,14 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
                 rows={4}
               />
             </div>
+
+            {role === 'employee' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-700">
+                  <strong>Note:</strong> This feed record will be linked to your employee account.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-xl">
@@ -462,7 +368,7 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
                 className="flex items-center gap-2 px-6 py-2.5 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
               >
                 <Check className="h-4 w-4" />
-                <span>{feedId ? 'Update Feed' : 'Create Feed'}</span>
+                <span>{feedCageId ? 'Update Record' : 'Create Record'}</span>
               </button>
             </div>
           </div>
@@ -481,4 +387,4 @@ const FeedForm: React.FC<{ role: string }> = ({ role }) => {
   );
 };
 
-export default FeedForm;
+export default FeedCageForm;
