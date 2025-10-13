@@ -138,6 +138,7 @@ parentEggMigration  ParentEggMigration[]
 
     ParentFishMedication ParentFishMedication[]
     EggFishMedication  EggFishMedication[]
+    laboratoryBoxWaterChanging LaboratoryBoxWaterChanging[]
 }
 
 model Contract {
@@ -769,6 +770,7 @@ model LaboratoryBox{
   description String?
   createdAt   DateTime @default(now())
   parentEggMigration  ParentEggMigration[]
+  BoxWaterChanging LaboratoryBoxWaterChanging[]
 }
 
 
@@ -812,4 +814,16 @@ model EggFishMedication {
   employeeId     String
   quantity       Int            @default(0)
   createdAt      DateTime       @default(now())
+}
+
+
+model LaboratoryBoxWaterChanging {
+  id            String          @id @default(uuid())
+  boxId  String
+  laboratoryBox   LaboratoryBox @relation(fields: [boxId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId    String
+  employee      Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  litersChanged Float           // ✅ liters of water changed
+  description   String?         // optional notes
+  createdAt     DateTime        @default(now())
 }
