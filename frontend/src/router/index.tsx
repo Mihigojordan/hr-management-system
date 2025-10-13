@@ -6,7 +6,7 @@ import AuthLayout from "../layout/AuthLayout";
 import DashboardLayout from "../layout/DashboardLayout";
 import ProtectPrivateAdminRoute from "../components/protectors/ProtectPrivateAdminRoute";
 import ProtectPrivateEmployeeRoute from "../components/protectors/ProtectPrivateEmployeeRoute";
-import logo from "../assets/images/aby_hr.png";
+import logo from "../assets/fine_fish_logo.png";
 import FeedstockDashboard from "../pages/dashboard/FeedstockDashboard";
 import ParentFishPoolManagement from "../pages/dashboard/ParentFishPoolManagement";
 import ParentFishFeedingManagement from "../pages/dashboard/ParentFishFeedingManagement";
@@ -14,6 +14,7 @@ import ParentWaterChangingManagement from "../pages/dashboard/ParentWaterChangin
 import ParentFishMedicationManagement from "../pages/dashboard/ParentFishMedicationManagement";
 import ParentEggMigrationManagement from "../pages/dashboard/ParentEggMigrationManagement";
 import EggFishFeedingManagement from "../pages/dashboard/EggFishFeedingManagement";
+import GrownEggPondManagement from "../pages/dashboard/GrownEggPondManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -450,7 +451,7 @@ const routes = createBrowserRouter([
                 )
               },
               {
-                path: 'sto',
+                path: 'store-management',
                 element: (
                   <SuspenseWrapper>
                     <StoreManagement role='admin' />
@@ -646,6 +647,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <EggFishFeedingManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+                 {
+                path: 'grown-egg-pond',
+                element: (
+                  <SuspenseWrapper>
+                    <GrownEggPondManagement  role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -885,6 +894,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <EggFishFeedingManagement  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'grown-egg-pond',
+                element: (
+                  <SuspenseWrapper>
+                    <GrownEggPondManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },
