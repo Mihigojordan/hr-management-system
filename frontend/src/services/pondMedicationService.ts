@@ -55,11 +55,10 @@ class PondMedicationService {
    */
   async createPondMedication(
     data: CreatePondMedicationInput,
-    employeeId: string,
   ): Promise<PondMedication> {
     try {
       const response: AxiosResponse<PondMedication> = await this.api.post(
-        `/pond-medication/${employeeId}`,
+        `/pond-medication`,
         data,
       );
       return response.data;

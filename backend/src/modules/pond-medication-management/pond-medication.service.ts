@@ -11,6 +11,24 @@ export class PondMedicationService {
 
   async create(data: any, employeeId: string) {
     try {
+      // Validate employee
+      const employee = await this.prisma.employee.findUnique({
+        where: { id: employeeId },
+      });
+      if (!employee) throw new BadRequestException('Employee not found');
+
+      // Validate eggToPondMigration
+      const migration = await this.prisma.eggToPondMigration.findUnique({
+        where: { id: data.eggtoPondId },
+      });
+      if (!migration)
+        throw new BadRequestException('EggToPondMigration not found');
+
+      // Validate medication
+      const med = await this.prisma.medicine.findUnique({
+        where: { id: data.medicationId },
+      });
+      if (!med) throw new BadRequestException('Medicine not found');
       const record = await this.prisma.pondMedication.create({
         data: {
           quantity: data.quantity,
@@ -68,7 +86,9 @@ export class PondMedicationService {
 
   async update(id: string, data: any) {
     try {
-      const existing = await this.prisma.pondMedication.findUnique({ where: { id } });
+      const existing = await this.prisma.pondMedication.findUnique({
+        where: { id },
+      });
       if (!existing)
         throw new BadRequestException('Pond medication record not found');
 
@@ -83,7 +103,10 @@ export class PondMedicationService {
       });
 
       this.gateway.emitUpdated(updated);
-      return { message: 'Pond medication record updated successfully', updated };
+      return {
+        message: 'Pond medication record updated successfully',
+        updated,
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -91,7 +114,9 @@ export class PondMedicationService {
 
   async remove(id: string) {
     try {
-      const existing = await this.prisma.pondMedication.findUnique({ where: { id } });
+      const existing = await this.prisma.pondMedication.findUnique({
+        where: { id },
+      });
       if (!existing)
         throw new BadRequestException('Pond medication record not found');
 
