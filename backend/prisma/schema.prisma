@@ -110,6 +110,8 @@ enum MaritalStatus {
     supervisedSites Site[] @relation("SupervisorRelation")
     medications      Medication[]
     feeds  Feed[]
+
+    eggToPondMigration  EggToPondMigration[]
       // Assigned site (one site only)
     siteId       String?
     site         Site?    @relation("SiteEmployees", fields: [siteId], references: [id] , onDelete: SetNull, onUpdate: Cascade)
@@ -798,6 +800,7 @@ model ParentEggMigration {
 
   eggFishFeeding   EggFishFeeding[]
   EggFishMedication   EggFishMedication[]
+  eggToPondMigration   EggToPondMigration[]
 
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
@@ -825,4 +828,50 @@ model EggFishMedication {
   employeeId     String
   quantity       Int            @default(0)
   createdAt      DateTime       @default(now())
+}
+
+
+
+
+
+model EggToPondMigration {
+  id                 String              @id @default(uuid())
+
+  parentEggMigrationId String
+  parentEggMigration   ParentEggMigration @relation(fields: [parentEggMigrationId], references: [id], onDelete: Cascade)
+
+  pondId             String
+  pond               GrownEggPond                @relation(fields: [pondId], references: [id], onDelete: Cascade)
+
+  employeeId         String
+  employee           Employee            @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  date               DateTime            @default(now())
+  description        String?
+
+  status             EggToPondStatus     @default(ACTIVE)
+
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+enum EggToPondStatus {
+  ACTIVE
+  COMPLETED
+  DISCARDED
+}
+
+
+
+
+model GrownEggPond {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String?
+  size        Float?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  EggToPondMigrations EggToPondMigration[]
 }
