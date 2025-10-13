@@ -39,6 +39,8 @@ import {
   MoveRight,
   ClipboardCheck,
   SoupIcon,
+  WheatIcon,
+  Milk,
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
@@ -347,6 +349,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
             label: "Grown Egg Pond Feeding",
             icon: ClipboardCheck,
             path: `${basePath}/grown-egg-pond-feeding`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "pond-water-changing-management",
+            label: "Pond Water Changing",
+            icon:Milk,
+            path: `${basePath}/pond-water-changing-management`,
             allowedRoles: ["employee", 'admin'],
           },
 
