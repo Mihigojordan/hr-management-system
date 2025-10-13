@@ -721,8 +721,8 @@ const EggFishMedicationManagement: React.FC<{ role: string }> = ({ role }) => {
           </div>
           <div className="bg-white rounded shadow p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-blue-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-primary-600" />
               </div>
               <div>
                 <p className="text-xs text-gray-600">Recent Medications (24h)</p>

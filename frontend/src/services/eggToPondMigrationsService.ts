@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import api from '../api/api'; // adjust the import path to your Axios instance
 
 // ✅ Types
