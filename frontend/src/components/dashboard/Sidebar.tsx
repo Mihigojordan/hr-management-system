@@ -358,6 +358,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
             path: `${basePath}/pond-water-changing-management`,
             allowedRoles: ["employee", 'admin'],
           },
+          {
+            id: "pond-medication-management",
+            label: "Pond Medication",
+            icon:Beaker,
+            path: `${basePath}/pond-medication-management`,
+            allowedRoles: ["employee", 'admin'],
+          },
 
         ],
       },

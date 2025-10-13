@@ -21,8 +21,8 @@ import {
   Settings,
 } from 'lucide-react';
 import pondMedicationService from '../../services/pondMedicationService';
-import eggToPondMigrationService from '../../services/eggToPondMigrationService';
-import medicineService from '../../services/medicineService';
+import eggToPondMigrationService from '../../services/eggToPondMigrationsService';
+import medicineService from '../../services/medecineService';
 import { useSocketEvent } from '../../context/SocketContext';
 
 type DosageForm = 'LIQUID' | 'POWDER' | 'TABLET' | 'CAPSULE' | 'OTHER';
@@ -203,10 +203,10 @@ const PondMedicationManagement: React.FC<{ role: string }> = ({ role }) => {
     }
   };
 
-  const handleCreateSubmit = async (data: Partial<PondMedication>, employeeId: string) => {
+  const handleCreateSubmit = async (data: Partial<PondMedication>) => {
     try {
       setOperationLoading(true);
-      await pondMedicationService.createPondMedication(data, employeeId);
+      await pondMedicationService.createPondMedication(data);
       setShowCreateModal(false);
       loadData();
       showOperationStatus('success', 'Pond medication record created successfully!');
@@ -252,14 +252,12 @@ const PondMedicationManagement: React.FC<{ role: string }> = ({ role }) => {
     const [formData, setFormData] = useState<Partial<PondMedication>>({
       eggtoPondId: '',
       medicationId: '',
-      employeeId: '',
       quantity: 0,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      const employeeId = formData.employeeId || 'default-employee-id'; // Replace with actual employee ID logic
-      handleCreateSubmit(formData, employeeId);
+      handleCreateSubmit(formData);
     };
 
     return (
@@ -305,22 +303,6 @@ const PondMedicationManagement: React.FC<{ role: string }> = ({ role }) => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700">Employee</label>
-              <select
-                value={formData.employeeId}
-                onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                required
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="">Select Employee</option>
-                {employees.map((employee) => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
               <label className="block text-xs font-medium text-gray-700">Quantity</label>
               <input
                 type="number"
@@ -359,7 +341,6 @@ const PondMedicationManagement: React.FC<{ role: string }> = ({ role }) => {
     const [formData, setFormData] = useState<Partial<PondMedication>>({
       eggtoPondId: medication.eggtoPondId,
       medicationId: medication.medicationId,
-      employeeId: medication.employeeId,
       quantity: medication.quantity,
     });
 
@@ -406,22 +387,6 @@ const PondMedicationManagement: React.FC<{ role: string }> = ({ role }) => {
                 {medicines.map((medicine) => (
                   <option key={medicine.id} value={medicine.id}>
                     {medicine.name} ({medicine.dosageForm})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Employee</label>
-              <select
-                value={formData.employeeId}
-                onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                required
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="">Select Employee</option>
-                {employees.map((employee) => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.name}
                   </option>
                 ))}
               </select>
