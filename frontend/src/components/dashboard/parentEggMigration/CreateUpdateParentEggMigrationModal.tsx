@@ -86,14 +86,14 @@ const SearchablePoolSelect: React.FC<{
                 onClick={handleToggle}
                 className={`w-full px-3 py-2.5 text-xs border rounded-lg cursor-pointer transition-colors ${
                     error ? 'border-red-300' : 'border-gray-200'
-                } ${isOpen ? 'ring-2 ring-blue-500 border-transparent' : 'hover:border-gray-300'} bg-white`}
+                } ${isOpen ? 'ring-2 ring-primary-500 border-transparent' : 'hover:border-gray-300'} bg-white`}
             >
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-1">
                         {selectedPool ? (
                             <>
-                                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <Egg className="h-3 w-3 text-blue-600" />
+                                <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center">
+                                    <Egg className="h-3 w-3 text-primary-600" />
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-gray-900 font-medium">
@@ -123,7 +123,7 @@ const SearchablePoolSelect: React.FC<{
                                 placeholder="Search by pool name..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                             />
                         </div>
                     </div>
@@ -149,18 +149,18 @@ const SearchablePoolSelect: React.FC<{
                                     key={pool.id}
                                     onClick={() => handlePoolSelect(pool)}
                                     className={`px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors ${
-                                        pool.id === selectedPoolId ? 'bg-blue-50 text-blue-900' : ''
+                                        pool.id === selectedPoolId ? 'bg-primary-50 text-primary-900' : ''
                                     }`}
                                 >
                                     <div className="flex items-center gap-2">
                                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                                             pool.id === selectedPoolId 
-                                                ? 'bg-blue-200' 
+                                                ? 'bg-primary-200' 
                                                 : 'bg-gray-100'
                                         }`}>
                                             <Egg className={`h-3 w-3 ${
                                                 pool.id === selectedPoolId 
-                                                    ? 'text-blue-700' 
+                                                    ? 'text-primary-700' 
                                                     : 'text-gray-600'
                                             }`} />
                                         </div>
@@ -173,7 +173,7 @@ const SearchablePoolSelect: React.FC<{
                                             )}
                                         </div>
                                         {pool.id === selectedPoolId && (
-                                            <Check className="h-3 w-3 text-blue-600" />
+                                            <Check className="h-3 w-3 text-primary-600" />
                                         )}
                                     </div>
                                 </div>
@@ -255,14 +255,14 @@ const SearchableLabBoxSelect: React.FC<{
                 onClick={handleToggle}
                 className={`w-full px-3 py-2.5 text-xs border rounded-lg cursor-pointer transition-colors ${
                     error ? 'border-red-300' : 'border-gray-200'
-                } ${isOpen ? 'ring-2 ring-blue-500 border-transparent' : 'hover:border-gray-300'} bg-white`}
+                } ${isOpen ? 'ring-2 ring-primary-500 border-transparent' : 'hover:border-gray-300'} bg-white`}
             >
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-1">
                         {selectedBox ? (
                             <>
-                                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <Egg className="h-3 w-3 text-blue-600" />
+                                <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center">
+                                    <Egg className="h-3 w-3 text-primary-600" />
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-gray-900 font-medium">
@@ -292,7 +292,7 @@ const SearchableLabBoxSelect: React.FC<{
                                 placeholder="Search by box name or code..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                             />
                         </div>
                     </div>
@@ -318,18 +318,18 @@ const SearchableLabBoxSelect: React.FC<{
                                     key={box.id}
                                     onClick={() => handleBoxSelect(box)}
                                     className={`px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors ${
-                                        box.id === selectedBoxId ? 'bg-blue-50 text-blue-900' : ''
+                                        box.id === selectedBoxId ? 'bg-primary-50 text-primary-900' : ''
                                     }`}
                                 >
                                     <div className="flex items-center gap-2">
                                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                                             box.id === selectedBoxId 
-                                                ? 'bg-blue-200' 
+                                                ? 'bg-primary-200' 
                                                 : 'bg-gray-100'
                                         }`}>
                                             <Egg className={`h-3 w-3 ${
                                                 box.id === selectedBoxId 
-                                                    ? 'text-blue-700' 
+                                                    ? 'text-primary-700' 
                                                     : 'text-gray-600'
                                             }`} />
                                         </div>
@@ -342,7 +342,7 @@ const SearchableLabBoxSelect: React.FC<{
                                             )}
                                         </div>
                                         {box.id === selectedBoxId && (
-                                            <Check className="h-3 w-3 text-blue-600" />
+                                            <Check className="h-3 w-3 text-primary-600" />
                                         )}
                                     </div>
                                 </div>
@@ -530,7 +530,7 @@ const CreateUpdateParentEggMigrationModal: React.FC<CreateUpdateParentEggMigrati
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Gradient Header */}
-                <div className={`relative px-6 pt-6 pb-8 bg-gradient-to-br from-blue-500 to-blue-600`}>
+                <div className={`relative px-6 pt-6 pb-8 bg-gradient-to-br from-primary-500 to-primary-600`}>
                     <button
                         onClick={handleClose}
                         disabled={isSubmitting}
@@ -622,7 +622,7 @@ const CreateUpdateParentEggMigrationModal: React.FC<CreateUpdateParentEggMigrati
                                 className={`w-full px-4 py-3 text-sm border-2 rounded-xl focus:outline-none transition-all ${
                                     errors.status 
                                         ? 'border-red-300 focus:border-red-500 bg-red-50' 
-                                        : 'border-gray-200 focus:border-blue-500 bg-gray-50 focus:bg-white'
+                                        : 'border-gray-200 focus:border-primary-500 bg-gray-50 focus:bg-white'
                                 }`}
                                 disabled={isSubmitting}
                             >
@@ -649,12 +649,12 @@ const CreateUpdateParentEggMigrationModal: React.FC<CreateUpdateParentEggMigrati
                         <textarea
                             id="description"
                             rows={4}
-                            value={formData.description}
+                            value={formData.description || ''}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             className={`w-full px-4 py-3 text-sm border-2 rounded-xl focus:outline-none transition-all resize-none ${
                                 errors.description 
                                     ? 'border-red-300 focus:border-red-500 bg-red-50' 
-                                    : 'border-gray-200 focus:border-blue-500 bg-gray-50 focus:bg-white'
+                                    : 'border-gray-200 focus:border-primary-500 bg-gray-50 focus:bg-white'
                             }`}
                             placeholder="Add a brief description of this egg migration..."
                             disabled={isSubmitting}
@@ -665,7 +665,7 @@ const CreateUpdateParentEggMigrationModal: React.FC<CreateUpdateParentEggMigrati
                                     className={`h-full rounded-full transition-all duration-300 ${
                                         charPercentage > 90 ? 'bg-red-500' : 
                                         charPercentage > 70 ? 'bg-yellow-500' : 
-                                        'bg-blue-500'
+                                        'bg-primary-500'
                                     }`}
                                     style={{ width: `${Math.min(charPercentage, 100)}%` }}
                                 />
@@ -717,7 +717,7 @@ const CreateUpdateParentEggMigrationModal: React.FC<CreateUpdateParentEggMigrati
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting || !formData.parentPoolId.trim() || !formData.laboratoryBoxId.trim()}
-                        className="flex items-center space-x-2 px-6 py-2.5 text-sm font-semibold text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                        className="flex items-center space-x-2 px-6 py-2.5 text-sm font-semibold text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700"
                     >
                         {isSubmitting ? (
                             <>

@@ -13,6 +13,7 @@ import ParentFishFeedingManagement from "../pages/dashboard/ParentFishFeedingMan
 import ParentWaterChangingManagement from "../pages/dashboard/ParentWaterChangingManagement";
 import ParentFishMedicationManagement from "../pages/dashboard/ParentFishMedicationManagement";
 import ParentEggMigrationManagement from "../pages/dashboard/ParentEggMigrationManagement";
+import EggFishFeedingManagement from "../pages/dashboard/EggFishFeedingManagement";
 
 // ✅ Lazy-loaded components
 const Home = lazy(() => import("../pages/landing/Home"));
@@ -605,7 +606,7 @@ const routes = createBrowserRouter([
                 path: 'stock-history',
                 element: (
                   <SuspenseWrapper>
-                    <StockHistory  role='employee' />
+                    <StockHistory  role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -613,7 +614,7 @@ const routes = createBrowserRouter([
                 path: 'ParentFish-Feeding',
                 element: (
                   <SuspenseWrapper>
-                    <ParentFishFeedingManagement  role='employee' />
+                    <ParentFishFeedingManagement  role='admin' />
                   </SuspenseWrapper>
                 ),
               },
@@ -622,6 +623,30 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <StockHistory  role='employee' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'Laboratory-Box-management',
+                element: (
+                  <SuspenseWrapper>
+                    <LaboratoryBoxManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: 'parent-egg-migration',
+                element: (
+                  <SuspenseWrapper>
+                    <ParentEggMigrationManagement  role='admin' />
+                  </SuspenseWrapper>
+                ),
+              },
+               {
+                path: 'egg-feed-management',
+                element: (
+                  <SuspenseWrapper>
+                    <EggFishFeedingManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },
@@ -861,6 +886,14 @@ const routes = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <BoxWaterChangingManagement  role='employee' />
+                  </SuspenseWrapper>
+                )
+              },
+              {
+                path: 'egg-feed-management',
+                element: (
+                  <SuspenseWrapper>
+                    <EggFishFeedingManagement  role='employee' />
                   </SuspenseWrapper>
                 ),
               },

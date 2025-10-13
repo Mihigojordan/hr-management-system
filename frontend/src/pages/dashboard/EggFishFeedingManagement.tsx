@@ -22,9 +22,9 @@ import {
     MoreHorizontal
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
-import parentEggMigrationService, { ParentEggMigrationStatus, type CreateParentEggMigrationInput, type UpdateParentEggMigrationInput, type ParentEggMigration } from '../../services/parentEggMigrationService';
-import DeleteParentEggMigrationModal from '../../components/dashboard/parentEggMigration/DeleteParentEggMigrationModal';
-import CreateUpdateParentEggMigrationModal from '../../components/dashboard/parentEggMigration/CreateUpdateParentEggMigrationModal';
+import eggFishFeedingService, { type CreateEggFishFeedingInput, type UpdateEggFishFeedingInput, type EggFishFeeding } from '../../services/eggFishFeedingService';
+import DeleteEggFishFeedingModal from '../../components/dashboard/eggFishFeeding/DeleteEggFishFeedingModal';
+import CreateUpdateEggFishFeedingModal from '../../components/dashboard/eggFishFeeding/CreateUpdateEggFishFeedingModal';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -36,13 +36,13 @@ interface OperationStatus {
 type ViewMode = 'table' | 'grid' | 'list';
 type ModalMode = 'create' | 'update';
 
-const ParentEggMigrationManagement = ({ role }: { role: string }) => {
-    const [records, setRecords] = useState<ParentEggMigration[]>([]);
-    const [allRecords, setAllRecords] = useState<ParentEggMigration[]>([]);
+const EggFishFeedingManagement = ({ role }: { role: string }) => {
+    const [records, setRecords] = useState<EggFishFeeding[]>([]);
+    const [allRecords, setAllRecords] = useState<EggFishFeeding[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState<keyof ParentEggMigration>('date');
+    const [sortBy, setSortBy] = useState<keyof EggFishFeeding>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [rowsPerPage] = useState(8);
     const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +50,7 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isCreateUpdateModalOpen, setIsCreateUpdateModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<ModalMode>('create');
-    const [selectedRecord, setSelectedRecord] = useState<ParentEggMigration | null>(null);
+    const [selectedRecord, setSelectedRecord] = useState<EggFishFeeding | null>(null);
     const [operationStatus, setOperationStatus] = useState<OperationStatus | null>(null);
     const [operationLoading, setOperationLoading] = useState<boolean>(false);
     const [showFilters, setShowFilters] = useState<boolean>(false);
@@ -62,12 +62,12 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
         const fetchRecords = async () => {
             try {
                 setLoading(true);
-                const data = await parentEggMigrationService.getAllParentEggMigrations();
+                const data = await eggFishFeedingService.getAllFeedings();
                 setAllRecords(data || []);
                 setError(null);
             } catch (err: any) {
-                const errorMessage = err.message || 'Failed to load egg migration records';
-                console.error('Error fetching egg migration records:', err);
+                const errorMessage = err.message || 'Failed to load feeding records';
+                console.error('Error fetching feeding records:', err);
                 setError(errorMessage);
                 showOperationStatus('error', errorMessage);
             } finally {
@@ -105,19 +105,24 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
         if (searchTerm.trim()) {
             filtered = filtered.filter(
                 (record) =>
-                    record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    record.parentPool?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    record.laboratoryBox?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+                    (record.employee &&
+                        `${record.employee.first_name} ${record.employee.last_name}`
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase())) ||
+                    record.feed?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    record.parentEggMigration?.description?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
         filtered.sort((a, b) => {
             let aValue = a[sortBy] ?? '';
             let bValue = b[sortBy] ?? '';
-            if (sortBy === 'date' || sortBy === 'createdAt' || sortBy === 'updatedAt') {
+            if (sortBy === 'createdAt') {
                 const dateA = new Date(aValue as string).getTime();
                 const dateB = new Date(bValue as string).getTime();
                 return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+            } else if (sortBy === 'quantity') {
+                return sortOrder === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
             } else {
                 const strA = aValue.toString().toLowerCase();
                 const strB = bValue.toString().toLowerCase();
@@ -129,29 +134,29 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
         setCurrentPage(1);
     };
 
-    const handleSaveRecord = async (data: CreateParentEggMigrationInput | UpdateParentEggMigrationInput) => {
+    const handleSaveRecord = async (data: CreateEggFishFeedingInput | UpdateEggFishFeedingInput) => {
         try {
             setOperationLoading(true);
             if (modalMode === 'create') {
-                const newRecord = await parentEggMigrationService.createParentEggMigration(data as CreateParentEggMigrationInput);
+                const newRecord = await eggFishFeedingService.createFeeding(data as CreateEggFishFeedingInput);
                 if (!newRecord) {
-                    throw new Error('No egg migration record data returned from create');
+                    throw new Error('No feeding record data returned from create');
                 }
                 setAllRecords((prev) => [...prev, newRecord]);
-                showOperationStatus('success', 'Egg migration record created successfully');
+                showOperationStatus('success', 'Feeding record created successfully');
                 setIsCreateUpdateModalOpen(false);
             } else {
                 if (!selectedRecord) {
-                    throw new Error('No egg migration record selected for update');
+                    throw new Error('No feeding record selected for update');
                 }
-                const updatedRecord = await parentEggMigrationService.updateParentEggMigration(selectedRecord.id, data as UpdateParentEggMigrationInput);
+                const updatedRecord = await eggFishFeedingService.updateFeeding(selectedRecord.id, data as UpdateEggFishFeedingInput);
                 setAllRecords((prev) => prev.map((r) => (r.id === updatedRecord.id ? updatedRecord : r)));
-                showOperationStatus('success', 'Egg migration record updated successfully');
+                showOperationStatus('success', 'Feeding record updated successfully');
                 setIsCreateUpdateModalOpen(false);
             }
         } catch (err: any) {
             console.error('Error in handleSaveRecord:', err);
-            showOperationStatus('error', err.message || 'Failed to save egg migration record');
+            showOperationStatus('error', err.message || 'Failed to save feeding record');
         } finally {
             setOperationLoading(false);
         }
@@ -161,17 +166,17 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
         try {
             setOperationLoading(true);
             const date = new Date().toLocaleDateString('en-CA').replace(/\//g, '');
-            const filename = `egg_migrations_export_${date}.pdf`;
+            const filename = `egg_fish_feedings_export_${date}.pdf`;
 
             const tableRows = records.map((record, index) => {
                 return `
                     <tr>
                         <td style="font-size:10px;">${index + 1}</td>
-                        <td style="font-size:10px;">${record.parentPool?.name || 'N/A'}</td>
-                        <td style="font-size:10px;">${record.laboratoryBox?.name || 'N/A'}</td>
-                        <td style="font-size:10px;">${record.status}</td>
-                        <td style="font-size:10px;">${new Date(record.date).toLocaleDateString('en-GB')}</td>
-                        <td style="font-size:10px;">${record.description || 'N/A'}</td>
+                        <td style="font-size:10px;">${record.parentEggMigration?.description || 'N/A'}</td>
+                        <td style="font-size:10px;">${record.feed?.name || 'N/A'}</td>
+                        <td style="font-size:10px;">${record.employee ? `${record.employee.first_name} ${record.employee.last_name}` : 'N/A'}</td>
+                        <td style="font-size:10px;">${record.quantity}</td>
+                        <td style="font-size:10px;">${new Date(record.createdAt).toLocaleDateString('en-GB')}</td>
                     </tr>
                 `;
             }).join('');
@@ -190,17 +195,17 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                     </style>
                 </head>
                 <body>
-                    <h1>Egg Migration Records</h1>
+                    <h1>Egg Fish Feeding Records</h1>
                     <p>Exported on: ${new Date().toLocaleString('en-US', { timeZone: 'Africa/Johannesburg' })}</p>
                     <table>
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Parent Pool</th>
-                                <th>Laboratory Box</th>
-                                <th>Status</th>
+                                <th>Egg Migration</th>
+                                <th>Feed</th>
+                                <th>Employee</th>
+                                <th>Quantity</th>
                                 <th>Date</th>
-                                <th>Description</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -235,32 +240,32 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
         setIsCreateUpdateModalOpen(true);
     };
 
-    const handleEditRecord = (record: ParentEggMigration) => {
+    const handleEditRecord = (record: EggFishFeeding) => {
         if (!record.id) return Swal.fire({ icon: 'error', title: 'Error', text: 'Invalid record ID' });
         setModalMode('update');
         setSelectedRecord(record);
         setIsCreateUpdateModalOpen(true);
     };
 
-    const handleViewRecord = (record: ParentEggMigration) => {
+    const handleViewRecord = (record: EggFishFeeding) => {
         if (!record.id) return Swal.fire({ icon: 'error', title: 'Error', text: 'Invalid record ID' });
         navigate(`${record.id}`);
     };
 
-    const handleDeleteRecord = (record: ParentEggMigration) => {
+    const handleDeleteRecord = (record: EggFishFeeding) => {
         setSelectedRecord(record);
         setIsDeleteModalOpen(true);
     };
 
-    const handleDelete = async (record: ParentEggMigration) => {
+    const handleDelete = async (record: EggFishFeeding) => {
         try {
             setOperationLoading(true);
-            await parentEggMigrationService.deleteParentEggMigration(record.id);
+            await eggFishFeedingService.deleteFeeding(record.id);
             setAllRecords((prev) => prev.filter((r) => r.id !== record.id));
-            showOperationStatus('success', `Egg migration record deleted successfully`);
+            showOperationStatus('success', `Feeding record deleted successfully`);
         } catch (err: any) {
-            console.error('Error deleting egg migration record:', err);
-            showOperationStatus('error', err.message || 'Failed to delete egg migration record');
+            console.error('Error deleting feeding record:', err);
+            showOperationStatus('error', err.message || 'Failed to delete feeding record');
         } finally {
             setOperationLoading(false);
             setIsDeleteModalOpen(false);
@@ -285,11 +290,11 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
 
     // Summary statistics
     const totalRecords = allRecords.length;
-    const activeRecords = allRecords.filter(r => r.status === ParentEggMigrationStatus.ACTIVE).length;
-    const uniquePools = new Set(allRecords.map(r => r.parentPoolId)).size;
-    const uniqueLabBoxes = new Set(allRecords.map(r => r.laboratoryBoxId)).size;
+    const totalQuantity = allRecords.reduce((sum, r) => sum + (r.quantity || 0), 0);
+    const uniqueEggMigrations = new Set(allRecords.map(r => r.parentEggMigrationId)).size;
+    const uniqueFeeds = new Set(allRecords.map(r => r.feedId)).size;
 
-    const EggMigrationCard = ({ record }: { record: ParentEggMigration }) => {
+    const EggFishFeedingCard = ({ record }: { record: EggFishFeeding }) => {
         const [isDropdownOpen, setIsDropdownOpen] = useState(false);
         const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -352,29 +357,30 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                     </div>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getAvatarColor(record.parentPool?.name || 'Unknown')} text-white text-xs font-medium`}>
-                        {getInitials(record.parentPool?.name || 'UN')}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getAvatarColor(record.feed?.name || 'Unknown')} text-white text-xs font-medium`}>
+                        {getInitials(record.feed?.name || 'UN')}
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="font-medium text-gray-900 text-xs truncate">
-                            {record.parentPool?.name || 'Unknown Pool'}
+                            {record.feed?.name || 'Unknown Feed'}
                         </div>
-                        <div className="text-gray-500 text-xs truncate">{record.description || 'No description'}</div>
+                        <div className="text-gray-500 text-xs truncate">{record.parentEggMigration?.description || 'No description'}</div>
                     </div>
                 </div>
                 <div className="space-y-1 mb-2">
                     <div className="flex items-center space-x-1 text-xs text-gray-600">
                         <Egg className="w-3 h-3" />
-                        <span>Box: {record.laboratoryBox?.name || 'N/A'}</span>
+                        <span>Egg Migration: {record.parentEggMigration?.description || 'N/A'}</span>
                     </div>
                     <div className="flex items-center space-x-1 text-xs text-gray-600">
                         <Calendar className="w-3 h-3" />
-                        <span>{formatDate(record.date)}</span>
+                        <span>{formatDate(record.createdAt)}</span>
                     </div>
-                    <div className="flex items-center space-x-1 text-xs">
-                        <span className={`font-medium ${record.status === ParentEggMigrationStatus.ACTIVE ? 'text-green-600' : record.status === ParentEggMigrationStatus.COMPLETED ? 'text-primary-600' : 'text-red-600'}`}>
-                            Status: {record.status}
-                        </span>
+                    <div className="flex items-center space-x-1 text-xs text-gray-600">
+                        <span>By: {record.employee ? `${record.employee.first_name} ${record.employee.last_name}` : 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-xs text-gray-600">
+                        <span>Quantity: {record.quantity}</span>
                     </div>
                 </div>
             </div>
@@ -391,52 +397,63 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                             <th
                                 className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
                                 onClick={() => {
-                                    setSortBy('parentPoolId');
-                                    setSortOrder(sortBy === 'parentPoolId' && sortOrder === 'asc' ? 'desc' : 'asc');
+                                    setSortBy('parentEggMigrationId');
+                                    setSortOrder(sortBy === 'parentEggMigrationId' && sortOrder === 'asc' ? 'desc' : 'asc');
                                 }}
                             >
                                 <div className="flex items-center space-x-1">
-                                    <span>Parent Pool</span>
-                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'parentPoolId' ? 'text-primary-600' : 'text-gray-400'}`} />
+                                    <span>Egg Migration</span>
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'parentEggMigrationId' ? 'text-primary-600' : 'text-gray-400'}`} />
                                 </div>
                             </th>
                             <th
                                 className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
                                 onClick={() => {
-                                    setSortBy('laboratoryBoxId');
-                                    setSortOrder(sortBy === 'laboratoryBoxId' && sortOrder === 'asc' ? 'desc' : 'asc');
+                                    setSortBy('feedId');
+                                    setSortOrder(sortBy === 'feedId' && sortOrder === 'asc' ? 'desc' : 'asc');
                                 }}
                             >
                                 <div className="flex items-center space-x-1">
-                                    <span>Laboratory Box</span>
-                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'laboratoryBoxId' ? 'text-primary-600' : 'text-gray-400'}`} />
+                                    <span>Feed</span>
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'feedId' ? 'text-primary-600' : 'text-gray-400'}`} />
                                 </div>
                             </th>
                             <th
                                 className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
                                 onClick={() => {
-                                    setSortBy('status');
-                                    setSortOrder(sortBy === 'status' && sortOrder === 'asc' ? 'desc' : 'asc');
+                                    setSortBy('employeeId');
+                                    setSortOrder(sortBy === 'employeeId' && sortOrder === 'asc' ? 'desc' : 'asc');
                                 }}
                             >
                                 <div className="flex items-center space-x-1">
-                                    <span>Status</span>
-                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'status' ? 'text-primary-600' : 'text-gray-400'}`} />
+                                    <span>Employee</span>
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'employeeId' ? 'text-primary-600' : 'text-gray-400'}`} />
                                 </div>
                             </th>
                             <th
                                 className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
                                 onClick={() => {
-                                    setSortBy('date');
-                                    setSortOrder(sortBy === 'date' && sortOrder === 'asc' ? 'desc' : 'asc');
+                                    setSortBy('quantity');
+                                    setSortOrder(sortBy === 'quantity' && sortOrder === 'asc' ? 'desc' : 'asc');
+                                }}
+                            >
+                                <div className="flex items-center space-x-1">
+                                    <span>Quantity</span>
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'quantity' ? 'text-primary-600' : 'text-gray-400'}`} />
+                                </div>
+                            </th>
+                            <th
+                                className="text-left py-2 px-2 text-gray-600 font-medium cursor-pointer hover:bg-gray-100"
+                                onClick={() => {
+                                    setSortBy('createdAt');
+                                    setSortOrder(sortBy === 'createdAt' && sortOrder === 'asc' ? 'desc' : 'asc');
                                 }}
                             >
                                 <div className="flex items-center space-x-1">
                                     <span>Date</span>
-                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'date' ? 'text-primary-600' : 'text-gray-400'}`} />
+                                    <ChevronDown className={`w-3 h-3 ${sortBy === 'createdAt' ? 'text-primary-600' : 'text-gray-400'}`} />
                                 </div>
                             </th>
-                            <th className="text-left py-2 px-2 text-gray-600 font-medium">Description</th>
                             <th className="text-right py-2 px-2 text-gray-600 font-medium">Actions</th>
                         </tr>
                     </thead>
@@ -446,22 +463,18 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                                 <td className="py-2 px-2 text-gray-700">{startIndex + index + 1}</td>
                                 <td className="py-2 px-2">
                                     <div className="flex items-center space-x-2">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getAvatarColor(record.parentPool?.name || 'Unknown')} text-white text-xs font-medium`}>
-                                            {getInitials(record.parentPool?.name || 'UN')}
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getAvatarColor(record.parentEggMigration?.description || 'Unknown')} text-white text-xs font-medium`}>
+                                            {getInitials(record.parentEggMigration?.description || 'UN')}
                                         </div>
                                         <span className="font-medium text-gray-900 text-xs">
-                                            {record.parentPool?.name || 'Unknown'}
+                                            {record.parentEggMigration?.description || 'Unknown'}
                                         </span>
                                     </div>
                                 </td>
-                                <td className="py-2 px-2 text-gray-700">{record.laboratoryBox?.name || 'N/A'}</td>
-                                <td className="py-2 px-2">
-                                    <span className={`font-medium ${record.status === ParentEggMigrationStatus.ACTIVE ? 'text-green-600' : record.status === ParentEggMigrationStatus.COMPLETED ? 'text-primary-600' : 'text-red-600'}`}>
-                                        {record.status}
-                                    </span>
-                                </td>
-                                <td className="py-2 px-2 text-gray-700">{formatDate(record.date)}</td>
-                                <td className="py-2 px-2 text-gray-700">{record.description || 'N/A'}</td>
+                                <td className="py-2 px-2 text-gray-700">{record.feed?.name || 'N/A'}</td>
+                                <td className="py-2 px-2 text-gray-700">{record.employee ? `${record.employee.first_name} ${record.employee.last_name}` : 'N/A'}</td>
+                                <td className="py-2 px-2 text-gray-700">{record.quantity}</td>
+                                <td className="py-2 px-2 text-gray-700">{formatDate(record.createdAt)}</td>
                                 <td className="py-2 px-2">
                                     <div className="flex items-center justify-end space-x-1">
                                         <button
@@ -500,7 +513,7 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
     const renderGridView = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {currentRecords.map((record) => (
-                <EggMigrationCard key={record.id} record={record} />
+                <EggFishFeedingCard key={record.id} record={record} />
             ))}
         </div>
     );
@@ -511,22 +524,20 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                 <div key={record.id} className="px-4 py-3 hover:bg-gray-25">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3 flex-1 min-w-0">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getAvatarColor(record.parentPool?.name || 'Unknown')} text-white text-sm font-medium`}>
-                                {getInitials(record.parentPool?.name || 'UN')}
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getAvatarColor(record.feed?.name || 'Unknown')} text-white text-sm font-medium`}>
+                                {getInitials(record.feed?.name || 'UN')}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="font-medium text-gray-900 text-sm truncate">
-                                    {record.parentPool?.name || 'Unknown Pool'}
+                                    {record.feed?.name || 'Unknown Feed'}
                                 </div>
-                                <div className="text-gray-500 text-xs truncate">{record.description || 'No description'}</div>
+                                <div className="text-gray-500 text-xs truncate">{record.parentEggMigration?.description || 'No description'}</div>
                             </div>
                         </div>
                         <div className="hidden md:grid grid-cols-3 gap-4 text-xs text-gray-600 flex-1 max-w-xl px-4">
-                            <span>Box: {record.laboratoryBox?.name || 'N/A'}</span>
-                            <span>{formatDate(record.date)}</span>
-                            <span className={`font-medium ${record.status === ParentEggMigrationStatus.ACTIVE ? 'text-green-600' : record.status === ParentEggMigrationStatus.COMPLETED ? 'text-primary-600' : 'text-red-600'}`}>
-                                {record.status}
-                            </span>
+                            <span>Egg Migration: {record.parentEggMigration?.description || 'N/A'}</span>
+                            <span>By: {record.employee ? `${record.employee.first_name} ${record.employee.last_name}` : 'N/A'}</span>
+                            <span>Quantity: {record.quantity}</span>
                         </div>
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <button
@@ -613,13 +624,13 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
 
     return (
         <div className="min-h-screen bg-gray-50 text-xs">
-            <DeleteParentEggMigrationModal
+            <DeleteEggFishFeedingModal
                 isOpen={isDeleteModalOpen}
                 record={selectedRecord}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onDelete={handleDelete}
             />
-            <CreateUpdateParentEggMigrationModal
+            <CreateUpdateEggFishFeedingModal
                 isOpen={isCreateUpdateModalOpen}
                 record={selectedRecord}
                 onClose={() => {
@@ -664,12 +675,12 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                 <div className="px-4 py-3">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-lg font-semibold text-gray-900">Egg Migration Management</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">Manage your egg migration records</p>
+                            <h1 className="text-lg font-semibold text-gray-900">Egg Fish Feeding Management</h1>
+                            <p className="text-xs text-gray-500 mt-0.5">Manage your egg fish feeding records</p>
                         </div>
                         <div className="flex items-center space-x-2">
                             <button
-                                onClick={() => parentEggMigrationService.getAllParentEggMigrations().then(data => setAllRecords(data || []))}
+                                onClick={() => eggFishFeedingService.getAllFeedings().then(data => setAllRecords(data || []))}
                                 disabled={loading}
                                 className="flex items-center space-x-1 px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50"
                                 title="Refresh"
@@ -690,7 +701,7 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                                 onClick={handleAddRecord}
                                 disabled={operationLoading}
                                 className="flex items-center space-x-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
-                                aria-label="Add new egg migration record"
+                                aria-label="Add new feeding record"
                             >
                                 <Plus className="w-3 h-3" />
                                 <span>Add Record</span>
@@ -718,8 +729,8 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                                 <Egg className="w-5 h-5 text-green-600" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-600">Active Migrations</p>
-                                <p className="text-lg font-semibold text-gray-900">{activeRecords}</p>
+                                <p className="text-xs text-gray-600">Total Quantity</p>
+                                <p className="text-lg font-semibold text-gray-900">{totalQuantity}</p>
                             </div>
                         </div>
                     </div>
@@ -729,8 +740,8 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                                 <Egg className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-600">Unique Pools</p>
-                                <p className="text-lg font-semibold text-gray-900">{uniquePools}</p>
+                                <p className="text-xs text-gray-600">Unique Egg Migrations</p>
+                                <p className="text-lg font-semibold text-gray-900">{uniqueEggMigrations}</p>
                             </div>
                         </div>
                     </div>
@@ -740,8 +751,8 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                                 <Egg className="w-5 h-5 text-gray-600" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-600">Unique Lab Boxes</p>
-                                <p className="text-lg font-semibold text-gray-900">{uniqueLabBoxes}</p>
+                                <p className="text-xs text-gray-600">Unique Feeds</p>
+                                <p className="text-lg font-semibold text-gray-900">{uniqueFeeds}</p>
                             </div>
                         </div>
                     </div>
@@ -753,11 +764,11 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                                 <Search className="w-3 h-3 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
                                 <input
                                     type="text"
-                                    placeholder="Search egg migration records..."
+                                    placeholder="Search feeding records..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-48 pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-transparent"
-                                    aria-label="Search egg migration records"
+                                    aria-label="Search feeding records"
                                 />
                             </div>
                             <button
@@ -774,21 +785,23 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                             <select
                                 value={`${sortBy}-${sortOrder}`}
                                 onChange={(e) => {
-                                    const [field, order] = e.target.value.split('-') as [keyof ParentEggMigration, 'asc' | 'desc'];
+                                    const [field, order] = e.target.value.split('-') as [keyof EggFishFeeding, 'asc' | 'desc'];
                                     setSortBy(field);
                                     setSortOrder(order);
                                 }}
                                 className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                aria-label="Sort egg migration records"
+                                aria-label="Sort feeding records"
                             >
-                                <option value="parentPoolId-asc">Parent Pool (A-Z)</option>
-                                <option value="parentPoolId-desc">Parent Pool (Z-A)</option>
-                                <option value="laboratoryBoxId-asc">Lab Box (A-Z)</option>
-                                <option value="laboratoryBoxId-desc">Lab Box (Z-A)</option>
-                                <option value="status-asc">Status (A-Z)</option>
-                                <option value="status-desc">Status (Z-A)</option>
-                                <option value="date-desc">Newest First</option>
-                                <option value="date-asc">Oldest First</option>
+                                <option value="parentEggMigrationId-asc">Egg Migration (A-Z)</option>
+                                <option value="parentEggMigrationId-desc">Egg Migration (Z-A)</option>
+                                <option value="feedId-asc">Feed (A-Z)</option>
+                                <option value="feedId-desc">Feed (Z-A)</option>
+                                <option value="employeeId-asc">Employee (A-Z)</option>
+                                <option value="employeeId-desc">Employee (Z-A)</option>
+                                <option value="quantity-asc">Quantity (Low to High)</option>
+                                <option value="quantity-desc">Quantity (High to Low)</option>
+                                <option value="createdAt-desc">Newest First</option>
+                                <option value="createdAt-asc">Oldest First</option>
                             </select>
                             <div className="flex items-center border border-gray-200 rounded">
                                 <button
@@ -845,13 +858,13 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
                     <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
                         <div className="inline-flex items-center space-x-2">
                             <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                            <span className="text-xs">Loading egg migration records...</span>
+                            <span className="text-xs">Loading feeding records...</span>
                         </div>
                     </div>
                 ) : currentRecords.length === 0 ? (
                     <div className="bg-white rounded border border-gray-200 p-8 text-center text-gray-500">
                         <div className="text-xs">
-                            {searchTerm ? 'No egg migration records found matching your search' : 'No egg migration records found'}
+                            {searchTerm ? 'No feeding records found matching your search' : 'No feeding records found'}
                         </div>
                     </div>
                 ) : (
@@ -867,4 +880,4 @@ const ParentEggMigrationManagement = ({ role }: { role: string }) => {
     );
 };
 
-export default ParentEggMigrationManagement;
+export default EggFishFeedingManagement;

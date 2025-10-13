@@ -487,6 +487,74 @@ CREATE TABLE `LaboratoryBox` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `ParentEggMigration` (
+    `id` VARCHAR(191) NOT NULL,
+    `parentPoolId` VARCHAR(191) NOT NULL,
+    `laboratoryBoxId` VARCHAR(191) NOT NULL,
+    `employeeId` VARCHAR(191) NOT NULL,
+    `status` ENUM('ACTIVE', 'COMPLETED', 'DISCARDED') NOT NULL DEFAULT 'ACTIVE',
+    `date` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `description` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `EggFishFeeding` (
+    `id` VARCHAR(191) NOT NULL,
+    `parentEggMigrationId` VARCHAR(191) NOT NULL,
+    `feedId` VARCHAR(191) NOT NULL,
+    `employeeId` VARCHAR(191) NOT NULL,
+    `quantity` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `EggFishMedication` (
+    `id` VARCHAR(191) NOT NULL,
+    `parentEggMigrationId` VARCHAR(191) NOT NULL,
+    `medicationId` VARCHAR(191) NOT NULL,
+    `employeeId` VARCHAR(191) NOT NULL,
+    `quantity` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `EggToPondMigration` (
+    `id` VARCHAR(191) NOT NULL,
+    `parentEggMigrationId` VARCHAR(191) NOT NULL,
+    `pondId` VARCHAR(191) NOT NULL,
+    `employeeId` VARCHAR(191) NOT NULL,
+    `date` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `description` VARCHAR(191) NULL,
+    `status` ENUM('ACTIVE', 'COMPLETED', 'DISCARDED') NOT NULL DEFAULT 'ACTIVE',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `GrownEggPond` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `code` VARCHAR(191) NULL,
+    `size` DOUBLE NULL,
+    `description` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `GrownEggPond_name_key`(`name`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Employee` ADD CONSTRAINT `Employee_departmentId_fkey` FOREIGN KEY (`departmentId`) REFERENCES `Department`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -621,3 +689,39 @@ ALTER TABLE `ParentFishMedication` ADD CONSTRAINT `ParentFishMedication_medicati
 
 -- AddForeignKey
 ALTER TABLE `ParentFishMedication` ADD CONSTRAINT `ParentFishMedication_employeeId_fkey` FOREIGN KEY (`employeeId`) REFERENCES `Employee`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ParentEggMigration` ADD CONSTRAINT `ParentEggMigration_parentPoolId_fkey` FOREIGN KEY (`parentPoolId`) REFERENCES `ParentFishPool`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ParentEggMigration` ADD CONSTRAINT `ParentEggMigration_laboratoryBoxId_fkey` FOREIGN KEY (`laboratoryBoxId`) REFERENCES `LaboratoryBox`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ParentEggMigration` ADD CONSTRAINT `ParentEggMigration_employeeId_fkey` FOREIGN KEY (`employeeId`) REFERENCES `Employee`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggFishFeeding` ADD CONSTRAINT `EggFishFeeding_parentEggMigrationId_fkey` FOREIGN KEY (`parentEggMigrationId`) REFERENCES `ParentEggMigration`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggFishFeeding` ADD CONSTRAINT `EggFishFeeding_feedId_fkey` FOREIGN KEY (`feedId`) REFERENCES `FeedStock`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggFishFeeding` ADD CONSTRAINT `EggFishFeeding_employeeId_fkey` FOREIGN KEY (`employeeId`) REFERENCES `Employee`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggFishMedication` ADD CONSTRAINT `EggFishMedication_parentEggMigrationId_fkey` FOREIGN KEY (`parentEggMigrationId`) REFERENCES `ParentEggMigration`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggFishMedication` ADD CONSTRAINT `EggFishMedication_medicationId_fkey` FOREIGN KEY (`medicationId`) REFERENCES `Medicine`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggFishMedication` ADD CONSTRAINT `EggFishMedication_employeeId_fkey` FOREIGN KEY (`employeeId`) REFERENCES `Employee`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggToPondMigration` ADD CONSTRAINT `EggToPondMigration_parentEggMigrationId_fkey` FOREIGN KEY (`parentEggMigrationId`) REFERENCES `ParentEggMigration`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggToPondMigration` ADD CONSTRAINT `EggToPondMigration_pondId_fkey` FOREIGN KEY (`pondId`) REFERENCES `GrownEggPond`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EggToPondMigration` ADD CONSTRAINT `EggToPondMigration_employeeId_fkey` FOREIGN KEY (`employeeId`) REFERENCES `Employee`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

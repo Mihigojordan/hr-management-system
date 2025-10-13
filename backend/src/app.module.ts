@@ -29,6 +29,9 @@ import { LaboratoryBoxModule } from './modules/Laboratory-Box-Management/laborat
 import { ParentEggMigrationModule } from './modules/parent-egg-migration/parent-egg-migration.module';
 import { EggFishMedicationModule } from './modules/egg-fish-medication-management/egg-fish-medication.module';
 import { LaboratoryBoxWaterChangingModule } from './modules/box-water-changing-management/box-water-changing.module';
+import { EggFishFeedingModule } from './modules/egg-fish-feeding/egg-fish-feeding.module';
+import { GrownEggPondModule } from './modules/grown-egg-pond/grown-egg-pond.module';
+import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to-pond-migration.module';
 
 @Module({
   imports: [
@@ -60,6 +63,9 @@ import { LaboratoryBoxWaterChangingModule } from './modules/box-water-changing-m
     ParentEggMigrationModule,
     EggFishMedicationModule,
     LaboratoryBoxWaterChangingModule,
+    EggFishFeedingModule,
+    GrownEggPondModule,
+    EggToPondMigrationModule,
   ],
   controllers: [AppController],
 })
