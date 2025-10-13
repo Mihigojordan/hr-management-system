@@ -28,6 +28,7 @@ import { ParentFishMedicationModule } from './modules/parent-fish-medication-man
 import { LaboratoryBoxModule } from './modules/Laboratory-Box-Management/laboratory-box.module';
 import { ParentEggMigrationModule } from './modules/parent-egg-migration/parent-egg-migration.module';
 import { EggFishMedicationModule } from './modules/egg-fish-medication-management/egg-fish-medication.module';
+import { LaboratoryBoxWaterChangingModule } from './modules/box-water-changing-management/box-water-changing.module';
 import { EggFishFeedingModule } from './modules/egg-fish-feeding/egg-fish-feeding.module';
 import { GrownEggPondModule } from './modules/grown-egg-pond/grown-egg-pond.module';
 import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to-pond-migration.module';
@@ -61,6 +62,7 @@ import { EggToPondMigrationModule } from './modules/egg-to-pond-migration/egg-to
     LaboratoryBoxModule,
     ParentEggMigrationModule,
     EggFishMedicationModule,
+    LaboratoryBoxWaterChangingModule,
     EggFishFeedingModule,
     GrownEggPondModule,
     EggToPondMigrationModule,
