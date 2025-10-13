@@ -27,6 +27,20 @@ import {
   MapPinned,
   Truck,
   TruckIcon,
+  FlaskConical,
+  FishSymbol,
+  Database,
+  Droplet,
+  Beaker,
+  Microscope,
+  Egg,
+  Waves,
+  Soup,
+  MoveRight,
+  ClipboardCheck,
+  SoupIcon,
+  WheatIcon,
+  Milk,
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
@@ -67,6 +81,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
     setOpenDropdown((prev) => (prev === id ? null : id));
   };
 
+
+
   const getNavlinks = (role: string): (NavItem | DropdownGroup)[] => {
     const basePath = `/${role}/dashboard`;
 
@@ -98,44 +114,50 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         path: `${basePath}/employee-management`,
         allowedRoles: ["admin"],
       },
-      {
-        id: "requestedAssets-management",
-        label: "requested assets Management",
-        icon: Inbox,
-        path: `${basePath}/requestedAssets-management`,
-        allowedRoles: ["admin"],
-      },
-      {
-        id: "procurement",
-        label: "procurement Management",
-        icon: TruckIcon,
-        path: `${basePath}/procurement-management`,
-         allowedRoles: ["admin"],
-      },
+
       {
         id: "clients",
         label: "Clients Management",
         icon: User2,
         path: `${basePath}/client-management`,
-        
       },
       {
-        id: "assets",
-        label: "Asset Management",
+        id: "asset-group",
+        label: "Asset  Management",
         icon: Cog,
-        path: `${basePath}/asset-management`,
-      
+        items: [
+          {
+            id: "assets",
+            label: "Asset Management",
+            icon: Cog,
+            path: `${basePath}/asset-management`,
+          },
+          {
+            id: "assets-request",
+            label: "Asset Request Management",
+            icon: Inbox,
+            path: `${basePath}/asset-request-management`,
+            allowedRoles: ["employee", "admin"],
+          },
+          {
+            id: "requested-assets",
+            label: "Requested Assets Management",
+            icon: Inbox,
+            path: `${basePath}/requestedAssets-management`,
+            allowedRoles: ["admin"],
+          },
+          {
+            id: "procurement",
+            label: "Procurement Management",
+            icon: TruckIcon,
+            path: `${basePath}/procurement-management`,
+            allowedRoles: ["admin"],
+          },
+        ],
       },
-      {
-        id: "assets request",
-        label: "Asset request Management",
-        icon: Inbox,
-        path: `${basePath}/asset-request-management`,
-         allowedRoles: ["employee"],
-      },
+
       {
         id: "sites",
-        // id: "site-management",
         label: "Site Management",
         icon: MapPinned,
         items: [
@@ -144,14 +166,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
             label: "Sites",
             icon: MapPin,
             path: `${basePath}/site-management`,
-             allowedRoles: ["admin"],
+            allowedRoles: ["admin"],
           },
           {
             id: "site-assign",
             label: "Site Assignment",
             icon: Layers,
             path: `${basePath}/assign-management`,
-             allowedRoles: ["admin"],
+            allowedRoles: ["admin"],
           },
         ],
       },
@@ -165,14 +187,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
             label: "Categories",
             icon: FolderTree,
             path: `${basePath}/category-management`,
-             allowedRoles: ["admin"],
+            allowedRoles: ["admin"],
           },
           {
             id: "stock",
             label: "Stock",
             icon: ShoppingBasket,
             path: `${basePath}/stock-management`,
-             allowedRoles: ["admin"],
+            allowedRoles: ["admin"],
           },
           {
             id: "stock-request",
@@ -185,14 +207,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
             label: "Stock History",
             icon: History,
             path: `${basePath}/stock-history`,
-             allowedRoles: ["admin"],
+            allowedRoles: ["admin"],
           },
           {
             id: "store",
             label: "Stores",
             icon: Store,
             path: `${basePath}/store-management`,
-             allowedRoles: ["admin"],
+            allowedRoles: ["admin"],
           },
         ],
       },
@@ -201,17 +223,148 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         label: "Cage Management",
         icon: Grid,
         path: `${basePath}/cage-management`,
-         allowedRoles: ["admin"],
+        allowedRoles: ["admin"],
       },
       {
-        id: "medecine managment",
-        label: "medicine stock Management",
-        icon: Inbox,
+        id: "medicine-stock",
+        label: "Medicine Stock Management",
+        icon: FlaskConical,
         path: `${basePath}/medicine-management`,
-         allowedRoles: ["employee"],
+        allowedRoles: ["employee", 'admin'],
       },
+
+      {
+        id: "feedstock-management",
+        label: "Feedstock Management",
+        icon: PackageSearch,
+        path: `${basePath}/FeedStock-management`,
+        allowedRoles: ["admin"],
+      },
+
+      // 🐟 Parent & Egg Management Section
+      {
+        id: "parent-fish-management",
+        label: "Parent Fish Management",
+        icon: FishSymbol,
+        items: [
+          {
+            id: "parent-fish",
+            label: "Parent Fish Pool",
+            icon: Database,
+            path: `${basePath}/parent-fish-management`,
+            allowedRoles: ["employee", "admin"],
+          },
+          {
+            id: "parent-water",
+            label: "Parent Water Changing",
+            icon: Droplet,
+            path: `${basePath}/parent-water-changing`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "parent-medicine",
+            label: "Parent Fish Medication",
+            icon: Beaker,
+            path: `${basePath}/Parent-Fish-medication-management`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "parent-medicine",
+            label: "Parent Fish Feeding",
+            icon: SoupIcon,
+            path: `${basePath}/ParentFish-Feeding`,
+            allowedRoles: ["employee", 'admin'],
+          },
+
+        ],
+      },
+      {
+        id: "fish-laboratory",
+        label: "Laboratory Management",
+        icon: FishSymbol,
+        items: [
+
+          {
+            id: "laboratory-box",
+            label: "Laboratory Box Management",
+            icon: Microscope,
+            path: `${basePath}/Laboratory-Box-management`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "parent-egg-migration",
+            label: "Parent Egg Migration",
+            icon: Egg,
+            path: `${basePath}/parent-egg-migration`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "egg-medicine",
+            label: "Egg Medication Management",
+            icon: Beaker,
+            path: `${basePath}/egg-medication-management`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "box-water-change",
+            label: "Box Water Changing",
+            icon: Waves,
+            path: `${basePath}/box-water-changing-management`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "egg-feed",
+            label: "Egg Feeding Management",
+            icon: Soup,
+            path: `${basePath}/egg-feed-management`,
+            allowedRoles: ["employee", 'admin'],
+          },
+
+
+        ],
+      },
+      {
+        id: "Pond-manaagement",
+        label: "Pond Management",
+        icon: FishSymbol,
+        items: [
+
+
+          {
+            id: "grown-egg-pond",
+            label: "Grown Egg Pond Management",
+            icon: Database,
+            path: `${basePath}/grown-egg-pond`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "egg-to-pond-migration",
+            label: "Egg to Pond Migration",
+            icon: MoveRight,
+            path: `${basePath}/egg-to-pond-migration`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "grown-egg-pond-feeding",
+            label: "Grown Egg Pond Feeding",
+            icon: ClipboardCheck,
+            path: `${basePath}/grown-egg-pond-feeding`,
+            allowedRoles: ["employee", 'admin'],
+          },
+          {
+            id: "pond-water-changing-management",
+            label: "Pond Water Changing",
+            icon:Milk,
+            path: `${basePath}/pond-water-changing-management`,
+            allowedRoles: ["employee", 'admin'],
+          },
+
+        ],
+      },
+
     ];
   };
+
 
   const filterNavItems = (items: (NavItem | DropdownGroup)[]): (NavItem | DropdownGroup)[] => {
     return items
@@ -280,10 +433,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
         to={item.path}
         end
         className={({ isActive }) =>
-          `w-full flex items-center space-x-2 px-2 py-2 rounded-lg transition-all duration-200 group border-l-4 ${
-            isActive
-              ? "bg-primary-500/10 text-primary-700 border-primary-500"
-              : "text-gray-700 hover:bg-gray-50 border-transparent"
+          `w-full flex items-center space-x-2 px-2 py-2 rounded-lg transition-all duration-200 group border-l-4 ${isActive
+            ? "bg-primary-500/10 text-primary-700 border-primary-500"
+            : "text-gray-700 hover:bg-gray-50 border-transparent"
           }`
         }
         onClick={() => {
@@ -311,11 +463,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
       <div key={dropdown.id} className="w-full">
         <button
           onClick={() => toggleDropdown(dropdown.id)}
-          className={`w-full flex items-center justify-between px-2 py-2 rounded-lg transition-all duration-200 ${
-            hasActiveChild
-              ? "bg-primary-500/10 text-primary-700 border-l-4 border-primary-500"
-              : "text-gray-700 hover:bg-gray-50 border-l-4 border-transparent"
-          }`}
+          className={`w-full flex items-center justify-between px-2 py-2 rounded-lg transition-all duration-200 ${hasActiveChild
+            ? "bg-primary-500/10 text-primary-700 border-l-4 border-primary-500"
+            : "text-gray-700 hover:bg-gray-50 border-l-4 border-transparent"
+            }`}
         >
           <div className="flex items-center space-x-2">
             <div className={`p-1 rounded-md ${hasActiveChild ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-600"}`}>
@@ -324,15 +475,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
             <span className="text-sm font-medium">{dropdown.label}</span>
           </div>
           <ChevronDown
-            className={`w-4 h-4 transition-transform duration-300 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            } ${hasActiveChild ? "text-primary-600" : "text-gray-400"}`}
+            className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"
+              } ${hasActiveChild ? "text-primary-600" : "text-gray-400"}`}
           />
         </button>
         <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"
-          }`}
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"
+            }`}
         >
           <div className="ml-4 space-y-0.5 border-l-2 border-primary-100 pl-3 py-0.5">
             {dropdown.items.map((item) => {
@@ -343,10 +492,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
                   to={item.path}
                   end
                   className={({ isActive }) =>
-                    `w-full flex items-center space-x-2 px-2 py-1.5 rounded-md transition-all duration-200 group relative ${
-                      isActive
-                        ? "bg-primary-500 text-white shadow-sm"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    `w-full flex items-center space-x-2 px-2 py-1.5 rounded-md transition-all duration-200 group relative ${isActive
+                      ? "bg-primary-500 text-white shadow-sm"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     }`
                   }
                   onClick={() => {
@@ -383,9 +531,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle, role }) => {
 
       {/* Sidebar Container */}
       <div
-        className={`fixed left-0 top-0 min-h-screen bg-white flex flex-col border-r border-primary-200 shadow-lg transform transition-transform duration-300 z-50 lg:relative lg:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } w-72`}
+        className={`fixed left-0 top-0 min-h-screen bg-white flex flex-col border-r border-primary-200 shadow-lg transform transition-transform duration-300 z-50 lg:relative lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
+          } w-72`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-3 border-b border-primary-200">
